@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { redirect } from 'next/navigation';
 import { Home, Building2, MessageSquare, User, LogOut } from 'lucide-react';
 
@@ -13,7 +14,6 @@ import {
   SidebarFooter,
   SidebarProvider,
 } from '@/components/ui/sidebar';
-import { Logo } from '@/components/Logo';
 import { Button } from '@/components/ui/button';
 
 export default function AdminLayout({
@@ -33,9 +33,8 @@ export default function AdminLayout({
     <SidebarProvider>
       <Sidebar>
         <SidebarHeader>
-          <Link href="/" className="flex items-center gap-2">
-            <Logo className="h-6 w-auto text-primary" />
-            <span className="font-bold font-headline text-foreground">Artecasa</span>
+          <Link href="/" className="flex items-center">
+            <Image src="/logo.png" alt="Artecasa Logo" width={120} height={30} className="h-8 w-auto" />
           </Link>
         </SidebarHeader>
         <SidebarContent>

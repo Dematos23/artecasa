@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { app } from '@/lib/firebase';
-import { Logo } from '@/components/Logo';
+import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -70,7 +70,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
           <div className="mx-auto mb-4">
-            <Logo className="h-12 w-auto text-primary" />
+            <Image src="/logo.png" alt="Artecasa Logo" width={180} height={45} className="h-12 w-auto" />
           </div>
           <CardTitle className="font-headline text-2xl">Acceso de Administrador</CardTitle>
           <CardDescription>Ingresa tus credenciales para acceder al panel.</CardDescription>

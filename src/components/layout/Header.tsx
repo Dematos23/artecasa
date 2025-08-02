@@ -1,9 +1,9 @@
 "use client";
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Logo } from '@/components/Logo';
 import { cn } from '@/lib/utils';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu } from 'lucide-react';
@@ -37,9 +37,8 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center px-[3%] md:px-[5%] xl:px-[12%]">
-        <Link href="/" className="mr-6 flex items-center gap-2">
-          <Logo className="h-6 w-auto text-primary" />
-          <span className="font-bold font-headline text-foreground">Artecasa</span>
+        <Link href="/" className="mr-6 flex items-center">
+          <Image src="/logo.png" alt="Artecasa Logo" width={120} height={30} className="h-8 w-auto" />
         </Link>
 
         <div className="hidden md:flex flex-grow items-center">
@@ -60,9 +59,8 @@ export function Header() {
               </SheetTrigger>
               <SheetContent side="right">
                 <div className="flex flex-col gap-4 p-4">
-                  <Link href="/" className="mr-6 flex items-center gap-2 mb-4">
-                    <Logo className="h-6 w-auto text-primary" />
-                    <span className="font-bold font-headline">Artecasa</span>
+                  <Link href="/" className="mr-6 flex items-center mb-4">
+                    <Image src="/logo.png" alt="Artecasa Logo" width={120} height={30} className="h-8 w-auto" />
                   </Link>
                   <NavItems className="flex-col items-start gap-4" />
                 </div>
