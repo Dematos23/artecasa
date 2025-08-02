@@ -36,7 +36,7 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background">
-      <div className="container mx-auto flex h-16 items-center px-[3%] md:px-[5%] xl:px-[12%]">
+      <div className="container mx-auto flex h-16 items-center px-4 md:px-6">
         <Link href="/" className="mr-6 flex items-center">
           <Image src="/logo.png" alt="Artecasa Logo" width={120} height={30} className="h-8 w-auto" />
         </Link>

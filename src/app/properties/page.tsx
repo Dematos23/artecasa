@@ -17,17 +17,17 @@ const dummyProperties: Property[] = [
 
 export default function PropertiesPage() {
   return (
-    <div className="container mx-auto py-12 px-[3%] md:px-[5%] xl:px-[12%]">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl md:text-5xl font-bold font-headline mb-4">Nuestras Propiedades</h1>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+    <div className="container mx-auto py-8 md:py-12 px-4 md:px-6">
+      <div className="text-center mb-8 md:mb-12">
+        <h1 className="text-3xl md:text-5xl font-bold font-headline mb-4">Nuestras Propiedades</h1>
+        <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
           Explora nuestra colección de propiedades exclusivas y encuentra tu próximo hogar.
         </p>
       </div>
 
       <Card className="p-4 md:p-6 mb-8 bg-secondary">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
-          <div className="relative">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+          <div className="relative sm:col-span-2 lg:col-span-1">
             <Input
               type="text"
               placeholder="Buscar por ubicación, palabra clave..."
@@ -60,7 +60,7 @@ export default function PropertiesPage() {
         </div>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
         {dummyProperties.map((property) => (
           <PropertyCard key={property.id} property={property} />
         ))}

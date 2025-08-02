@@ -7,7 +7,7 @@ export function Footer() {
 
   return (
     <footer className="bg-secondary text-secondary-foreground">
-      <div className="container mx-auto py-12 px-[3%] md:px-[5%] xl:px-[12%]">
+      <div className="container mx-auto py-8 md:py-12 px-4 md:px-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
             <Link href="/" className="flex items-center gap-2 mb-4">

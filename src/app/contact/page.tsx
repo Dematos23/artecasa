@@ -17,16 +17,16 @@ async function handleContactSubmit(formData: FormData) {
 
 export default function ContactPage() {
   return (
-    <div className="container mx-auto py-12 md:py-24 px-[3%] md:px-[5%] xl:px-[12%]">
+    <div className="container mx-auto py-12 md:py-24 px-4 md:px-6">
       <div className="text-center mb-12">
-        <h1 className="text-4xl md:text-5xl font-bold font-headline mb-4">Contáctanos</h1>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+        <h1 className="text-3xl md:text-5xl font-bold font-headline mb-4">Contáctanos</h1>
+        <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
           Estamos aquí para ayudarte a encontrar la casa de tus sueños. Contáctanos con cualquier pregunta.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-        <div className="space-y-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+        <div className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">

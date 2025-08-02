@@ -34,10 +34,10 @@ export default function PropertyDetailsPage({ params }: { params: { id: string }
 
   return (
     <div className="bg-secondary">
-      <div className="container mx-auto py-12 md:py-16 px-[3%] md:px-[5%] xl:px-[12%]">
+      <div className="container mx-auto py-8 md:py-16 px-4 md:px-6">
         <div className="mb-8">
-          <h1 className="text-3xl md:text-5xl font-bold font-headline mb-2">{property.title}</h1>
-          <p className="text-lg text-muted-foreground flex items-center gap-2"><MapPin size={18} /> {property.address}</p>
+          <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold font-headline mb-2">{property.title}</h1>
+          <p className="text-base md:text-lg text-muted-foreground flex items-center gap-2"><MapPin size={18} /> {property.address}</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -69,7 +69,7 @@ export default function PropertyDetailsPage({ params }: { params: { id: string }
                 <CardTitle className="font-headline">Detalles de la Propiedad</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-4xl font-bold text-primary mb-6">${property.price}</p>
+                <p className="text-3xl md:text-4xl font-bold text-primary mb-6">${property.price}</p>
                 <div className="space-y-4 text-foreground">
                   <div className="flex justify-between items-center"><span className="text-muted-foreground">Dormitorios</span> <span className="font-semibold flex items-center gap-2">{property.bedrooms} <BedDouble size={18}/></span></div>
                   <div className="flex justify-between items-center"><span className="text-muted-foreground">Baños</span> <span className="font-semibold flex items-center gap-2">{property.bathrooms} <Bath size={18}/></span></div>
