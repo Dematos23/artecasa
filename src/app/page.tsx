@@ -60,16 +60,16 @@ export default function Home() {
   return (
     <div className="bg-background">
       <section className="relative h-[70vh] min-h-[500px] max-h-[700px] w-full">
-        <Carousel className="w-full h-full" opts={{ loop: true }}>
+        <Carousel className="absolute w-full h-full" opts={{ loop: true }}>
           <CarouselContent className="w-full h-full">
             {heroImages.map((src, index) => (
-              <CarouselItem key={index} className="w-full h-full relative">
+              <CarouselItem key={index} className="w-full h-full">
                 <Image
                   src={src}
                   alt={`Imagen de fondo de una casa de lujo moderna ${index + 1}`}
                   fill
                   style={{ objectFit: 'cover' }}
-                  className="absolute inset-0 z-0"
+                  className="w-full h-full"
                 />
               </CarouselItem>
             ))}
