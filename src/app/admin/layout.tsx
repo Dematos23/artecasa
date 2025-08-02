@@ -44,7 +44,7 @@ export default function AdminLayout({
               <SidebarMenuButton asChild>
                 <Link href="/admin">
                   <Home />
-                  Dashboard
+                  Panel
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -52,7 +52,7 @@ export default function AdminLayout({
               <SidebarMenuButton asChild>
                 <Link href="/admin/properties">
                   <Building2 />
-                  Properties
+                  Propiedades
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -60,7 +60,7 @@ export default function AdminLayout({
               <SidebarMenuButton asChild>
                 <Link href="/admin/contacts">
                   <MessageSquare />
-                  Contacts
+                  Contactos
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -71,7 +71,7 @@ export default function AdminLayout({
             <div className="flex items-center gap-2 p-2 rounded-md bg-secondary">
               <User className="h-8 w-8 rounded-full bg-primary/20 text-primary p-1.5" />
               <div className="flex flex-col">
-                <span className="text-sm font-semibold">Admin User</span>
+                <span className="text-sm font-semibold">Usuario Admin</span>
                 <span className="text-xs text-muted-foreground">admin@artecasa.com</span>
               </div>
               <Button variant="ghost" size="icon" className="ml-auto">

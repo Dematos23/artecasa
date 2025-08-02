@@ -19,9 +19,9 @@ export default function ContactPage() {
   return (
     <div className="container mx-auto py-12 md:py-24 px-[3%] md:px-[5%] xl:px-[12%]">
       <div className="text-center mb-12">
-        <h1 className="text-4xl md:text-5xl font-bold font-headline mb-4">Contact Us</h1>
+        <h1 className="text-4xl md:text-5xl font-bold font-headline mb-4">Contáctanos</h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          We're here to help you find your dream home. Reach out to us with any questions.
+          Estamos aquí para ayudarte a encontrar la casa de tus sueños. Contáctanos con cualquier pregunta.
         </p>
       </div>
 
@@ -30,7 +30,7 @@ export default function ContactPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <MapPin className="text-primary" /> Office Address
+                <MapPin className="text-primary" /> Dirección de la Oficina
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -40,7 +40,7 @@ export default function ContactPage() {
            <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Mail className="text-primary" /> Email Us
+                <Mail className="text-primary" /> Envíanos un Correo
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -50,7 +50,7 @@ export default function ContactPage() {
            <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Phone className="text-primary" /> Call Us
+                <Phone className="text-primary" /> Llámanos
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -62,32 +62,32 @@ export default function ContactPage() {
         <div>
           <Card>
             <CardHeader>
-              <CardTitle className="font-headline">Send us a Message</CardTitle>
-              <CardDescription>Fill out the form below and we'll get back to you shortly.</CardDescription>
+              <CardTitle className="font-headline">Envíanos un Mensaje</CardTitle>
+              <CardDescription>Completa el formulario a continuación y nos pondremos en contacto contigo en breve.</CardDescription>
             </CardHeader>
             <CardContent>
               <form action={handleContactSubmit} className="space-y-4">
                 <div>
-                  <label htmlFor="name" className="sr-only">Name</label>
-                  <Input id="name" name="name" type="text" placeholder="Your Name" required />
+                  <label htmlFor="name" className="sr-only">Nombre</label>
+                  <Input id="name" name="name" type="text" placeholder="Tu Nombre" required />
                 </div>
                 <div>
-                  <label htmlFor="email" className="sr-only">Email</label>
-                  <Input id="email" name="email" type="email" placeholder="Your Email" required />
+                  <label htmlFor="email" className="sr-only">Correo Electrónico</label>
+                  <Input id="email" name="email" type="email" placeholder="Tu Correo Electrónico" required />
                 </div>
                 <div>
-                  <label htmlFor="phone" className="sr-only">Phone</label>
-                  <Input id="phone" name="phone" type="tel" placeholder="Your Phone (Optional)" />
+                  <label htmlFor="phone" className="sr-only">Teléfono</label>
+                  <Input id="phone" name="phone" type="tel" placeholder="Tu Teléfono (Opcional)" />
                 </div>
                 <div>
-                  <label htmlFor="message" className="sr-only">Message</label>
-                  <Textarea id="message" name="message" placeholder="Your Message" required rows={5} />
+                  <label htmlFor="message" className="sr-only">Mensaje</label>
+                  <Textarea id="message" name="message" placeholder="Tu Mensaje" required rows={5} />
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <Button type="submit" className="flex-1">Send Message</Button>
+                  <Button type="submit" className="flex-1">Enviar Mensaje</Button>
                   <Button asChild variant="outline" className="flex-1 border-green-500 text-green-600 hover:bg-green-500 hover:text-white">
                     <Link href="https://wa.me/1234567890" target="_blank">
-                      <MessageCircle className="mr-2" /> Chat on WhatsApp
+                      <MessageCircle className="mr-2" /> Chatea por WhatsApp
                     </Link>
                   </Button>
                 </div>

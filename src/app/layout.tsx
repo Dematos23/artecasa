@@ -6,8 +6,8 @@ import { Footer } from '@/components/layout/Footer';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'Artecasa - Luxury Real Estate',
-  description: 'Find your dream home with Artecasa. Specializing in luxury properties.',
+  title: 'Artecasa - Inmobiliaria de Lujo',
+  description: 'Encuentra la casa de tus sueños con Artecasa. Especializados en propiedades de lujo.',
 };
 
 export default function RootLayout({
@@ -16,7 +16,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="es" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

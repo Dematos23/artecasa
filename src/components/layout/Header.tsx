@@ -9,9 +9,9 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu } from 'lucide-react';
 
 const navLinks = [
-  { href: '/', label: 'Home' },
-  { href: '/properties', label: 'Properties' },
-  { href: '/contact', label: 'Contact' },
+  { href: '/', label: 'Inicio' },
+  { href: '/properties', label: 'Propiedades' },
+  { href: '/contact', label: 'Contacto' },
 ];
 
 export function Header() {
@@ -48,14 +48,14 @@ export function Header() {
 
         <div className="flex flex-1 items-center justify-end gap-2">
           <Button asChild variant="outline">
-            <Link href="/login">Admin Login</Link>
+            <Link href="/login">Acceso Admin</Link>
           </Button>
           <div className="md:hidden">
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon">
                   <Menu className="h-6 w-6" />
-                  <span className="sr-only">Toggle menu</span>
+                  <span className="sr-only">Alternar menú</span>
                 </Button>
               </SheetTrigger>
               <SheetContent side="right">

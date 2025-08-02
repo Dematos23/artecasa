@@ -12,21 +12,21 @@ export default function LoginPage() {
           <div className="mx-auto mb-4">
             <Logo className="h-12 w-auto text-primary" />
           </div>
-          <CardTitle className="font-headline text-2xl">Admin Login</CardTitle>
-          <CardDescription>Enter your credentials to access the dashboard.</CardDescription>
+          <CardTitle className="font-headline text-2xl">Acceso de Administrador</CardTitle>
+          <CardDescription>Ingresa tus credenciales para acceder al panel.</CardDescription>
         </CardHeader>
         <CardContent>
           <form className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">Correo Electrónico</Label>
               <Input id="email" type="email" placeholder="admin@artecasa.com" required />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Contraseña</Label>
               <Input id="password" type="password" required />
             </div>
             <Button type="submit" className="w-full">
-              Login
+              Iniciar Sesión
             </Button>
           </form>
         </CardContent>

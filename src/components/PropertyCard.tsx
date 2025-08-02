@@ -23,7 +23,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
             className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-300"
           />
           {property.featured && (
-            <Badge className="absolute top-4 left-4">Featured</Badge>
+            <Badge className="absolute top-4 left-4">Destacada</Badge>
           )}
         </div>
         <CardContent className="p-4">
@@ -37,15 +37,15 @@ export function PropertyCard({ property }: PropertyCardProps) {
           <div className="mt-4 pt-4 border-t border-border flex justify-around text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
               <BedDouble className="w-4 h-4 text-primary" />
-              <span>{property.bedrooms} Beds</span>
+              <span>{property.bedrooms} Dorms</span>
             </div>
             <div className="flex items-center gap-2">
               <Bath className="w-4 h-4 text-primary" />
-              <span>{property.bathrooms} Baths</span>
+              <span>{property.bathrooms} Baños</span>
             </div>
              <div className="flex items-center gap-2">
               <Car className="w-4 h-4 text-primary" />
-              <span>{property.garage} Garage</span>
+              <span>{property.garage} Cochera</span>
             </div>
           </div>
         </CardContent>

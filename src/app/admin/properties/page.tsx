@@ -14,9 +14,9 @@ import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 const dummyProperties: Property[] = [
-  { id: '1', title: 'Modern Villa in a Gated Community', price: '2,500,000', address: '123 Luxury Lane, Beverly Hills, CA', bedrooms: 5, bathrooms: 6, garage: 3, sqft: 5800, imageUrl: '', featured: true },
-  { id: '2', title: 'Downtown Penthouse with City Views', price: '3,200,000', address: '456 High Rise, New York, NY', bedrooms: 3, bathrooms: 4, garage: 2, sqft: 3500, imageUrl: '', featured: true },
-  { id: '3', title: 'Cozy Beachfront Cottage', price: '1,800,000', address: '789 Ocean Drive, Malibu, CA', bedrooms: 4, bathrooms: 3, garage: 1, sqft: 2200, imageUrl: '', featured: false },
+  { id: '1', title: 'Villa Moderna en Condominio Privado', price: '2,500,000', address: '123 Luxury Lane, Beverly Hills, CA', bedrooms: 5, bathrooms: 6, garage: 3, sqft: 5800, imageUrl: '', featured: true },
+  { id: '2', title: 'Penthouse en el Centro con Vistas a la Ciudad', price: '3,200,000', address: '456 High Rise, New York, NY', bedrooms: 3, bathrooms: 4, garage: 2, sqft: 3500, imageUrl: '', featured: true },
+  { id: '3', title: 'Acogedora Casa de Playa', price: '1,800,000', address: '789 Ocean Drive, Malibu, CA', bedrooms: 4, bathrooms: 3, garage: 1, sqft: 2200, imageUrl: '', featured: false },
 ];
 
 export default function AdminPropertiesPage() {
@@ -25,11 +25,11 @@ export default function AdminPropertiesPage() {
       <CardHeader>
         <div className="flex justify-between items-center">
           <div>
-            <CardTitle className="font-headline">Property Management</CardTitle>
-            <CardDescription>Add, edit, or remove properties from your listing.</CardDescription>
+            <CardTitle className="font-headline">Gestión de Propiedades</CardTitle>
+            <CardDescription>Agrega, edita o elimina propiedades de tu listado.</CardDescription>
           </div>
           <Button>
-            <PlusCircle className="mr-2 h-4 w-4" /> Add Property
+            <PlusCircle className="mr-2 h-4 w-4" /> Agregar Propiedad
           </Button>
         </div>
       </CardHeader>
@@ -37,10 +37,10 @@ export default function AdminPropertiesPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Title</TableHead>
-              <TableHead>Price</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Actions</TableHead>
+              <TableHead>Título</TableHead>
+              <TableHead>Precio</TableHead>
+              <TableHead>Estado</TableHead>
+              <TableHead>Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -50,20 +50,20 @@ export default function AdminPropertiesPage() {
                 <TableCell>${property.price}</TableCell>
                 <TableCell>
                   <Badge variant={property.featured ? 'default' : 'secondary'}>
-                    {property.featured ? 'Featured' : 'Standard'}
+                    {property.featured ? 'Destacada' : 'Estándar'}
                   </Badge>
                 </TableCell>
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" className="h-8 w-8 p-0">
-                        <span className="sr-only">Open menu</span>
+                        <span className="sr-only">Abrir menú</span>
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
-                      <DropdownMenuItem>Delete</DropdownMenuItem>
+                      <DropdownMenuItem>Editar</DropdownMenuItem>
+                      <DropdownMenuItem>Eliminar</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>

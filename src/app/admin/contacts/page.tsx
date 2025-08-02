@@ -14,27 +14,27 @@ import { Badge } from '@/components/ui/badge';
 
 
 const dummyContacts = [
-  { id: '1', name: 'John Doe', email: 'john.doe@example.com', message: 'I am interested in the Modern Villa. Can I get more details?', date: '2024-05-20', status: 'New' },
-  { id: '2', name: 'Jane Smith', email: 'jane.smith@example.com', message: 'Please schedule a viewing for the Downtown Penthouse.', date: '2024-05-19', status: 'Contacted' },
-  { id: '3', name: 'Sam Wilson', email: 'sam.wilson@example.com', message: 'What are the financing options available?', date: '2024-05-18', status: 'Resolved' },
+  { id: '1', name: 'John Doe', email: 'john.doe@example.com', message: 'I am interested in the Modern Villa. Can I get more details?', date: '2024-05-20', status: 'Nuevo' },
+  { id: '2', name: 'Jane Smith', email: 'jane.smith@example.com', message: 'Please schedule a viewing for the Downtown Penthouse.', date: '2024-05-19', status: 'Contactado' },
+  { id: '3', name: 'Sam Wilson', email: 'sam.wilson@example.com', message: 'What are the financing options available?', date: '2024-05-18', status: 'Resuelto' },
 ];
 
 export default function AdminContactsPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-headline">Contact Submissions</CardTitle>
-        <CardDescription>View and manage inquiries from potential clients.</CardDescription>
+        <CardTitle className="font-headline">Formularios de Contacto</CardTitle>
+        <CardDescription>Ver y gestionar las consultas de clientes potenciales.</CardDescription>
       </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Actions</TableHead>
+              <TableHead>Nombre</TableHead>
+              <TableHead>Correo Electrónico</TableHead>
+              <TableHead>Fecha</TableHead>
+              <TableHead>Estado</TableHead>
+              <TableHead>Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -44,7 +44,7 @@ export default function AdminContactsPage() {
                 <TableCell>{contact.email}</TableCell>
                 <TableCell>{contact.date}</TableCell>
                  <TableCell>
-                  <Badge variant={contact.status === 'New' ? 'destructive' : 'outline'}>
+                  <Badge variant={contact.status === 'Nuevo' ? 'destructive' : 'outline'}>
                     {contact.status}
                   </Badge>
                 </TableCell>
@@ -52,14 +52,14 @@ export default function AdminContactsPage() {
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" className="h-8 w-8 p-0">
-                        <span className="sr-only">Open menu</span>
+                        <span className="sr-only">Abrir menú</span>
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>View Message</DropdownMenuItem>
-                      <DropdownMenuItem>Mark as Contacted</DropdownMenuItem>
-                      <DropdownMenuItem>Delete</DropdownMenuItem>
+                      <DropdownMenuItem>Ver Mensaje</DropdownMenuItem>
+                      <DropdownMenuItem>Marcar como Contactado</DropdownMenuItem>
+                      <DropdownMenuItem>Eliminar</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
