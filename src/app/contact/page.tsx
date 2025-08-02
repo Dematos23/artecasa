@@ -87,7 +87,7 @@ export default function ContactPage() {
                   <Button type="submit" className="flex-1">Enviar Mensaje</Button>
                   <Button asChild variant="outline" className="flex-1 border-green-500 text-green-600 hover:bg-green-500 hover:text-white">
                     <Link href="https://wa.me/1234567890" target="_blank">
-                      <MessageCircle className="mr-2" /> Chatea por WhatsApp
+                      <MessageCircle className="mr-2" /> WhatsApp
                     </Link>
                   </Button>
                 </div>
