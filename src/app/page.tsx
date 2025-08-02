@@ -4,6 +4,15 @@ import type { Property } from '@/types';
 import Link from 'next/link';
 import { ArrowRight, BedDouble, Bath, Car, MapPin } from 'lucide-react';
 import Image from 'next/image';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselPrevious,
+  CarouselNext,
+} from '@/components/ui/carousel';
+
+const heroImages = ['/hero1.webp', '/hero2.webp'];
 
 const dummyProperties: Property[] = [
   {
@@ -51,14 +60,21 @@ export default function Home() {
   return (
     <div className="bg-background">
       <section className="relative h-[70vh] min-h-[500px] max-h-[700px] w-full">
-        <Image
-          src="https://placehold.co/1920x1080.png"
-          data-ai-hint="modern house exterior"
-          alt="Imagen de fondo de una casa de lujo moderna"
-          layout="fill"
-          objectFit="cover"
-          className="absolute inset-0 z-0"
-        />
+        <Carousel className="w-full h-full" opts={{ loop: true }}>
+          <CarouselContent className="w-full h-full">
+            {heroImages.map((src, index) => (
+              <CarouselItem key={index} className="w-full h-full relative">
+                <Image
+                  src={src}
+                  alt={`Imagen de fondo de una casa de lujo moderna ${index + 1}`}
+                  fill
+                  style={{ objectFit: 'cover' }}
+                  className="absolute inset-0 z-0"
+                />
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+        </Carousel>
         <div className="absolute inset-0 bg-black/50 z-10" />
         <div className="relative z-20 flex flex-col items-center justify-center h-full text-center text-white px-[3%] md:px-[5%] xl:px-[12%]">
           <h1 className="text-4xl md:text-6xl font-bold font-headline text-primary mb-4">Artecasa</h1>
