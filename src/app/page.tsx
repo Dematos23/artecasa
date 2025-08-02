@@ -10,8 +10,6 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselPrevious,
-  CarouselNext,
 } from '@/components/ui/carousel';
 import Autoplay from "embla-carousel-autoplay"
 import React from 'react';
@@ -66,17 +64,17 @@ export default function Home() {
 
   return (
     <div className="bg-background">
-      <section className="relative h-[70vh] min-h-[500px] max-h-[700px] w-full">
+      <section className="relative h-[70vh] min-h-[500px] max-h-[700px] w-full flex items-center justify-center">
         <Carousel
           plugins={[plugin.current]}
-          className="w-full h-full"
+          className="absolute w-full h-full"
           opts={{ loop: true }}
           onMouseEnter={plugin.current.stop}
           onMouseLeave={plugin.current.reset}
         >
-          <CarouselContent className="-ml-0 h-full">
+          <CarouselContent className="h-full">
             {heroImages.map((src, index) => (
-              <CarouselItem key={index} className="pl-0 relative">
+              <CarouselItem key={index} className="relative">
                 <Image
                   src={src}
                   alt={`Imagen de fondo de una casa de lujo moderna ${index + 1}`}
