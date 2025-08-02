@@ -67,22 +67,23 @@ export default function Home() {
   return (
     <div className="bg-background">
       <section className="relative h-[70vh] min-h-[500px] max-h-[700px] w-full">
-        <Carousel 
+        <Carousel
           plugins={[plugin.current]}
-          className="absolute w-full h-full" 
+          className="w-full h-full"
           opts={{ loop: true }}
           onMouseEnter={plugin.current.stop}
           onMouseLeave={plugin.current.reset}
-          >
-          <CarouselContent className="w-full h-full">
+        >
+          <CarouselContent className="-ml-0 h-full">
             {heroImages.map((src, index) => (
-              <CarouselItem key={index} className="w-full h-full">
+              <CarouselItem key={index} className="pl-0 relative">
                 <Image
                   src={src}
                   alt={`Imagen de fondo de una casa de lujo moderna ${index + 1}`}
                   fill
                   style={{ objectFit: 'cover' }}
                   className="w-full h-full"
+                  priority={index === 0}
                 />
               </CarouselItem>
             ))}
@@ -159,4 +160,3 @@ export default function Home() {
     </div>
   );
 }
-
