@@ -1,0 +1,55 @@
+import Image from 'next/image';
+import Link from 'next/link';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import type { Property } from '@/types';
+import { BedDouble, Bath, Car } from 'lucide-react';
+
+interface PropertyCardProps {
+  property: Property;
+}
+
+export function PropertyCard({ property }: PropertyCardProps) {
+  return (
+    <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 group">
+      <Link href={`/properties/${property.id}`}>
+        <div className="relative">
+          <Image
+            src={property.imageUrl}
+            data-ai-hint="house exterior"
+            alt={property.title}
+            width={400}
+            height={300}
+            className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+          {property.featured && (
+            <Badge className="absolute top-4 left-4">Featured</Badge>
+          )}
+        </div>
+        <CardContent className="p-4">
+          <h3 className="text-lg font-bold font-headline truncate group-hover:text-primary transition-colors">
+            {property.title}
+          </h3>
+          <p className="text-sm text-muted-foreground mt-1 truncate">{property.address}</p>
+          <div className="mt-4 flex justify-between items-center">
+             <p className="text-xl font-bold text-primary">${property.price}</p>
+          </div>
+          <div className="mt-4 pt-4 border-t border-border flex justify-around text-sm text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <BedDouble className="w-4 h-4 text-primary" />
+              <span>{property.bedrooms} Beds</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Bath className="w-4 h-4 text-primary" />
+              <span>{property.bathrooms} Baths</span>
+            </div>
+             <div className="flex items-center gap-2">
+              <Car className="w-4 h-4 text-primary" />
+              <span>{property.garage} Garage</span>
+            </div>
+          </div>
+        </CardContent>
+      </Link>
+    </Card>
+  );
+}

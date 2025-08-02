@@ -1,0 +1,77 @@
+import { Button } from '@/components/ui/button';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { PlusCircle, MoreHorizontal } from 'lucide-react';
+import type { Property } from '@/types';
+import { Badge } from '@/components/ui/badge';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+
+const dummyProperties: Property[] = [
+  { id: '1', title: 'Modern Villa in a Gated Community', price: '2,500,000', address: '123 Luxury Lane, Beverly Hills, CA', bedrooms: 5, bathrooms: 6, garage: 3, sqft: 5800, imageUrl: '', featured: true },
+  { id: '2', title: 'Downtown Penthouse with City Views', price: '3,200,000', address: '456 High Rise, New York, NY', bedrooms: 3, bathrooms: 4, garage: 2, sqft: 3500, imageUrl: '', featured: true },
+  { id: '3', title: 'Cozy Beachfront Cottage', price: '1,800,000', address: '789 Ocean Drive, Malibu, CA', bedrooms: 4, bathrooms: 3, garage: 1, sqft: 2200, imageUrl: '', featured: false },
+];
+
+export default function AdminPropertiesPage() {
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex justify-between items-center">
+          <div>
+            <CardTitle className="font-headline">Property Management</CardTitle>
+            <CardDescription>Add, edit, or remove properties from your listing.</CardDescription>
+          </div>
+          <Button>
+            <PlusCircle className="mr-2 h-4 w-4" /> Add Property
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Title</TableHead>
+              <TableHead>Price</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {dummyProperties.map((property) => (
+              <TableRow key={property.id}>
+                <TableCell className="font-medium">{property.title}</TableCell>
+                <TableCell>${property.price}</TableCell>
+                <TableCell>
+                  <Badge variant={property.featured ? 'default' : 'secondary'}>
+                    {property.featured ? 'Featured' : 'Standard'}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="h-8 w-8 p-0">
+                        <span className="sr-only">Open menu</span>
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem>Edit</DropdownMenuItem>
+                      <DropdownMenuItem>Delete</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  );
+}
