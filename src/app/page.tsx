@@ -1,3 +1,5 @@
+
+"use client"
 import { Button } from '@/components/ui/button';
 import { PropertyCard } from '@/components/PropertyCard';
 import type { Property } from '@/types';
@@ -11,6 +13,8 @@ import {
   CarouselPrevious,
   CarouselNext,
 } from '@/components/ui/carousel';
+import Autoplay from "embla-carousel-autoplay"
+import React from 'react';
 
 const heroImages = ['/hero1.webp', '/hero2.webp'];
 
@@ -56,11 +60,20 @@ const dummyProperties: Property[] = [
 
 export default function Home() {
   const featuredProperty = dummyProperties[0];
+  const plugin = React.useRef(
+    Autoplay({ delay: 5000, stopOnInteraction: true })
+  )
 
   return (
     <div className="bg-background">
       <section className="relative h-[70vh] min-h-[500px] max-h-[700px] w-full">
-        <Carousel className="absolute w-full h-full" opts={{ loop: true }}>
+        <Carousel 
+          plugins={[plugin.current]}
+          className="absolute w-full h-full" 
+          opts={{ loop: true }}
+          onMouseEnter={plugin.current.stop}
+          onMouseLeave={plugin.current.reset}
+          >
           <CarouselContent className="w-full h-full">
             {heroImages.map((src, index) => (
               <CarouselItem key={index} className="w-full h-full">
@@ -146,3 +159,4 @@ export default function Home() {
     </div>
   );
 }
+
