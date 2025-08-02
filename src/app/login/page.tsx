@@ -70,7 +70,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
           <div className="mx-auto mb-4">
-            <Image src="/logo.png" alt="Artecasa Logo" width={180} height={45} className="h-12 w-auto" />
+            <Image src="/logo.png" alt="Artecasa Logo" width={240} height={60} className="h-16 w-auto" />
           </div>
           <CardTitle className="font-headline text-2xl">Acceso de Administrador</CardTitle>
           <CardDescription>Ingresa tus credenciales para acceder al panel.</CardDescription>
