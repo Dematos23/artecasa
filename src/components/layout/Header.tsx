@@ -47,7 +47,7 @@ export function Header() {
 
         <div className="flex flex-1 items-center justify-end gap-2">
           <Button asChild variant="outline">
-            <Link href="/login">Acceso Admin</Link>
+            <Link href="/login">Login</Link>
           </Button>
           <div className="md:hidden">
             <Sheet>
