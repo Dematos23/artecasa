@@ -31,58 +31,60 @@ export default function AdminLayout({
 
   return (
     <SidebarProvider>
-      <Sidebar>
-        <SidebarHeader>
-          <Link href="/" className="flex items-center">
-            <Image src="/logo.png" alt="Artecasa Logo" width={120} height={30} className="h-8 w-auto" />
-          </Link>
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild>
-                <Link href="/admin">
-                  <Home />
-                  Panel
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild>
-                <Link href="/admin/properties">
-                  <Building2 />
-                  Propiedades
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild>
-                <Link href="/admin/contacts">
-                  <MessageSquare />
-                  Contactos
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarContent>
-        <SidebarFooter>
-          <div className="border-t -mx-2 p-2 pt-2">
-            <div className="flex items-center gap-2 p-2 rounded-md bg-secondary">
-              <User className="h-8 w-8 rounded-full bg-primary/20 text-primary p-1.5" />
-              <div className="flex flex-col">
-                <span className="text-sm font-semibold">Usuario Admin</span>
-                <span className="text-xs text-muted-foreground">admin@artecasa.com</span>
+      <div className="flex h-screen">
+        <Sidebar>
+          <SidebarHeader>
+            <Link href="/" className="flex items-center">
+              <Image src="/logo.png" alt="Artecasa Logo" width={120} height={30} className="h-8 w-auto" />
+            </Link>
+          </SidebarHeader>
+          <SidebarContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link href="/admin">
+                    <Home />
+                    Panel
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link href="/admin/properties">
+                    <Building2 />
+                    Propiedades
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link href="/admin/contacts">
+                    <MessageSquare />
+                    Contactos
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarContent>
+          <SidebarFooter>
+            <div className="border-t -mx-2 p-2 pt-2">
+              <div className="flex items-center gap-2 p-2 rounded-md bg-secondary">
+                <User className="h-8 w-8 rounded-full bg-primary/20 text-primary p-1.5" />
+                <div className="flex flex-col">
+                  <span className="text-sm font-semibold">Usuario Admin</span>
+                  <span className="text-xs text-muted-foreground">admin@artecasa.com</span>
+                </div>
+                <Button variant="ghost" size="icon" className="ml-auto">
+                  <LogOut />
+                </Button>
               </div>
-              <Button variant="ghost" size="icon" className="ml-auto">
-                <LogOut />
-              </Button>
             </div>
-          </div>
-        </SidebarFooter>
-      </Sidebar>
-      <SidebarInset>
-        <div className="p-4 sm:p-6 lg:p-8">{children}</div>
-      </SidebarInset>
+          </SidebarFooter>
+        </Sidebar>
+        <SidebarInset>
+          <div className="p-4 sm:p-6 lg:p-8">{children}</div>
+        </SidebarInset>
+      </div>
     </SidebarProvider>
   );
 }
