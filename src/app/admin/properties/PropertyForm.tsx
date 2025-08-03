@@ -4,7 +4,7 @@
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import type { Property, Contact } from '@/types';
+import type { Property } from '@/types';
 import {
   Dialog,
   DialogContent,
@@ -38,12 +38,7 @@ import { UploadCloud, X } from 'lucide-react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { peruLocations } from '@/lib/peru-locations';
-import { MultiSelect } from '../contacts/ContactForm';
 
-
-const getFullName = (contact: Pick<Contact, 'firstname' | 'secondname' | 'firstlastname' | 'secondlastname'>) => {
-    return [contact.firstname, contact.secondname, contact.firstlastname, contact.secondlastname].filter(Boolean).join(' ');
-}
 
 const propertySchema = z.object({
   title: z.string().min(1, { message: 'El título es obligatorio.' }),
@@ -63,8 +58,6 @@ const propertySchema = z.object({
   antiquity: z.string().optional(),
   imageUrls: z.array(z.string()).optional().default([]),
   featured: z.boolean().default(false),
-  ownerId: z.string().optional(),
-  interestedContactIds: z.array(z.string()).optional().default([]),
   newImages: z.any().optional(),
 });
 
@@ -72,10 +65,9 @@ const propertySchema = z.object({
 interface PropertyFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (property: Omit<Property, 'id'>, newImages: File[]) => void;
+  onSave: (property: Omit<Property, 'id' | 'ownerId' | 'interestedContactIds'>, newImages: File[]) => void;
   property?: Property;
   googleMapsApiKey: string | undefined;
-  contacts: Contact[];
 }
 
 const containerStyle = {
@@ -117,7 +109,7 @@ function MapView({ address }: { address: string }) {
     );
 }
 
-export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiKey, contacts }: PropertyFormProps) {
+export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiKey }: PropertyFormProps) {
   const form = useForm<z.infer<typeof propertySchema>>({
     resolver: zodResolver(propertySchema),
   });
@@ -143,21 +135,11 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
     preventGoogleFontsLoading: true,
   });
 
-  const ownerContacts = useMemo(() => 
-    contacts.filter(c => c.types.includes('vendedor') || c.types.includes('arrendador')),
-    [contacts]
-  );
-  
-  const interestedContacts = useMemo(() => 
-    contacts.filter(c => c.types.includes('comprador') || c.types.includes('arrendatario')),
-    [contacts]
-  );
 
   useEffect(() => {
     const defaultVals = property ? {
         ...property,
         price: Number(property.price.replace(/,/g, '')),
-        interestedContactIds: property.interestedContactIds || [],
     } : {
         title: '',
         price: 0,
@@ -174,8 +156,6 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
         antiquity: '',
         imageUrls: [],
         featured: false,
-        ownerId: undefined,
-        interestedContactIds: [],
         newImages: [],
     };
     form.reset(defaultVals);
@@ -217,7 +197,7 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
   const onSubmit = async (values: z.infer<typeof propertySchema>) => {
     const { newImages, ...propertyData } = values;
     
-    const finalProperty: Omit<Property, 'id'> = {
+    const finalProperty: Omit<Property, 'id' | 'ownerId' | 'interestedContactIds'> = {
         ...propertyData,
         price: propertyData.price.toString(),
         imageUrls: values.imageUrls || [],
@@ -424,51 +404,7 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
                     </div>
                   ) : <div>Cargando mapa...</div>
                 ) : <div className="text-sm text-muted-foreground">Para mostrar el mapa, por favor, añade tu clave de API de Google Maps (NEXT_PUBLIC_GOOGLE_MAPS_API_KEY) a tus variables de entorno.</div>}
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <FormField
-                        control={form.control}
-                        name="ownerId"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Propietario</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Seleccionar propietario..." />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                    {ownerContacts.map(contact => (
-                                        <SelectItem key={contact.id} value={contact.id}>{getFullName(contact)}</SelectItem>
-                                    ))}
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="interestedContactIds"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Contactos Interesados</FormLabel>
-                          <FormControl>
-                            <MultiSelect
-                              options={interestedContacts.map(c => ({ value: c.id, label: getFullName(c) }))}
-                              selected={field.value || []}
-                              onChange={field.onChange}
-                              className="w-full"
-                              placeholder="Seleccionar interesados..."
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                </div>
-
+                
                  <FormField
                     control={form.control}
                     name="featured"

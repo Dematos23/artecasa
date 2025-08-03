@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/table';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { PlusCircle, MoreHorizontal } from 'lucide-react';
-import type { Property, Contact } from '@/types';
+import type { Property } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import React, { useState, useEffect } from 'react';
@@ -28,7 +28,6 @@ const storage = getStorage(app);
 
 export default function AdminPropertiesPage() {
   const [properties, setProperties] = useState<Property[]>([]);
-  const [contacts, setContacts] = useState<Contact[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<Property | undefined>(undefined);
   const [isSaving, setIsSaving] = useState(false);
@@ -39,7 +38,7 @@ export default function AdminPropertiesPage() {
   const editPropertyId = searchParams.get('edit');
 
   useEffect(() => {
-    // TODO: Fetch properties and contacts from Firestore
+    // TODO: Fetch properties from Firestore
   }, []);
 
   useEffect(() => {
@@ -55,7 +54,7 @@ export default function AdminPropertiesPage() {
   }, [editPropertyId, properties, router]);
 
 
-  const handleSave = async (propertyData: Omit<Property, 'id'>, newImages: File[]) => {
+  const handleSave = async (propertyData: Omit<Property, 'id' | 'ownerId' | 'interestedContactIds'>, newImages: File[]) => {
     setIsSaving(true);
 
     try {
@@ -70,6 +69,8 @@ export default function AdminPropertiesPage() {
 
         const finalPropertyData: Omit<Property, 'id'> = {
             ...propertyData,
+            ownerId: undefined,
+            interestedContactIds: [],
             imageUrls: [...(propertyData.imageUrls || []), ...uploadedImageUrls],
         };
 
@@ -118,7 +119,6 @@ export default function AdminPropertiesPage() {
         onSave={handleSave}
         property={selectedProperty}
         googleMapsApiKey={googleMapsApiKey}
-        contacts={contacts}
       />
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
