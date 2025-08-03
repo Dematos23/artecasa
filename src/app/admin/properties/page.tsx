@@ -112,7 +112,36 @@ export default function AdminPropertiesPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
+          {/* Mobile View - Cards */}
+          <div className="md:hidden space-y-4">
+            {properties.map((property) => (
+              <Card key={property.id} className="w-full">
+                <CardHeader>
+                  <CardTitle className="text-base font-bold truncate">{property.title}</CardTitle>
+                  <CardDescription className="capitalize">{property.modality} - ${Number(property.price).toLocaleString()}</CardDescription>
+                </CardHeader>
+                <CardContent className="flex justify-between items-center">
+                   <Badge variant={property.featured ? 'default' : 'secondary'}>
+                      {property.featured ? 'Destacada' : 'Estándar'}
+                    </Badge>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <span className="sr-only">Abrir menú</span>
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => openFormForEdit(property)}>Editar</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDelete(property.id)} className="text-destructive">Eliminar</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+           {/* Desktop View - Table */}
+          <div className="hidden md:block overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>

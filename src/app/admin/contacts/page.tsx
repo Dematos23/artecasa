@@ -84,7 +84,40 @@ export default function AdminContactsPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
+          {/* Mobile View - Cards */}
+          <div className="md:hidden space-y-4">
+             {contacts.map((contact) => (
+              <Card key={contact.id}>
+                <CardHeader>
+                  <CardTitle className="text-base font-bold truncate">{getFullName(contact)}</CardTitle>
+                  <CardDescription>{contact.email}</CardDescription>
+                </CardHeader>
+                <CardContent className="flex justify-between items-center">
+                   <div className="flex gap-1 flex-wrap">
+                      {contact.types.map(type => (
+                          <Badge key={type} variant="secondary" className="capitalize">{type}</Badge>
+                      ))}
+                    </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="h-8 w-8 p-0">
+                        <span className="sr-only">Abrir menú</span>
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem>Ver Notas</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => openFormForEdit(contact)}>Editar</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleDelete(contact.id)} className="text-destructive">Eliminar</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </CardContent>
+              </Card>
+             ))}
+          </div>
+
+          {/* Desktop View - Table */}
+          <div className="hidden md:block overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
