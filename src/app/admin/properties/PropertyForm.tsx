@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useForm, useWatch, Controller } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import type { Property, Contact } from '@/types';
@@ -34,7 +34,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import React, { useEffect, useState, useMemo } from 'react';
 import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
-import { UploadCloud, X, User } from 'lucide-react';
+import { UploadCloud, X } from 'lucide-react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { peruLocations } from '@/lib/peru-locations';
@@ -273,9 +273,9 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
                                 <FormLabel>Modalidad</FormLabel>
                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                                     <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Selecciona una modalidad" />
-                                    </SelectTrigger>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Selecciona una modalidad" />
+                                        </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
                                     <SelectItem value="venta">Venta</SelectItem>
@@ -434,9 +434,9 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
                                 <FormLabel>Propietario</FormLabel>
                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                                     <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Seleccionar propietario..." />
-                                    </SelectTrigger>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Seleccionar propietario..." />
+                                        </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
                                     {ownerContacts.map(contact => (
@@ -501,5 +501,3 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
     </Dialog>
   );
 }
-
-    

@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useForm, Controller, useWatch } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import type { Contact, ContactType, Property } from '@/types';
@@ -96,7 +96,13 @@ export function ContactForm({ isOpen, onClose, onSave, contact, properties }: Co
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4 max-h-[70vh] overflow-y-auto px-2">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <FormField control={form.control} name="firstname" render={({ field }) => ( <FormItem> <FormLabel>Primer Nombre</FormLabel> <FormControl> <Input placeholder="Ej. Juan" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
+                    <FormField control={form.control} name="firstname" render={({ field }) => ( 
+                      <FormItem> 
+                        <FormLabel>Primer Nombre</FormLabel> 
+                        <FormControl><Input placeholder="Ej. Juan" {...field} /></FormControl> 
+                        <FormMessage /> 
+                      </FormItem> 
+                    )}/>
                     <FormField control={form.control} name="secondname" render={({ field }) => ( <FormItem> <FormLabel>Segundo Nombre</FormLabel> <FormControl> <Input placeholder="Ej. Carlos" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
                 </div>
                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -108,48 +114,71 @@ export function ContactForm({ isOpen, onClose, onSave, contact, properties }: Co
                 <FormField control={form.control} name="notes" render={({ field }) => ( <FormItem> <FormLabel>Notas</FormLabel> <FormControl> <Textarea placeholder="Escribe las notas del contacto..." {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
                 
                 <FormField
-                    control={form.control}
-                    name="types"
-                    render={() => (
-                        <FormItem>
-                            <div className="mb-4"><FormLabel className="text-base">Tipo</FormLabel></div>
-                            <div className="grid grid-cols-2 gap-4">
-                                {contactTypes.map((item) => (
-                                <FormField key={item} control={form.control} name="types" render={({ field }) => (
-                                    <FormItem key={item} className="flex flex-row items-start space-x-3 space-y-0">
-                                        <FormControl>
-                                            <Checkbox checked={field.value?.includes(item)} onCheckedChange={(checked) => ( checked ? field.onChange([...(field.value || []), item]) : field.onChange(field.value?.filter((value) => value !== item)) )}/>
-                                        </FormControl>
-                                        <FormLabel className="font-normal capitalize">{item}</FormLabel>
-                                    </FormItem>
-                                )}/>
-                                ))}
-                            </div>
-                            <FormMessage />
-                        </FormItem>
-                    )}
+                  control={form.control}
+                  name="types"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="mb-4">
+                        <FormLabel className="text-base">Tipo</FormLabel>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        {contactTypes.map((item) => (
+                          <FormField
+                            key={item}
+                            control={form.control}
+                            name="types"
+                            render={({ field }) => {
+                              return (
+                                <FormItem
+                                  key={item}
+                                  className="flex flex-row items-start space-x-3 space-y-0"
+                                >
+                                  <FormControl>
+                                    <Checkbox
+                                      checked={field.value?.includes(item)}
+                                      onCheckedChange={(checked) => {
+                                        return checked
+                                          ? field.onChange([...field.value, item])
+                                          : field.onChange(
+                                              field.value?.filter(
+                                                (value) => value !== item
+                                              )
+                                            )
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormLabel className="font-normal capitalize">{item}</FormLabel>
+                                </FormItem>
+                              )
+                            }}
+                          />
+                        ))}
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
                 
                 {showInterestedProperties && (
-                    <FormField
-                      control={form.control}
-                      name="interestedPropertyIds"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Propiedades de Interés</FormLabel>
-                          <FormControl>
-                             <MultiSelect
+                  <FormField
+                    control={form.control}
+                    name="interestedPropertyIds"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Propiedades de Interés</FormLabel>
+                         <FormControl>
+                           <MultiSelect
                               options={properties.map(p => ({ value: p.id, label: p.title }))}
                               selected={field.value || []}
                               onChange={field.onChange}
                               className="w-full"
                               placeholder="Seleccionar propiedades..."
                             />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                         </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 )}
 
                 <DialogFooter>
@@ -216,5 +245,3 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
     );
 });
 MultiSelect.displayName = "MultiSelect";
-
-    
