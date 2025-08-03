@@ -457,7 +457,6 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
                           <FormLabel>Contactos Interesados</FormLabel>
                           <FormControl>
                             <MultiSelect
-                              {...field}
                               options={interestedContacts.map(c => ({ value: c.id, label: getFullName(c) }))}
                               selected={field.value || []}
                               onChange={field.onChange}
@@ -575,3 +574,5 @@ const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>(
     );
 });
 MultiSelect.displayName = "MultiSelect";
+
+    

@@ -138,8 +138,7 @@ export function ContactForm({ isOpen, onClose, onSave, contact, properties }: Co
                         <FormItem>
                           <FormLabel>Propiedades de Interés</FormLabel>
                           <FormControl>
-                            <MultiSelect
-                              {...field}
+                             <MultiSelect
                               options={properties.map(p => ({ value: p.id, label: p.title }))}
                               selected={field.value || []}
                               onChange={field.onChange}
@@ -217,3 +216,5 @@ const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>(
     );
 });
 MultiSelect.displayName = "MultiSelect";
+
+    
