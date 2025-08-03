@@ -100,7 +100,7 @@ export function ContactForm({ isOpen, onClose, onSave, contact, properties }: Co
           </DialogDescription>
         </DialogHeader>
         {/* --- Formulario gestionado manualmente con react-hook-form --- */}
-        <ScrollArea className="max-h-[70vh] pr-6">
+        <div className="max-h-[70vh] pr-6">
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4 px-2">
             {/* --- Campos de texto con form.register --- */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -181,7 +181,7 @@ export function ContactForm({ isOpen, onClose, onSave, contact, properties }: Co
                 <Button type="submit">Guardar</Button>
             </DialogFooter>
             </form>
-        </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   );
@@ -240,7 +240,3 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
     );
   });
 MultiSelect.displayName = "MultiSelect";
-
-    
-
-    
