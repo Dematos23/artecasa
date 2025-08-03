@@ -22,6 +22,7 @@ import { Textarea } from '@/components/ui/textarea';
 import React, { useEffect } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { UpdateContactData } from '@/services/contacts';
 
 const contactSchema = z.object({
   firstname: z.string().min(1, { message: 'El primer nombre es obligatorio.' }),
@@ -39,7 +40,7 @@ const contactSchema = z.object({
 interface ContactFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (contact: Omit<Contact, 'id' | 'date' | 'interestedPropertyIds'>) => Promise<void>;
+  onSave: (contact: UpdateContactData) => Promise<void>;
   contact?: Contact;
 }
 
@@ -65,10 +66,12 @@ export function ContactForm({ isOpen, onClose, onSave, contact }: ContactFormPro
   const watchedTypes = form.watch('types', contact?.types || []);
 
   useEffect(() => {
-    form.reset(contact ? {
-        ...contact,
-        types: contact.types || [],
-    } : defaultValues);
+    if (isOpen) {
+        form.reset(contact ? {
+            ...contact,
+            types: contact.types || [],
+        } : defaultValues);
+    }
   }, [contact, form, isOpen]);
 
   // --- Manejador para el envío del formulario ---
@@ -94,10 +97,8 @@ export function ContactForm({ isOpen, onClose, onSave, contact }: ContactFormPro
             {contact ? 'Actualiza los detalles del contacto.' : 'Completa el formulario para crear un nuevo contacto.'}
           </DialogDescription>
         </DialogHeader>
-        {/* --- Formulario gestionado manualmente con react-hook-form --- */}
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4 pr-2">
             <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                {/* --- Campos de texto con form.register --- */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                         <Label htmlFor="firstname">Primer Nombre</Label>
@@ -135,8 +136,6 @@ export function ContactForm({ isOpen, onClose, onSave, contact }: ContactFormPro
                     <Textarea id="notes" placeholder="Escribe las notas del contacto..." {...form.register('notes')} />
                     {errors.notes && <p className="text-sm font-medium text-destructive">{errors.notes.message}</p>}
                 </div>
-
-                {/* --- Grupo de Checkboxes con manejo manual --- */}
                 <div className="space-y-2">
                     <Label>Tipo</Label>
                     <div className="grid grid-cols-2 gap-4 pt-2">

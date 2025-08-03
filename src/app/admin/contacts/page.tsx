@@ -18,7 +18,7 @@ import type { Contact } from '@/types';
 import React, { useState, useEffect, useCallback } from 'react';
 import { ContactForm } from './ContactForm';
 import Link from 'next/link';
-import { getContacts, addContact, NewContactData, deleteContact } from '@/services/contacts';
+import { getContacts, addContact, deleteContact, updateContact, UpdateContactData } from '@/services/contacts';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import {
@@ -72,12 +72,16 @@ export default function AdminContactsPage() {
     }
   }, [authLoading, user, fetchContacts]);
 
-  const handleSave = async (contactData: Omit<Contact, 'id' | 'date' | 'interestedPropertyIds'>) => {
+  const handleSave = async (contactData: UpdateContactData) => {
     try {
       if (selectedContact) {
-        // TODO: Implement edit logic
+        await updateContact(selectedContact.id, contactData);
+        toast({
+            title: "Éxito",
+            description: "El contacto se ha actualizado correctamente.",
+        });
       } else {
-        await addContact(contactData);
+        await addContact(contactData as Omit<Contact, 'id' | 'date' | 'interestedPropertyIds'>);
         toast({
             title: "Éxito",
             description: "El contacto se ha creado correctamente.",

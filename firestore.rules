@@ -8,9 +8,9 @@ service cloud.firestore {
     match /contacts/{contactId} {
       allow create: if request.auth != null;
       allow read: if request.auth != null; // Añadimos la regla de lectura
-      // Puedes añadir reglas para actualización y eliminación si es necesario
-      // allow update: if request.auth != null;
-      // allow delete: if request.auth != null;
+      // Rules for update and delete if necessary
+      allow update: if request.auth != null;
+      allow delete: if request.auth != null;
     }
 
     // Mantener una regla para otras colecciones si las tienes,
