@@ -90,7 +90,11 @@ export default function AdminContactsPage() {
              {contacts.map((contact) => (
               <Card key={contact.id}>
                 <CardHeader>
-                  <CardTitle className="text-base font-bold truncate">{getFullName(contact)}</CardTitle>
+                  <CardTitle className="text-base font-bold truncate">
+                    <Link href={`/admin/contacts/${contact.id}`} className="hover:underline">
+                        {getFullName(contact)}
+                    </Link>
+                  </CardTitle>
                   <CardDescription>{contact.email}</CardDescription>
                 </CardHeader>
                 <CardContent className="flex justify-between items-center">
@@ -107,9 +111,6 @@ export default function AdminContactsPage() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem asChild>
-                        <Link href={`/admin/contacts/${contact.id}`}>Ver Detalles</Link>
-                      </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => openFormForEdit(contact)}>Editar</DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleDelete(contact.id)} className="text-destructive">Eliminar</DropdownMenuItem>
                     </DropdownMenuContent>
@@ -134,7 +135,11 @@ export default function AdminContactsPage() {
               <TableBody>
                 {contacts.map((contact) => (
                   <TableRow key={contact.id}>
-                    <TableCell className="font-medium">{getFullName(contact)}</TableCell>
+                    <TableCell className="font-medium">
+                      <Link href={`/admin/contacts/${contact.id}`} className="hover:underline">
+                        {getFullName(contact)}
+                      </Link>
+                    </TableCell>
                     <TableCell>{contact.email}</TableCell>
                     <TableCell>{contact.phone || '-'}</TableCell>
                     <TableCell>
@@ -153,9 +158,6 @@ export default function AdminContactsPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                           <DropdownMenuItem asChild>
-                            <Link href={`/admin/contacts/${contact.id}`}>Ver Detalles</Link>
-                          </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => openFormForEdit(contact)}>Editar</DropdownMenuItem>
                           <DropdownMenuItem onClick={() => handleDelete(contact.id)} className="text-destructive">Eliminar</DropdownMenuItem>
                         </DropdownMenuContent>

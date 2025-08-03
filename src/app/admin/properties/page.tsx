@@ -119,7 +119,11 @@ export default function AdminPropertiesPage() {
             {properties.map((property) => (
               <Card key={property.id}>
                 <CardHeader>
-                  <CardTitle className="text-base font-bold truncate">{property.title}</CardTitle>
+                  <CardTitle className="text-base font-bold truncate">
+                    <Link href={`/properties/${property.id}`} className="hover:underline">
+                      {property.title}
+                    </Link>
+                  </CardTitle>
                   <CardDescription className="capitalize">{property.modality} - ${Number(property.price).toLocaleString()}</CardDescription>
                 </CardHeader>
                 <CardContent className="flex justify-between items-center">
@@ -134,9 +138,6 @@ export default function AdminPropertiesPage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem asChild>
-                            <Link href={`/properties/${property.id}`}>Ver Detalles</Link>
-                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => openFormForEdit(property)}>Editar</DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handleDelete(property.id)} className="text-destructive">Eliminar</DropdownMenuItem>
                       </DropdownMenuContent>
@@ -160,7 +161,11 @@ export default function AdminPropertiesPage() {
               <TableBody>
                 {properties.map((property) => (
                   <TableRow key={property.id}>
-                    <TableCell className="font-medium">{property.title}</TableCell>
+                    <TableCell className="font-medium">
+                      <Link href={`/properties/${property.id}`} className="hover:underline">
+                        {property.title}
+                      </Link>
+                    </TableCell>
                     <TableCell>${Number(property.price).toLocaleString()}</TableCell>
                     <TableCell className="capitalize">{property.modality}</TableCell>
                     <TableCell>
@@ -177,9 +182,6 @@ export default function AdminPropertiesPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                           <DropdownMenuItem asChild>
-                            <Link href={`/properties/${property.id}`}>Ver Detalles</Link>
-                          </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => openFormForEdit(property)}>Editar</DropdownMenuItem>
                           <DropdownMenuItem onClick={() => handleDelete(property.id)} className="text-destructive">Eliminar</DropdownMenuItem>
                         </DropdownMenuContent>
