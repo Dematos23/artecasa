@@ -131,27 +131,26 @@ export function ContactForm({ isOpen, onClose, onSave, contact, properties }: Co
                 />
                 
                 {showInterestedProperties && (
-                  <FormField
-                    control={form.control}
-                    name="interestedPropertyIds"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Propiedades de Interés</FormLabel>
-                        <FormControl>
-                          <MultiSelect
-                            options={properties.map(p => ({ value: p.id, label: p.title }))}
-                            selected={field.value || []}
-                            onChange={field.onChange}
-                            className="w-full"
-                            placeholder="Seleccionar propiedades..."
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={form.control}
+                      name="interestedPropertyIds"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Propiedades de Interés</FormLabel>
+                          <FormControl>
+                            <MultiSelect
+                              options={properties.map(p => ({ value: p.id, label: p.title }))}
+                              selected={field.value || []}
+                              onChange={field.onChange}
+                              className="w-full"
+                              placeholder="Seleccionar propiedades..."
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                 )}
-
 
                 <DialogFooter>
                     <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>

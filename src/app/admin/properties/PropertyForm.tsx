@@ -470,7 +470,6 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
                     />
                 </div>
 
-
                  <FormField
                     control={form.control}
                     name="featured"
