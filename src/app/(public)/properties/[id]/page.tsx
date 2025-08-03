@@ -8,16 +8,35 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Property } from '@/types';
 import { BedDouble, Bath, Car, Maximize, MapPin, Phone, CalendarClock } from 'lucide-react';
 import Link from 'next/link';
+import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
 
 // TODO: Replace with actual data fetching logic from Firestore
 const getPropertyById = async (id: string): Promise<Property | undefined> => {
   return undefined;
 };
 
+const containerStyle = {
+  width: '100%',
+  height: '400px',
+  borderRadius: '0.5rem',
+};
+
+const defaultCenter = {
+  lat: -12.046374,
+  lng: -77.042793
+};
+
 export default function PropertyDetailsPage({ params }: { params: { id: string } }) {
   const { id: propertyId } = params;
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
+  const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
+  const { isLoaded } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: googleMapsApiKey || "",
+    preventGoogleFontsLoading: true,
+  });
   
   useEffect(() => {
     if (!propertyId) return;
@@ -72,12 +91,28 @@ export default function PropertyDetailsPage({ params }: { params: { id: string }
               />
             </Card>
 
-            <Card>
+            <Card className="mb-8">
               <CardHeader>
                 <CardTitle className="font-headline">Descripción de la Propiedad</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">{property.description}</p>
+              </CardContent>
+            </Card>
+             <Card>
+              <CardHeader>
+                <CardTitle className="font-headline">Ubicación en el Mapa</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {googleMapsApiKey && isLoaded ? (
+                  <GoogleMap
+                      mapContainerStyle={containerStyle}
+                      center={property.location || defaultCenter}
+                      zoom={property.location ? 16 : 10}
+                  >
+                      {property.location && <Marker position={property.location} />}
+                  </GoogleMap>
+                ) : <p className="text-muted-foreground">El mapa no está disponible en este momento.</p>}
               </CardContent>
             </Card>
           </div>

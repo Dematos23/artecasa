@@ -19,6 +19,10 @@ export interface Property {
   description?: string;
   featured?: boolean;
   antiquity?: number;
+  location?: {
+    lat: number;
+    lng: number;
+  };
 }
 
 // Type for new property data, omitting id which will be generated

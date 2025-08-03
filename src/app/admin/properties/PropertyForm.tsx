@@ -32,7 +32,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
 import { UploadCloud, X } from 'lucide-react';
 import Image from 'next/image';
@@ -62,6 +62,10 @@ const propertySchema = z.object({
   imageUrls: z.array(z.string()).optional().default([]),
   featured: z.boolean().default(false),
   newImages: z.any().optional(),
+  location: z.object({
+    lat: z.number(),
+    lng: z.number(),
+  }).optional(),
 });
 
 
@@ -84,31 +88,44 @@ const defaultCenter = {
   lng: -77.042793
 };
 
-function MapView({ address }: { address: string }) {
-    const [center, setCenter] = useState(defaultCenter);
+function MapView({ address, location, onLocationChange }: { address: string, location?: {lat: number, lng: number}, onLocationChange: (location: {lat: number, lng: number}) => void }) {
+    const [center, setCenter] = useState(location || defaultCenter);
 
     useEffect(() => {
+      if (location) {
+        setCenter(location);
+      }
+    }, [location]);
+
+    const handleGeocode = useCallback(() => {
         if (address && window.google) {
             const geocoder = new window.google.maps.Geocoder();
             geocoder.geocode({ address }, (results, status) => {
                 if (status === 'OK' && results && results[0]) {
-                    const location = results[0].geometry.location;
-                    setCenter({ lat: location.lat(), lng: location.lng() });
+                    const newLocation = results[0].geometry.location;
+                    const newCenter = { lat: newLocation.lat(), lng: newLocation.lng() };
+                    setCenter(newCenter);
+                    onLocationChange(newCenter);
                 } else {
                     console.error(`Geocode was not successful for the following reason: ${status}`);
                 }
             });
         }
-    }, [address]);
+    }, [address, onLocationChange]);
 
     return (
-        <GoogleMap
-            mapContainerStyle={containerStyle}
-            center={center}
-            zoom={15}
-        >
-            <Marker position={center} />
-        </GoogleMap>
+        <div>
+            <Button type="button" onClick={handleGeocode} className="mb-2" disabled={!address}>
+                Buscar Dirección en el Mapa
+            </Button>
+            <GoogleMap
+                mapContainerStyle={containerStyle}
+                center={center}
+                zoom={15}
+            >
+                <Marker position={center} />
+            </GoogleMap>
+        </div>
     );
 }
 
@@ -122,6 +139,8 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
   const watchedAddress = useWatch({ control: form.control, name: 'address' });
   const watchedRegion = useWatch({ control: form.control, name: 'region' });
   const watchedProvince = useWatch({ control: form.control, name: 'province' });
+  const watchedDistrict = useWatch({ control: form.control, name: 'district' });
+  const watchedLocation = useWatch({ control: form.control, name: 'location' });
 
   const provinces = useMemo(() => {
     return peruLocations.find(r => r.region === watchedRegion)?.provinces || [];
@@ -130,6 +149,10 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
   const districts = useMemo(() => {
     return provinces.find(p => p.province === watchedProvince)?.districts || [];
   }, [watchedProvince, provinces]);
+
+  const fullAddress = useMemo(() => {
+      return [watchedAddress, watchedDistrict, watchedProvince, watchedRegion, 'Perú'].filter(Boolean).join(', ');
+  }, [watchedAddress, watchedDistrict, watchedProvince, watchedRegion]);
 
 
   const { isLoaded } = useJsApiLoader({
@@ -425,7 +448,11 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
                 {googleMapsApiKey ? (
                   isLoaded ? (
                     <div className="mt-2">
-                        <MapView address={watchedAddress} />
+                        <MapView 
+                            address={fullAddress} 
+                            location={watchedLocation}
+                            onLocationChange={(newLocation) => form.setValue('location', newLocation)}
+                        />
                     </div>
                   ) : <div>Cargando mapa...</div>
                 ) : <div className="text-sm text-muted-foreground">Para mostrar el mapa, por favor, añade tu clave de API de Google Maps (NEXT_PUBLIC_GOOGLE_MAPS_API_KEY) a tus variables de entorno.</div>}
