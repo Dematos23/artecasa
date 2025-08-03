@@ -1,6 +1,6 @@
 
 import { db } from '@/lib/firebase';
-import { collection, getDocs, addDoc, serverTimestamp, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, addDoc, serverTimestamp, query, orderBy, doc, deleteDoc } from 'firebase/firestore';
 import type { Contact } from '@/types';
 
 const contactsCollection = collection(db, 'contacts');
@@ -32,4 +32,10 @@ export async function addContact(contactData: NewContactData): Promise<string> {
     date: serverTimestamp(),
   });
   return docRef.id;
+}
+
+// Function to delete a contact from Firestore
+export async function deleteContact(id: string): Promise<void> {
+    const contactDoc = doc(db, 'contacts', id);
+    await deleteDoc(contactDoc);
 }

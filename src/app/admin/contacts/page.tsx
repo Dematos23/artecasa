@@ -18,9 +18,19 @@ import type { Contact } from '@/types';
 import React, { useState, useEffect, useCallback } from 'react';
 import { ContactForm } from './ContactForm';
 import Link from 'next/link';
-import { getContacts, addContact, NewContactData } from '@/services/contacts';
+import { getContacts, addContact, NewContactData, deleteContact } from '@/services/contacts';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/context/AuthContext'; // Import useAuth
+import { useAuth } from '@/context/AuthContext';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 const getFullName = (contact: Pick<Contact, 'firstname' | 'secondname' | 'firstlastname' | 'secondlastname'>) => {
     return [contact.firstname, contact.secondname, contact.firstlastname, contact.secondlastname].filter(Boolean).join(' ');
@@ -33,6 +43,8 @@ export default function AdminContactsPage() {
   const [selectedContact, setSelectedContact] = useState<Contact | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [contactToDelete, setContactToDelete] = useState<string | null>(null);
 
   const fetchContacts = useCallback(async () => {
     try {
@@ -94,14 +106,52 @@ export default function AdminContactsPage() {
     setIsFormOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    // TODO: Implement Firestore delete logic
-    setContacts(contacts.filter(c => c.id !== id));
+  const handleDeleteClick = (id: string) => {
+    setContactToDelete(id);
+    setIsAlertOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (contactToDelete) {
+        try {
+            await deleteContact(contactToDelete);
+            toast({
+                title: "Éxito",
+                description: "El contacto se ha eliminado correctamente.",
+            });
+            await fetchContacts();
+        } catch (error) {
+            console.error("Error deleting contact: ", error);
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "No se pudo eliminar el contacto.",
+            });
+        } finally {
+            setIsAlertOpen(false);
+            setContactToDelete(null);
+        }
+    }
   };
 
 
   return (
     <>
+      <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Estás absolutamente seguro?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. Esto eliminará permanentemente
+              el contacto de la base de datos.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setContactToDelete(null)}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>Continuar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <ContactForm 
         isOpen={isFormOpen}
         onClose={() => setIsFormOpen(false)}
@@ -149,7 +199,7 @@ export default function AdminContactsPage() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onClick={() => openFormForEdit(contact)}>Editar</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleDelete(contact.id)} className="text-destructive">Eliminar</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleDeleteClick(contact.id)} className="text-destructive">Eliminar</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </CardContent>
@@ -196,7 +246,7 @@ export default function AdminContactsPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => openFormForEdit(contact)}>Editar</DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleDelete(contact.id)} className="text-destructive">Eliminar</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleDeleteClick(contact.id)} className="text-destructive">Eliminar</DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
