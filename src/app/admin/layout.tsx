@@ -75,7 +75,7 @@ export default function AdminLayout({
         <Sidebar>
             <SidebarHeader>
             <Link href="/" className="flex items-center justify-center">
-                <Image src="/logo.png" alt="Artecasa Logo" width={160} height={40} className="h-12 w-auto" />
+                <Image src="/logo.png" alt="Artecasa Logo" width={160} height={40} className="h-16 w-auto" />
             </Link>
             </SidebarHeader>
             <SidebarContent>

@@ -143,11 +143,13 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
   const watchedLocation = useWatch({ control: form.control, name: 'location' });
 
   const provinces = useMemo(() => {
-    return peruLocations.find(r => r.region === watchedRegion)?.provinces || [];
+    const regionData = peruLocations.find(r => r.region === watchedRegion);
+    return regionData ? regionData.provinces : [];
   }, [watchedRegion]);
 
   const districts = useMemo(() => {
-    return provinces.find(p => p.province === watchedProvince)?.districts || [];
+    const provinceData = provinces.find(p => p.province === watchedProvince);
+    return provinceData ? provinceData.districts : [];
   }, [watchedProvince, provinces]);
 
   const fullAddress = useMemo(() => {
