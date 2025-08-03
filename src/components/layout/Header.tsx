@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -115,7 +116,7 @@ export function Header() {
                    <DropdownMenuItem asChild>
                      <Link href="/admin">
                         <User className="mr-2 h-4 w-4" />
-                        <span>Panel Admin</span>
+                        <span>Panel de Administrador</span>
                       </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleLogout}>

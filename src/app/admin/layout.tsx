@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -52,7 +53,6 @@ export default function AdminLayout({
   if (!user) {
     return null;
   }
-
 
   return (
     <SidebarProvider>
@@ -121,7 +121,7 @@ export default function AdminLayout({
         <main className="flex-1 overflow-y-auto">
             <header className="p-4 sm:p-6 lg:p-8 flex items-center md:hidden border-b">
                 <SidebarTrigger />
-                <h1 className='text-xl font-bold font-headline ml-4'>Panel Admin</h1>
+                <h1 className='text-xl font-bold font-headline ml-4'>Panel de Administrador</h1>
             </header>
             <div className="p-4 sm:p-6 lg:p-8">{children}</div>
         </main>
