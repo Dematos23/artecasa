@@ -15,18 +15,20 @@ const getPropertyById = async (id: string): Promise<Property | undefined> => {
 };
 
 export default function PropertyDetailsPage({ params }: { params: { id: string } }) {
+  const propertyId = params.id;
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
+    if (!propertyId) return;
     const fetchProperty = async () => {
       setLoading(true);
-      const fetchedProperty = await getPropertyById(params.id);
+      const fetchedProperty = await getPropertyById(propertyId);
       setProperty(fetchedProperty || null);
       setLoading(false);
     };
     fetchProperty();
-  }, [params.id]);
+  }, [propertyId]);
 
   if (loading) {
      return (

@@ -34,6 +34,7 @@ export default function ContactDetailsPage({ params }: { params: { id: string } 
   const [loading, setLoading] = useState(true);
   
    useEffect(() => {
+    if (!contactId) return;
     const fetchDetails = async () => {
       setLoading(true);
       const contactData = await getContactById(contactId);

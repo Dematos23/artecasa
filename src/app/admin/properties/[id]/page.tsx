@@ -39,6 +39,7 @@ export default function AdminPropertyDetailsPage({ params }: { params: { id: str
   const [loading, setLoading] = useState(true);
 
    useEffect(() => {
+    if (!propertyId) return;
     const fetchDetails = async () => {
       setLoading(true);
       const prop = await getPropertyById(propertyId);
