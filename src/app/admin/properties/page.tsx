@@ -60,7 +60,7 @@ export default function AdminPropertiesPage() {
 
         const finalPropertyData: Omit<Property, 'id'> = {
             ...propertyData,
-            imageUrls: [...propertyData.imageUrls, ...uploadedImageUrls],
+            imageUrls: [...(propertyData.imageUrls || []), ...uploadedImageUrls],
         };
 
         if (selectedProperty) {
@@ -126,7 +126,7 @@ export default function AdminPropertiesPage() {
           <Card key={property.id}>
             <CardHeader>
               <CardTitle className="text-base truncate">
-                <Link href={`/properties/${property.id}`} className="font-bold">
+                <Link href={`/admin/properties/${property.id}`} className="font-bold">
                   {property.title}
                 </Link>
               </CardTitle>
@@ -168,8 +168,8 @@ export default function AdminPropertiesPage() {
           <TableBody>
             {properties.map((property) => (
               <TableRow key={property.id}>
-                <TableCell className="font-medium">
-                  <Link href={`/properties/${property.id}`} className="font-bold">
+                <TableCell>
+                  <Link href={`/admin/properties/${property.id}`} className="font-bold">
                     {property.title}
                   </Link>
                 </TableCell>
