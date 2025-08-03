@@ -19,6 +19,8 @@ import React, { useState } from 'react';
 import { PropertyForm } from './PropertyForm';
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { app } from '@/lib/firebase'; // Assuming you have firebase initialized here
+import Link from 'next/link';
+
 
 const storage = getStorage(app);
 
@@ -132,6 +134,9 @@ export default function AdminPropertiesPage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
+                        <DropdownMenuItem asChild>
+                            <Link href={`/properties/${property.id}`}>Ver Detalles</Link>
+                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => openFormForEdit(property)}>Editar</DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handleDelete(property.id)} className="text-destructive">Eliminar</DropdownMenuItem>
                       </DropdownMenuContent>
@@ -172,6 +177,9 @@ export default function AdminPropertiesPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                           <DropdownMenuItem asChild>
+                            <Link href={`/properties/${property.id}`}>Ver Detalles</Link>
+                          </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => openFormForEdit(property)}>Editar</DropdownMenuItem>
                           <DropdownMenuItem onClick={() => handleDelete(property.id)} className="text-destructive">Eliminar</DropdownMenuItem>
                         </DropdownMenuContent>

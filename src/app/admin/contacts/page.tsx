@@ -108,7 +108,7 @@ export default function AdminContactsPage() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem asChild>
-                        <Link href={`/admin/contacts/${contact.id}`}>Ver Notas</Link>
+                        <Link href={`/admin/contacts/${contact.id}`}>Ver Detalles</Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => openFormForEdit(contact)}>Editar</DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleDelete(contact.id)} className="text-destructive">Eliminar</DropdownMenuItem>
@@ -154,7 +154,7 @@ export default function AdminContactsPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                            <DropdownMenuItem asChild>
-                            <Link href={`/admin/contacts/${contact.id}`}>Ver Notas</Link>
+                            <Link href={`/admin/contacts/${contact.id}`}>Ver Detalles</Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => openFormForEdit(contact)}>Editar</DropdownMenuItem>
                           <DropdownMenuItem onClick={() => handleDelete(contact.id)} className="text-destructive">Eliminar</DropdownMenuItem>
