@@ -62,6 +62,7 @@ export default function AdminPropertyDetailsPage({ params }: { params: { id: str
   }
 
   const currencySymbol = property.currency === 'USD' ? '$' : 'S/';
+  const antiquityText = property.antiquity === 0 ? 'A estrenar' : property.antiquity ? `${property.antiquity} años` : 'N/A';
 
   return (
     <div>
@@ -102,7 +103,7 @@ export default function AdminPropertyDetailsPage({ params }: { params: { id: str
                             <div className="flex flex-col items-center gap-1"><Bath size={20} className="text-primary"/> <span className="font-semibold">{property.bathrooms}</span> <span className="text-xs text-muted-foreground">Baños</span></div>
                             <div className="flex flex-col items-center gap-1"><Car size={20} className="text-primary"/> <span className="font-semibold">{property.garage}</span> <span className="text-xs text-muted-foreground">Cochera</span></div>
                             <div className="flex flex-col items-center gap-1"><Maximize size={20} className="text-primary"/> <span className="font-semibold">{property.area_m2}</span> <span className="text-xs text-muted-foreground">m²</span></div>
-                            <div className="flex flex-col items-center gap-1"><CalendarClock size={20} className="text-primary"/> <span className="font-semibold">{property.antiquity || 'N/A'}</span> <span className="text-xs text-muted-foreground">Antigüedad</span></div>
+                            <div className="flex flex-col items-center gap-1"><CalendarClock size={20} className="text-primary"/> <span className="font-semibold">{antiquityText}</span> <span className="text-xs text-muted-foreground">Antigüedad</span></div>
                         </div>
 
                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">

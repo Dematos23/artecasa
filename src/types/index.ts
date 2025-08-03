@@ -18,7 +18,7 @@ export interface Property {
   imageUrls: string[];
   description?: string;
   featured?: boolean;
-  antiquity?: string;
+  antiquity?: number;
 }
 
 export const contactTypes = ['comprador', 'arrendatario', 'arrendador', 'vendedor'] as const;

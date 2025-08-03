@@ -48,6 +48,8 @@ export default function PropertyDetailsPage({ params }: { params: { id: string }
       </div>
     );
   }
+  
+  const currencySymbol = property.currency === 'USD' ? '$' : 'S/';
 
   return (
     <div className="bg-secondary">
@@ -86,15 +88,21 @@ export default function PropertyDetailsPage({ params }: { params: { id: string }
                 <CardTitle className="font-headline">Detalles de la Propiedad</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-3xl md:text-4xl font-bold text-primary mb-6">${Number(property.price).toLocaleString()} <span className="text-lg font-normal text-muted-foreground capitalize">{property.modality === 'alquiler' ? '/ mes' : `en ${property.modality}`}</span></p>
+                <p className="text-3xl md:text-4xl font-bold text-primary mb-6">{currencySymbol}{Number(property.price).toLocaleString()} <span className="text-lg font-normal text-muted-foreground capitalize">{property.modality === 'alquiler' ? '/ mes' : `en ${property.modality}`}</span></p>
                 <div className="space-y-4 text-foreground">
                   <div className="flex justify-between items-center"><span className="text-muted-foreground">Dormitorios</span> <span className="font-semibold flex items-center gap-2">{property.bedrooms} <BedDouble size={18}/></span></div>
                   <div className="flex justify-between items-center"><span className="text-muted-foreground">Baños</span> <span className="font-semibold flex items-center gap-2">{property.bathrooms} <Bath size={18}/></span></div>
                   <div className="flex justify-between items-center"><span className="text-muted-foreground">Cochera</span> <span className="font-semibold flex items-center gap-2">{property.garage} <Car size={18}/></span></div>
                   <div className="flex justify-between items-center"><span className="text-muted-foreground">Área (m²)</span> <span className="font-semibold flex items-center gap-2">{property.area_m2.toLocaleString()} <Maximize size={18}/></span></div>
-                  {property.antiquity && (
-                    <div className="flex justify-between items-center"><span className="text-muted-foreground">Antigüedad</span> <span className="font-semibold flex items-center gap-2">{property.antiquity} {isNaN(Number(property.antiquity)) ? '' : 'años'} <CalendarClock size={18}/></span></div>
-                  )}
+                  {property.antiquity !== undefined && (
+                    <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Antigüedad</span>
+                        <span className="font-semibold flex items-center gap-2">
+                            {property.antiquity === 0 ? 'A estrenar' : `${property.antiquity} años`}
+                            <CalendarClock size={18}/>
+                        </span>
+                    </div>
+                   )}
                 </div>
                 <Button asChild size="lg" className="w-full mt-8">
                   <Link href="/contact">

@@ -58,7 +58,7 @@ const propertySchema = z.object({
   bathrooms: z.coerce.number().int().min(0, { message: 'Debe ser un número positivo.' }),
   garage: z.coerce.number().int().min(0, { message: 'Debe ser un número positivo.' }),
   area_m2: z.coerce.number().int().min(0, { message: 'Debe ser un número positivo.' }),
-  antiquity: z.string().optional(),
+  antiquity: z.coerce.number().int().min(0, "Debe ser un número positivo").optional(),
   imageUrls: z.array(z.string()).optional().default([]),
   featured: z.boolean().default(false),
   newImages: z.any().optional(),
@@ -157,7 +157,7 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
         bathrooms: 0,
         garage: 0,
         area_m2: 0,
-        antiquity: '',
+        antiquity: 0,
         imageUrls: [],
         featured: false,
         newImages: [],
@@ -310,7 +310,7 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
                     <FormField control={form.control} name="bathrooms" render={({ field }) => ( <FormItem><FormLabel>Baños</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )} />
                     <FormField control={form.control} name="garage" render={({ field }) => ( <FormItem><FormLabel>Cochera (autos)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )} />
                     <FormField control={form.control} name="area_m2" render={({ field }) => ( <FormItem><FormLabel>Área (m²)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                    <FormField control={form.control} name="antiquity" render={({ field }) => ( <FormItem><FormLabel>Antigüedad (años)</FormLabel><FormControl><Input placeholder="Ej: 5, o 'A estrenar'" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                    <FormField control={form.control} name="antiquity" render={({ field }) => ( <FormItem><FormLabel>Antigüedad (años)</FormLabel><FormControl><Input type="number" placeholder="0 para 'A estrenar'" {...field} /></FormControl><FormMessage /></FormItem> )} />
                 </div>
                  
                 <div>
