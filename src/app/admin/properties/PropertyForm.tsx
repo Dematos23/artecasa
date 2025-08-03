@@ -64,10 +64,10 @@ function MapView({ address }: { address: string }) {
     const [center, setCenter] = useState(defaultCenter);
 
     useEffect(() => {
-        if (address) {
+        if (address && window.google) {
             const geocoder = new window.google.maps.Geocoder();
             geocoder.geocode({ address }, (results, status) => {
-                if (status === 'OK' && results) {
+                if (status === 'OK' && results && results[0]) {
                     const location = results[0].geometry.location;
                     setCenter({ lat: location.lat(), lng: location.lng() });
                 } else {
@@ -108,10 +108,13 @@ export function PropertyForm({ isOpen, onClose, onSave, property }: PropertyForm
   });
 
   const watchedAddress = useWatch({ control: form.control, name: 'address' });
+  const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ""
+    googleMapsApiKey: googleMapsApiKey || "",
+    // Do not load the script if the key is not provided
+    preventGoogleFontsLoading: !googleMapsApiKey,
   });
 
 
@@ -241,6 +244,20 @@ export function PropertyForm({ isOpen, onClose, onSave, property }: PropertyForm
                 </div>
                  <FormField
                     control={form.control}
+                    name="imageUrl"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>URL de la Imagen</FormLabel>
+                        <FormControl>
+                            <Input placeholder="https://placehold.co/800x600.png" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                <FormField
+                    control={form.control}
                     name="address"
                     render={({ field }) => (
                         <FormItem>
@@ -253,25 +270,14 @@ export function PropertyForm({ isOpen, onClose, onSave, property }: PropertyForm
                     )}
                 />
 
-                {isLoaded ? (
-                   <div className="mt-2">
-                       <MapView address={watchedAddress} />
-                   </div>
-                ) : <div>Cargando mapa...</div>}
+                {googleMapsApiKey ? (
+                  isLoaded ? (
+                    <div className="mt-2">
+                        <MapView address={watchedAddress} />
+                    </div>
+                  ) : <div>Cargando mapa...</div>
+                ) : <div className="text-sm text-muted-foreground">Para mostrar el mapa, por favor, añade tu clave de API de Google Maps a las variables de entorno.</div>}
 
-                 <FormField
-                    control={form.control}
-                    name="imageUrl"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>URL de la Imagen</FormLabel>
-                        <FormControl>
-                            <Input placeholder="https://placehold.co/800x600.png" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                />
                  <FormField
                     control={form.control}
                     name="featured"
