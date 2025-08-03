@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { redirect, usePathname } from 'next/navigation';
-import { Home, Building2, MessageSquare, User, LogOut, ArrowLeft } from 'lucide-react';
+import { Home, Building2, Users, User, LogOut, ArrowLeft } from 'lucide-react';
 
 import {
   Sidebar,
@@ -16,11 +16,31 @@ import {
   SidebarFooter,
   SidebarProvider,
   SidebarTrigger,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
 import { auth } from '@/lib/firebase';
 import React from 'react';
+
+function AdminSidebarButton({ href, children }: { href: string, children: React.ReactNode }) {
+  const pathname = usePathname();
+  const { setOpenMobile, isMobile } = useSidebar();
+  
+  const handleClick = () => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
+
+  return (
+    <SidebarMenuButton asChild isActive={pathname.startsWith(href)} onClick={handleClick}>
+      <Link href={href}>
+        {children}
+      </Link>
+    </SidebarMenuButton>
+  );
+}
 
 
 export default function AdminLayout({
@@ -29,7 +49,6 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const { user, loading } = useAuth();
-  const pathname = usePathname();
   
   React.useEffect(() => {
     if (!loading && !user) {
@@ -42,16 +61,12 @@ export default function AdminLayout({
     redirect('/login');
   };
 
-  if (loading) {
+  if (loading || !user) {
     return (
         <div className="flex min-h-screen items-center justify-center bg-secondary p-4">
           <p>Cargando...</p>
         </div>
     );
-  }
-
-  if (!user) {
-    return null;
   }
 
   return (
@@ -66,28 +81,22 @@ export default function AdminLayout({
             <SidebarContent>
             <SidebarMenu>
                 <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname === '/admin'}>
-                    <Link href="/admin">
+                <AdminSidebarButton href="/admin">
                     <Home />
-                    Panel
-                    </Link>
-                </SidebarMenuButton>
+                    Panel de Administrador
+                </AdminSidebarButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname.startsWith('/admin/properties')}>
-                    <Link href="/admin/properties">
+                  <AdminSidebarButton href="/admin/properties">
                     <Building2 />
                     Propiedades
-                    </Link>
-                </SidebarMenuButton>
+                  </AdminSidebarButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname.startsWith('/admin/contacts')}>
-                    <Link href="/admin/contacts">
-                    <MessageSquare />
+                  <AdminSidebarButton href="/admin/contacts">
+                    <Users />
                     Contactos
-                    </Link>
-                </SidebarMenuButton>
+                  </AdminSidebarButton>
                 </SidebarMenuItem>
             </SidebarMenu>
             </SidebarContent>
