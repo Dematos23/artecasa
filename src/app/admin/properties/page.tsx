@@ -101,99 +101,95 @@ export default function AdminPropertiesPage() {
         property={selectedProperty}
         googleMapsApiKey={googleMapsApiKey}
       />
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <CardTitle className="font-headline">Gestión de Propiedades</CardTitle>
-              <CardDescription>Agrega, edita o elimina propiedades de tu listado.</CardDescription>
-            </div>
-            <Button onClick={openFormForCreate} className="w-full sm:w-auto">
-              <PlusCircle className="mr-2 h-4 w-4" /> Agregar Propiedad
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {/* Mobile View - Cards */}
-          <div className="md:hidden space-y-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+        <div>
+          <h1 className="text-2xl font-bold font-headline">Gestión de Propiedades</h1>
+          <p className="text-muted-foreground">Agrega, edita o elimina propiedades de tu listado.</p>
+        </div>
+        <Button onClick={openFormForCreate} className="w-full sm:w-auto">
+          <PlusCircle className="mr-2 h-4 w-4" /> Agregar Propiedad
+        </Button>
+      </div>
+      
+      {/* Mobile View - Cards */}
+      <div className="md:hidden space-y-4">
+        {properties.map((property) => (
+          <Card key={property.id}>
+            <CardHeader>
+              <CardTitle className="text-base truncate">
+                <Link href={`/properties/${property.id}`} className="font-bold">
+                  {property.title}
+                </Link>
+              </CardTitle>
+              <CardDescription className="capitalize">{property.modality} - ${Number(property.price).toLocaleString()}</CardDescription>
+            </CardHeader>
+            <CardContent className="flex justify-between items-center">
+                <Badge variant={property.featured ? 'default' : 'secondary'}>
+                  {property.featured ? 'Destacada' : 'Estándar'}
+                </Badge>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="h-8 w-8 p-0">
+                      <span className="sr-only">Abrir menú</span>
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => openFormForEdit(property)}>Editar</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleDelete(property.id)} className="text-destructive">Eliminar</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+        
+      {/* Desktop View - Table */}
+      <div className="hidden md:block overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Título</TableHead>
+              <TableHead>Precio</TableHead>
+              <TableHead>Modalidad</TableHead>
+              <TableHead>Estado</TableHead>
+              <TableHead>Acciones</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {properties.map((property) => (
-              <Card key={property.id}>
-                <CardHeader>
-                  <CardTitle className="text-base font-bold truncate">
-                    <Link href={`/properties/${property.id}`} className="font-bold">
-                      {property.title}
-                    </Link>
-                  </CardTitle>
-                  <CardDescription className="capitalize">{property.modality} - ${Number(property.price).toLocaleString()}</CardDescription>
-                </CardHeader>
-                <CardContent className="flex justify-between items-center">
-                   <Badge variant={property.featured ? 'default' : 'secondary'}>
-                      {property.featured ? 'Destacada' : 'Estándar'}
-                    </Badge>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <span className="sr-only">Abrir menú</span>
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => openFormForEdit(property)}>Editar</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleDelete(property.id)} className="text-destructive">Eliminar</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                </CardContent>
-              </Card>
+              <TableRow key={property.id}>
+                <TableCell className="font-medium">
+                  <Link href={`/properties/${property.id}`} className="font-bold">
+                    {property.title}
+                  </Link>
+                </TableCell>
+                <TableCell>${Number(property.price).toLocaleString()}</TableCell>
+                <TableCell className="capitalize">{property.modality}</TableCell>
+                <TableCell>
+                  <Badge variant={property.featured ? 'default' : 'secondary'}>
+                    {property.featured ? 'Destacada' : 'Estándar'}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="h-8 w-8 p-0">
+                        <span className="sr-only">Abrir menú</span>
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => openFormForEdit(property)}>Editar</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleDelete(property.id)} className="text-destructive">Eliminar</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
             ))}
-          </div>
-           {/* Desktop View - Table */}
-          <div className="hidden md:block overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Título</TableHead>
-                  <TableHead>Precio</TableHead>
-                  <TableHead>Modalidad</TableHead>
-                  <TableHead>Estado</TableHead>
-                  <TableHead>Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {properties.map((property) => (
-                  <TableRow key={property.id}>
-                    <TableCell className="font-medium">
-                      <Link href={`/properties/${property.id}`} className="font-bold">
-                        {property.title}
-                      </Link>
-                    </TableCell>
-                    <TableCell>${Number(property.price).toLocaleString()}</TableCell>
-                    <TableCell className="capitalize">{property.modality}</TableCell>
-                    <TableCell>
-                      <Badge variant={property.featured ? 'default' : 'secondary'}>
-                        {property.featured ? 'Destacada' : 'Estándar'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Abrir menú</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => openFormForEdit(property)}>Editar</DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleDelete(property.id)} className="text-destructive">Eliminar</DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+          </TableBody>
+        </Table>
+      </div>
     </>
   );
 }
