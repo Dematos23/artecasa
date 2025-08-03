@@ -32,9 +32,9 @@ const contactSchema = z.object({
   secondname: z.string().optional(),
   firstlastname: z.string().min(1, { message: 'El primer apellido es obligatorio.' }),
   secondlastname: z.string().optional(),
-  email: z.string().email({ message: 'Debe ser un correo electrónico válido.' }),
-  phone: z.string().optional(),
-  notes: z.string().min(1, { message: 'Las notas son obligatorias.' }),
+  email: z.string().email({ message: 'Debe ser un correo electrónico válido.' }).optional().or(z.literal('')),
+  phone: z.string().min(1, { message: 'El teléfono es obligatorio.' }),
+  notes: z.string().optional(),
   types: z.array(z.string()).refine((value) => value.some((item) => item), {
     message: 'Debes seleccionar al menos un tipo.',
   }),
@@ -131,6 +131,7 @@ export function ContactForm({ isOpen, onClose, onSave, contact, properties }: Co
           <div className="space-y-2">
             <Label htmlFor="phone">Teléfono</Label>
             <Input id="phone" type="tel" placeholder="Ej. 987654321" {...form.register('phone')} />
+            {errors.phone && <p className="text-sm font-medium text-destructive">{errors.phone.message}</p>}
           </div>
           <div className="space-y-2">
             <Label htmlFor="notes">Notas</Label>
