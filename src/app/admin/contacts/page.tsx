@@ -7,7 +7,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { MoreHorizontal } from 'lucide-react';
+import { MoreHorizontal, PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
@@ -23,8 +23,15 @@ export default function AdminContactsPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-headline">Formularios de Contacto</CardTitle>
-        <CardDescription>Ver y gestionar las consultas de clientes potenciales.</CardDescription>
+        <div className="flex justify-between items-center">
+            <div>
+                <CardTitle className="font-headline">Formularios de Contacto</CardTitle>
+                <CardDescription>Ver y gestionar las consultas de clientes potenciales.</CardDescription>
+            </div>
+            <Button>
+                <PlusCircle className="mr-2 h-4 w-4" /> Crear Contacto
+            </Button>
+        </div>
       </CardHeader>
       <CardContent>
         <Table>
