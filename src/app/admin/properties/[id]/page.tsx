@@ -6,8 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import type { Contact, Property } from '@/types';
 import Link from 'next/link';
-import { ArrowLeft, User, Users, Home, Building2, DollarSign, Tag, FileText, BedDouble, Bath, Car, Maximize, CalendarClock, MapPin } from 'lucide-react';
+import { ArrowLeft, User, Users, Home, DollarSign, FileText, BedDouble, Bath, Car, Maximize, CalendarClock, MapPin, Edit } from 'lucide-react';
 import Image from 'next/image';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 const dummyProperties: Property[] = [
     { id: '1', title: 'Villa Moderna en Condominio Privado', price: '2,500,000', modality: 'venta', region: 'Lima', province: 'Lima', district: 'Miraflores', address: '123 Luxury Lane, Beverly Hills, CA', bedrooms: 5, bathrooms: 6, garage: 3, area_m2: 5800, imageUrls: ['https://placehold.co/1200x800.png'], featured: true, ownerId: '3', interestedContactIds: ['1'], description: 'Experimenta un lujo sin igual en esta impresionante villa moderna. Con un espacio de vida de concepto abierto, cocina de última generación y una impresionante piscina infinita. Ubicada en un exclusivo condominio privado, esta casa ofrece privacidad y prestigio.', antiquity: "5" },
@@ -39,7 +42,9 @@ const getFullName = (contact: Pick<Contact, 'firstname' | 'secondname' | 'firstl
 
 
 export default function AdminPropertyDetailsPage({ params }: { params: { id: string } }) {
-  const property = getPropertyById(params.id);
+  const propertyId = params.id;
+  const property = getPropertyById(propertyId);
+  const router = useRouter();
   
   if (!property) {
     return (
@@ -53,15 +58,22 @@ export default function AdminPropertyDetailsPage({ params }: { params: { id: str
       </div>
     );
   }
+
+  const handleEdit = () => {
+    router.push(`/admin/properties?edit=${property.id}`);
+  }
   
   const owner = property.ownerId ? getContactById(property.ownerId) : undefined;
   const interestedContacts = property.interestedContactIds ? getContactsByIds(property.interestedContactIds) : [];
 
   return (
     <div>
-        <div className="mb-6">
+        <div className="flex justify-between items-center mb-6">
             <Button asChild variant="outline" size="sm">
                 <Link href="/admin/properties"><ArrowLeft className="mr-2" /> Volver a Propiedades</Link>
+            </Button>
+            <Button size="sm" onClick={handleEdit}>
+                <Edit className="mr-2 h-4 w-4" /> Editar Propiedad
             </Button>
         </div>
 
@@ -94,57 +106,104 @@ export default function AdminPropertyDetailsPage({ params }: { params: { id: str
                             <div className="flex flex-col items-center gap-1"><CalendarClock size={20} className="text-primary"/> <span className="font-semibold">{property.antiquity || 'N/A'}</span> <span className="text-xs text-muted-foreground">Antigüedad</span></div>
                         </div>
 
-                         <div className="space-y-2">
+                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="font-headline text-xl flex items-center gap-2"><DollarSign size={20} /> Información Financiera</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="flex items-baseline gap-2">
+                                        <span className="text-3xl font-bold text-primary">${Number(property.price).toLocaleString()}</span>
+                                    </div>
+                                    <div className="text-sm text-muted-foreground capitalize mt-1">{property.modality === 'alquiler' ? '/ mes' : `en ${property.modality}`}</div>
+                                </CardContent>
+                            </Card>
+                            {owner && (
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle className="font-headline text-xl flex items-center gap-2"><User size={20} /> Propietario</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <Link href={`/admin/contacts/${owner.id}`} className="text-primary hover:underline font-semibold">{getFullName(owner)}</Link>
+                                        <p className="text-sm text-muted-foreground">{owner.email}</p>
+                                    </CardContent>
+                                </Card>
+                            )}
+                         </div>
+
+                         <div className="space-y-4">
                             <h4 className="font-semibold flex items-center gap-2 text-lg"><FileText size={20}/> Descripción</h4>
                             <p className="text-muted-foreground whitespace-pre-wrap bg-secondary p-4 rounded-md">{property.description || 'No hay descripción para esta propiedad.'}</p>
                         </div>
+                        
+                         {interestedContacts.length > 0 && (
+                            <div className="mt-8">
+                                <h4 className="font-semibold flex items-center gap-2 text-lg mb-4"><Users size={20} /> Contactos Interesados</h4>
+                                <ContactListView contacts={interestedContacts} />
+                            </div>
+                        )}
 
                     </CardContent>
                 </Card>
             </div>
             <div className="lg:col-span-1 space-y-6">
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="font-headline text-xl flex items-center gap-2"><DollarSign size={20} /> Información Financiera</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex items-baseline gap-2">
-                            <span className="text-3xl font-bold text-primary">${Number(property.price).toLocaleString()}</span>
-                        </div>
-                        <div className="text-sm text-muted-foreground capitalize mt-1">{property.modality === 'alquiler' ? '/ mes' : `en ${property.modality}`}</div>
-                    </CardContent>
-                </Card>
-                
-                {owner && (
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="font-headline text-xl flex items-center gap-2"><User size={20} /> Propietario</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <Link href={`/admin/contacts/${owner.id}`} className="text-primary hover:underline font-semibold">{getFullName(owner)}</Link>
-                            <p className="text-sm text-muted-foreground">{owner.email}</p>
-                        </CardContent>
-                    </Card>
-                )}
-                 {interestedContacts.length > 0 && (
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="font-headline text-xl flex items-center gap-2"><Users size={20} /> Contactos Interesados</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <ul className="space-y-3">
-                                {interestedContacts.map(contact => (
-                                    <li key={contact.id} className="text-sm">
-                                        <Link href={`/admin/contacts/${contact.id}`} className="text-primary hover:underline font-medium">{getFullName(contact)}</Link>
-                                         <p className="text-xs text-muted-foreground">{contact.email}</p>
-                                    </li>
-                                ))}
-                            </ul>
-                        </CardContent>
-                    </Card>
-                )}
+                 {/* This column is now empty, content was moved to the left side */}
             </div>
         </div>
     </div>
   );
 }
+
+
+function ContactListView({ contacts }: { contacts: Contact[] }) {
+    return (
+        <>
+            {/* Mobile View */}
+            <div className="md:hidden space-y-4">
+                {contacts.map((contact) => (
+                    <Card key={contact.id}>
+                        <CardHeader>
+                             <CardTitle className="text-base">
+                                <Link href={`/admin/contacts/${contact.id}`} className="font-bold hover:underline">
+                                    {getFullName(contact)}
+                                </Link>
+                            </CardTitle>
+                            <CardDescription>{contact.email}</CardDescription>
+                        </CardHeader>
+                         <CardContent>
+                            <p className="text-sm text-muted-foreground">{contact.phone}</p>
+                        </CardContent>
+                    </Card>
+                ))}
+            </div>
+
+            {/* Desktop View */}
+            <div className="hidden md:block overflow-x-auto">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Nombre</TableHead>
+                            <TableHead>Email</TableHead>
+                            <TableHead>Teléfono</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {contacts.map((contact) => (
+                            <TableRow key={contact.id}>
+                                <TableCell>
+                                    <Link href={`/admin/contacts/${contact.id}`} className="font-bold hover:underline">
+                                        {getFullName(contact)}
+                                    </Link>
+                                </TableCell>
+                                <TableCell>{contact.email}</TableCell>
+                                <TableCell>{contact.phone || '-'}</TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </div>
+        </>
+    )
+}
+
+    

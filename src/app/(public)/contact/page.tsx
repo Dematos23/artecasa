@@ -9,6 +9,7 @@ import { Phone, Mail, MapPin, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { getSettings } from '@/services/settings';
+import { handleContactSubmit } from '@/actions/contact';
 
 export default function ContactPage() {
     const [name, setName] = useState('');
@@ -32,14 +33,6 @@ export default function ContactPage() {
         const encodedText = encodeURIComponent(text);
         window.open(`https://wa.me/${whatsAppNumber}?text=${encodedText}`, '_blank');
     };
-
-    async function handleContactSubmit(formData: FormData) {
-        'use server';
-        const name = formData.get('name');
-        const email = formData.get('email');
-        const message = formData.get('message');
-        console.log('New Contact Submission:', { name, email, message });
-    }
 
   return (
     <div className="container mx-auto py-12 md:py-24 px-4 md:px-6">
