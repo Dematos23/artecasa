@@ -17,6 +17,7 @@ import { Badge } from '@/components/ui/badge';
 import type { Contact } from '@/types';
 import React, { useState } from 'react';
 import { ContactForm } from './ContactForm';
+import Link from 'next/link';
 
 
 const dummyContacts: Contact[] = [
@@ -106,7 +107,9 @@ export default function AdminContactsPage() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>Ver Notas</DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href={`/admin/contacts/${contact.id}`}>Ver Notas</Link>
+                      </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => openFormForEdit(contact)}>Editar</DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleDelete(contact.id)} className="text-destructive">Eliminar</DropdownMenuItem>
                     </DropdownMenuContent>
@@ -150,7 +153,9 @@ export default function AdminContactsPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem>Ver Notas</DropdownMenuItem>
+                           <DropdownMenuItem asChild>
+                            <Link href={`/admin/contacts/${contact.id}`}>Ver Notas</Link>
+                          </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => openFormForEdit(contact)}>Editar</DropdownMenuItem>
                           <DropdownMenuItem onClick={() => handleDelete(contact.id)} className="text-destructive">Eliminar</DropdownMenuItem>
                         </DropdownMenuContent>
