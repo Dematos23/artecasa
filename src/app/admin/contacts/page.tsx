@@ -69,59 +69,61 @@ export default function AdminContactsPage() {
       />
       <Card>
         <CardHeader>
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
                   <CardTitle className="font-headline">Formularios de Contacto</CardTitle>
                   <CardDescription>Ver y gestionar las consultas de clientes potenciales.</CardDescription>
               </div>
-              <Button onClick={openFormForCreate}>
+              <Button onClick={openFormForCreate} className="w-full sm:w-auto">
                   <PlusCircle className="mr-2 h-4 w-4" /> Crear Contacto
               </Button>
           </div>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nombre</TableHead>
-                <TableHead>Correo Electrónico</TableHead>
-                <TableHead>Fecha</TableHead>
-                <TableHead>Tipo</TableHead>
-                <TableHead>Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {contacts.map((contact) => (
-                <TableRow key={contact.id}>
-                  <TableCell className="font-medium">{contact.name}</TableCell>
-                  <TableCell>{contact.email}</TableCell>
-                  <TableCell>{contact.date}</TableCell>
-                  <TableCell>
-                    <div className="flex gap-1 flex-wrap">
-                      {contact.types.map(type => (
-                         <Badge key={type} variant="secondary" className="capitalize">{type}</Badge>
-                      ))}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <span className="sr-only">Abrir menú</span>
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>Ver Notas</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => openFormForEdit(contact)}>Editar</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleDelete(contact.id)} className="text-destructive">Eliminar</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nombre</TableHead>
+                  <TableHead>Correo Electrónico</TableHead>
+                  <TableHead>Fecha</TableHead>
+                  <TableHead>Tipo</TableHead>
+                  <TableHead>Acciones</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {contacts.map((contact) => (
+                  <TableRow key={contact.id}>
+                    <TableCell className="font-medium">{contact.name}</TableCell>
+                    <TableCell>{contact.email}</TableCell>
+                    <TableCell>{contact.date}</TableCell>
+                    <TableCell>
+                      <div className="flex gap-1 flex-wrap">
+                        {contact.types.map(type => (
+                           <Badge key={type} variant="secondary" className="capitalize">{type}</Badge>
+                        ))}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <span className="sr-only">Abrir menú</span>
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem>Ver Notas</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => openFormForEdit(contact)}>Editar</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleDelete(contact.id)} className="text-destructive">Eliminar</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
     </>
