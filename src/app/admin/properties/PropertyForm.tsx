@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import type { Property } from '@/types';
@@ -25,7 +25,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
+import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
 
 const propertySchema = z.object({
   title: z.string().min(1, { message: 'El título es obligatorio.' }),
@@ -48,6 +49,47 @@ interface PropertyFormProps {
   property?: Property;
 }
 
+const containerStyle = {
+  width: '100%',
+  height: '250px',
+  borderRadius: '0.5rem',
+};
+
+const defaultCenter = {
+  lat: -34.397,
+  lng: 150.644
+};
+
+function MapView({ address }: { address: string }) {
+    const [center, setCenter] = useState(defaultCenter);
+
+    useEffect(() => {
+        if (address) {
+            const geocoder = new window.google.maps.Geocoder();
+            geocoder.geocode({ address }, (results, status) => {
+                if (status === 'OK' && results) {
+                    const location = results[0].geometry.location;
+                    setCenter({ lat: location.lat(), lng: location.lng() });
+                } else {
+                    console.error(`Geocode was not successful for the following reason: ${status}`);
+                    setCenter(defaultCenter);
+                }
+            });
+        }
+    }, [address]);
+
+    return (
+        <GoogleMap
+            mapContainerStyle={containerStyle}
+            center={center}
+            zoom={15}
+        >
+            <Marker position={center} />
+        </GoogleMap>
+    );
+}
+
+
 export function PropertyForm({ isOpen, onClose, onSave, property }: PropertyFormProps) {
   const form = useForm<z.infer<typeof propertySchema>>({
     resolver: zodResolver(propertySchema),
@@ -64,6 +106,14 @@ export function PropertyForm({ isOpen, onClose, onSave, property }: PropertyForm
         featured: false,
     },
   });
+
+  const watchedAddress = useWatch({ control: form.control, name: 'address' });
+
+  const { isLoaded } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ""
+  });
+
 
   useEffect(() => {
     form.reset(property || {
@@ -104,19 +154,6 @@ export function PropertyForm({ isOpen, onClose, onSave, property }: PropertyForm
                         <FormLabel>Título</FormLabel>
                         <FormControl>
                             <Input placeholder="Ej. Villa Moderna..." {...field} />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                <FormField
-                    control={form.control}
-                    name="address"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Dirección</FormLabel>
-                        <FormControl>
-                            <Input placeholder="Ej. 123 Luxury Lane..." {...field} />
                         </FormControl>
                         <FormMessage />
                         </FormItem>
@@ -202,6 +239,26 @@ export function PropertyForm({ isOpen, onClose, onSave, property }: PropertyForm
                         )}
                     />
                 </div>
+                 <FormField
+                    control={form.control}
+                    name="address"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Dirección</FormLabel>
+                        <FormControl>
+                            <Input placeholder="Ej. 123 Luxury Lane..." {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                {isLoaded ? (
+                   <div className="mt-2">
+                       <MapView address={watchedAddress} />
+                   </div>
+                ) : <div>Cargando mapa...</div>}
+
                  <FormField
                     control={form.control}
                     name="imageUrl"
