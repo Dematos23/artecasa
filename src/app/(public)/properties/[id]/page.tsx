@@ -69,13 +69,15 @@ export default function PropertyDetailsPage({ params }: { params: { id: string }
   }
   
   const currencySymbol = property.currency === 'USD' ? '$' : 'S/';
+  const fullAddress = [property.address, property.district, property.province, property.region].filter(Boolean).join(', ');
+
 
   return (
     <div className="bg-secondary">
       <div className="container mx-auto py-8 md:py-16 px-4 md:px-6">
         <div className="mb-8">
           <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold font-headline mb-2">{property.title}</h1>
-          <p className="text-base md:text-lg text-muted-foreground flex items-center gap-2"><MapPin size={18} /> {property.address}</p>
+          {fullAddress && <p className="text-base md:text-lg text-muted-foreground flex items-center gap-2"><MapPin size={18} /> {fullAddress}</p>}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -91,14 +93,16 @@ export default function PropertyDetailsPage({ params }: { params: { id: string }
               />
             </Card>
 
-            <Card className="mb-8">
-              <CardHeader>
-                <CardTitle className="font-headline">Descripción de la Propiedad</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">{property.description}</p>
-              </CardContent>
-            </Card>
+            {property.description && (
+              <Card className="mb-8">
+                <CardHeader>
+                  <CardTitle className="font-headline">Descripción de la Propiedad</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">{property.description}</p>
+                </CardContent>
+              </Card>
+            )}
              <Card>
               <CardHeader>
                 <CardTitle className="font-headline">Ubicación en el Mapa</CardTitle>
@@ -125,10 +129,10 @@ export default function PropertyDetailsPage({ params }: { params: { id: string }
               <CardContent>
                 <p className="text-3xl md:text-4xl font-bold text-primary mb-6">{currencySymbol}{Number(property.price).toLocaleString()} <span className="text-lg font-normal text-muted-foreground capitalize">{property.modality === 'alquiler' ? '/ mes' : `en ${property.modality}`}</span></p>
                 <div className="space-y-4 text-foreground">
-                  <div className="flex justify-between items-center"><span className="text-muted-foreground">Dormitorios</span> <span className="font-semibold flex items-center gap-2">{property.bedrooms} <BedDouble size={18}/></span></div>
-                  <div className="flex justify-between items-center"><span className="text-muted-foreground">Baños</span> <span className="font-semibold flex items-center gap-2">{property.bathrooms} <Bath size={18}/></span></div>
-                  <div className="flex justify-between items-center"><span className="text-muted-foreground">Cochera</span> <span className="font-semibold flex items-center gap-2">{property.garage} <Car size={18}/></span></div>
-                  <div className="flex justify-between items-center"><span className="text-muted-foreground">Área (m²)</span> <span className="font-semibold flex items-center gap-2">{property.area_m2.toLocaleString()} <Maximize size={18}/></span></div>
+                  {property.bedrooms !== undefined && <div className="flex justify-between items-center"><span className="text-muted-foreground">Dormitorios</span> <span className="font-semibold flex items-center gap-2">{property.bedrooms} <BedDouble size={18}/></span></div>}
+                  {property.bathrooms !== undefined && <div className="flex justify-between items-center"><span className="text-muted-foreground">Baños</span> <span className="font-semibold flex items-center gap-2">{property.bathrooms} <Bath size={18}/></span></div>}
+                  {property.garage !== undefined && <div className="flex justify-between items-center"><span className="text-muted-foreground">Cochera</span> <span className="font-semibold flex items-center gap-2">{property.garage} <Car size={18}/></span></div>}
+                  {property.area_m2 !== undefined && <div className="flex justify-between items-center"><span className="text-muted-foreground">Área (m²)</span> <span className="font-semibold flex items-center gap-2">{property.area_m2.toLocaleString()} <Maximize size={18}/></span></div>}
                   {property.antiquity !== undefined && (
                     <div className="flex justify-between items-center">
                         <span className="text-muted-foreground">Antigüedad</span>

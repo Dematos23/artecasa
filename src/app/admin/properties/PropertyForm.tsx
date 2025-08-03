@@ -42,22 +42,22 @@ import { peruLocations } from '@/lib/peru-locations';
 
 const propertySchema = z.object({
   title: z.string().min(1, { message: 'El título es obligatorio.' }),
-  price: z.coerce.number().min(1, { message: 'El precio es obligatorio.' }),
+  price: z.coerce.number().min(0, { message: 'El precio debe ser un número positivo.' }).optional(),
   currency: z.enum(['USD', 'PEN'], {
     required_error: 'Debes seleccionar una moneda.',
   }),
   modality: z.enum(['venta', 'alquiler'], {
     required_error: 'Debes seleccionar una modalidad.',
   }),
-  region: z.string().min(1, { message: 'La región es obligatoria.' }),
-  province: z.string().min(1, { message: 'La provincia es obligatoria.' }),
-  district: z.string().min(1, { message: 'El distrito es obligatorio.' }),
-  address: z.string().min(1, { message: 'La dirección es obligatoria.' }),
+  region: z.string().optional(),
+  province: z.string().optional(),
+  district: z.string().optional(),
+  address: z.string().optional(),
   description: z.string().optional(),
-  bedrooms: z.coerce.number().int().min(0, { message: 'Debe ser un número positivo.' }),
-  bathrooms: z.coerce.number().int().min(0, { message: 'Debe ser un número positivo.' }),
-  garage: z.coerce.number().int().min(0, { message: 'Debe ser un número positivo.' }),
-  area_m2: z.coerce.number().int().min(0, { message: 'Debe ser un número positivo.' }),
+  bedrooms: z.coerce.number().int().min(0).optional(),
+  bathrooms: z.coerce.number().int().min(0).optional(),
+  garage: z.coerce.number().int().min(0).optional(),
+  area_m2: z.coerce.number().int().min(0).optional(),
   antiquity: z.coerce.number().int().min(0, "Debe ser un número positivo").optional(),
   imageUrls: z.array(z.string()).optional().default([]),
   featured: z.boolean().default(false),
@@ -165,7 +165,7 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
   useEffect(() => {
     const defaultVals = property ? {
         ...property,
-        price: Number(property.price.replace(/,/g, '')),
+        price: Number(property.price?.replace(/,/g, '')),
     } : {
         title: '',
         price: 0,
@@ -226,7 +226,7 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
     
     const finalProperty: Omit<Property, 'id'> = {
         ...propertyData,
-        price: propertyData.price.toString(),
+        price: propertyData.price?.toString() ?? '0',
         imageUrls: values.imageUrls || [],
     }
     onSave(finalProperty, newImages || []);

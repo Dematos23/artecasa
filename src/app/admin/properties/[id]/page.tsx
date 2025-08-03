@@ -63,6 +63,7 @@ export default function AdminPropertyDetailsPage({ params }: { params: { id: str
 
   const currencySymbol = property.currency === 'USD' ? '$' : 'S/';
   const antiquityText = property.antiquity === 0 ? 'A estrenar' : property.antiquity ? `${property.antiquity} años` : 'N/A';
+  const fullAddress = [property.address, property.district, property.province, property.region].filter(Boolean).join(', ');
 
   return (
     <div>
@@ -84,7 +85,7 @@ export default function AdminPropertyDetailsPage({ params }: { params: { id: str
                                 <CardTitle className="font-headline text-2xl flex items-center gap-3">
                                    <Home /> {property.title}
                                 </CardTitle>
-                                <CardDescription className="flex items-center gap-2 pt-1"><MapPin size={14}/> {property.address}, {property.district}, {property.province}, {property.region}</CardDescription>
+                                {fullAddress && <CardDescription className="flex items-center gap-2 pt-1"><MapPin size={14}/> {fullAddress}</CardDescription>}
                             </div>
                             <Badge variant={property.featured ? 'default' : 'secondary'}>
                                 {property.featured ? 'Destacada' : 'Estándar'}
@@ -92,7 +93,7 @@ export default function AdminPropertyDetailsPage({ params }: { params: { id: str
                         </div>
                     </CardHeader>
                      <CardContent>
-                        {property.imageUrls.length > 0 ? (
+                        {property.imageUrls && property.imageUrls.length > 0 ? (
                             <div className="relative w-full h-96 rounded-lg overflow-hidden mb-6">
                                 <Image src={property.imageUrls[0]} alt={property.title} fill style={{objectFit: 'cover'}} />
                             </div>
@@ -103,11 +104,11 @@ export default function AdminPropertyDetailsPage({ params }: { params: { id: str
                         )}
 
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 text-center mb-6 py-4 border-y">
-                            <div className="flex flex-col items-center gap-1"><BedDouble size={20} className="text-primary"/> <span className="font-semibold">{property.bedrooms}</span> <span className="text-xs text-muted-foreground">Dorms</span></div>
-                            <div className="flex flex-col items-center gap-1"><Bath size={20} className="text-primary"/> <span className="font-semibold">{property.bathrooms}</span> <span className="text-xs text-muted-foreground">Baños</span></div>
-                            <div className="flex flex-col items-center gap-1"><Car size={20} className="text-primary"/> <span className="font-semibold">{property.garage}</span> <span className="text-xs text-muted-foreground">Cochera</span></div>
-                            <div className="flex flex-col items-center gap-1"><Maximize size={20} className="text-primary"/> <span className="font-semibold">{property.area_m2}</span> <span className="text-xs text-muted-foreground">m²</span></div>
-                            <div className="flex flex-col items-center gap-1"><CalendarClock size={20} className="text-primary"/> <span className="font-semibold">{antiquityText}</span> <span className="text-xs text-muted-foreground">Antigüedad</span></div>
+                            {property.bedrooms !== undefined && <div className="flex flex-col items-center gap-1"><BedDouble size={20} className="text-primary"/> <span className="font-semibold">{property.bedrooms}</span> <span className="text-xs text-muted-foreground">Dorms</span></div>}
+                            {property.bathrooms !== undefined && <div className="flex flex-col items-center gap-1"><Bath size={20} className="text-primary"/> <span className="font-semibold">{property.bathrooms}</span> <span className="text-xs text-muted-foreground">Baños</span></div>}
+                            {property.garage !== undefined && <div className="flex flex-col items-center gap-1"><Car size={20} className="text-primary"/> <span className="font-semibold">{property.garage}</span> <span className="text-xs text-muted-foreground">Cochera</span></div>}
+                            {property.area_m2 !== undefined && <div className="flex flex-col items-center gap-1"><Maximize size={20} className="text-primary"/> <span className="font-semibold">{property.area_m2}</span> <span className="text-xs text-muted-foreground">m²</span></div>}
+                            {property.antiquity !== undefined && <div className="flex flex-col items-center gap-1"><CalendarClock size={20} className="text-primary"/> <span className="font-semibold">{antiquityText}</span> <span className="text-xs text-muted-foreground">Antigüedad</span></div>}
                         </div>
 
                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">

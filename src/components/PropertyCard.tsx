@@ -18,7 +18,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
       <Link href={`/properties/${property.id}`}>
         <div className="relative">
           <Image
-            src={property.imageUrls[0] ?? '/appartment.webp'}
+            src={property.imageUrls?.[0] ?? '/appartment.webp'}
             data-ai-hint="house exterior"
             alt={property.title}
             width={400}
@@ -34,23 +34,29 @@ export function PropertyCard({ property }: PropertyCardProps) {
           <h3 className="text-lg font-bold font-headline truncate group-hover:text-primary transition-colors">
             {property.title}
           </h3>
-          <p className="text-sm text-muted-foreground mt-1 truncate">{property.address}</p>
+          {property.address && <p className="text-sm text-muted-foreground mt-1 truncate">{property.address}</p>}
           <div className="mt-4 flex justify-between items-center">
              <p className="text-xl font-bold text-primary">{currencySymbol}{Number(property.price).toLocaleString()}{property.modality === 'alquiler' && <span className="text-sm font-normal text-muted-foreground"> / mes</span>}</p>
           </div>
           <div className="mt-4 pt-4 border-t border-border flex justify-around text-sm text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <BedDouble className="w-4 h-4 text-primary" />
-              <span>{property.bedrooms} Dorms</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Bath className="w-4 h-4 text-primary" />
-              <span>{property.bathrooms} Baños</span>
-            </div>
-             <div className="flex items-center gap-2">
-              <Car className="w-4 h-4 text-primary" />
-              <span>{property.garage} Cochera</span>
-            </div>
+            {property.bedrooms !== undefined && (
+              <div className="flex items-center gap-2">
+                <BedDouble className="w-4 h-4 text-primary" />
+                <span>{property.bedrooms} Dorms</span>
+              </div>
+            )}
+            {property.bathrooms !== undefined && (
+              <div className="flex items-center gap-2">
+                <Bath className="w-4 h-4 text-primary" />
+                <span>{property.bathrooms} Baños</span>
+              </div>
+            )}
+             {property.garage !== undefined && (
+              <div className="flex items-center gap-2">
+                <Car className="w-4 h-4 text-primary" />
+                <span>{property.garage} Cochera</span>
+              </div>
+            )}
           </div>
         </CardContent>
       </Link>
