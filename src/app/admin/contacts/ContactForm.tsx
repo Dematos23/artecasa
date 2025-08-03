@@ -100,88 +100,88 @@ export function ContactForm({ isOpen, onClose, onSave, contact, properties }: Co
           </DialogDescription>
         </DialogHeader>
         {/* --- Formulario gestionado manualmente con react-hook-form --- */}
-        <div className="max-h-[70vh] pr-6">
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4 px-2">
-            {/* --- Campos de texto con form.register --- */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                    <Label htmlFor="firstname">Primer Nombre</Label>
-                    <Input id="firstname" placeholder="Ej. Juan" {...form.register('firstname')} />
-                    {errors.firstname && <p className="text-sm font-medium text-destructive">{errors.firstname.message}</p>}
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="secondname">Segundo Nombre</Label>
-                    <Input id="secondname" placeholder="Ej. Carlos" {...form.register('secondname')} />
-                </div>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                    <Label htmlFor="firstlastname">Primer Apellido</Label>
-                    <Input id="firstlastname" placeholder="Ej. Pérez" {...form.register('firstlastname')} />
-                    {errors.firstlastname && <p className="text-sm font-medium text-destructive">{errors.firstlastname.message}</p>}
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="secondlastname">Segundo Apellido</Label>
-                    <Input id="secondlastname" placeholder="Ej. Gonzales" {...form.register('secondlastname')} />
-                </div>
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="email">Correo Electrónico</Label>
-                <Input id="email" type="email" placeholder="Ej. john@example.com" {...form.register('email')} />
-                {errors.email && <p className="text-sm font-medium text-destructive">{errors.email.message}</p>}
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="phone">Teléfono</Label>
-                <Input id="phone" type="tel" placeholder="Ej. 987654321" {...form.register('phone')} />
-                {errors.phone && <p className="text-sm font-medium text-destructive">{errors.phone.message}</p>}
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="notes">Notas</Label>
-                <Textarea id="notes" placeholder="Escribe las notas del contacto..." {...form.register('notes')} />
-                {errors.notes && <p className="text-sm font-medium text-destructive">{errors.notes.message}</p>}
-            </div>
-
-            {/* --- Grupo de Checkboxes con manejo manual --- */}
-            <div className="space-y-2">
-                <Label>Tipo</Label>
-                <div className="grid grid-cols-2 gap-4 pt-2">
-                {contactTypes.map((item) => (
-                    <div key={item} className="flex flex-row items-start space-x-3 space-y-0">
-                    <Checkbox
-                        id={`type-${item}`}
-                        checked={watchedTypes.includes(item)}
-                        onCheckedChange={(checked) => handleTypeChange(item, checked)}
-                    />
-                    <Label htmlFor={`type-${item}`} className="font-normal capitalize cursor-pointer">
-                        {item}
-                    </Label>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4 pr-2">
+            <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                {/* --- Campos de texto con form.register --- */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="firstname">Primer Nombre</Label>
+                        <Input id="firstname" placeholder="Ej. Juan" {...form.register('firstname')} />
+                        {errors.firstname && <p className="text-sm font-medium text-destructive">{errors.firstname.message}</p>}
                     </div>
-                ))}
+                    <div className="space-y-2">
+                        <Label htmlFor="secondname">Segundo Nombre</Label>
+                        <Input id="secondname" placeholder="Ej. Carlos" {...form.register('secondname')} />
+                    </div>
                 </div>
-                {errors.types && <p className="text-sm font-medium text-destructive">{errors.types.message}</p>}
-            </div>
-
-            {/* --- Componente MultiSelect con manejo manual --- */}
-            {showInterestedProperties && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="firstlastname">Primer Apellido</Label>
+                        <Input id="firstlastname" placeholder="Ej. Pérez" {...form.register('firstlastname')} />
+                        {errors.firstlastname && <p className="text-sm font-medium text-destructive">{errors.firstlastname.message}</p>}
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="secondlastname">Segundo Apellido</Label>
+                        <Input id="secondlastname" placeholder="Ej. Gonzales" {...form.register('secondlastname')} />
+                    </div>
+                </div>
                 <div className="space-y-2">
-                <Label>Propiedades de Interés</Label>
-                <MultiSelect
-                    options={properties.map(p => ({ value: p.id, label: p.title }))}
-                    selected={watchedInterestedProperties}
-                    onChange={(newSelection) => form.setValue('interestedPropertyIds', newSelection)}
-                    className="w-full"
-                    placeholder="Seleccionar propiedades..."
-                />
-                {errors.interestedPropertyIds && <p className="text-sm font-medium text-destructive">{errors.interestedPropertyIds.message}</p>}
+                    <Label htmlFor="email">Correo Electrónico</Label>
+                    <Input id="email" type="email" placeholder="Ej. john@example.com" {...form.register('email')} />
+                    {errors.email && <p className="text-sm font-medium text-destructive">{errors.email.message}</p>}
                 </div>
-            )}
+                <div className="space-y-2">
+                    <Label htmlFor="phone">Teléfono</Label>
+                    <Input id="phone" type="tel" placeholder="Ej. 987654321" {...form.register('phone')} />
+                    {errors.phone && <p className="text-sm font-medium text-destructive">{errors.phone.message}</p>}
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="notes">Notas</Label>
+                    <Textarea id="notes" placeholder="Escribe las notas del contacto..." {...form.register('notes')} />
+                    {errors.notes && <p className="text-sm font-medium text-destructive">{errors.notes.message}</p>}
+                </div>
+
+                {/* --- Grupo de Checkboxes con manejo manual --- */}
+                <div className="space-y-2">
+                    <Label>Tipo</Label>
+                    <div className="grid grid-cols-2 gap-4 pt-2">
+                    {contactTypes.map((item) => (
+                        <div key={item} className="flex flex-row items-start space-x-3 space-y-0">
+                        <Checkbox
+                            id={`type-${item}`}
+                            checked={watchedTypes.includes(item)}
+                            onCheckedChange={(checked) => handleTypeChange(item, checked)}
+                        />
+                        <Label htmlFor={`type-${item}`} className="font-normal capitalize cursor-pointer">
+                            {item}
+                        </Label>
+                        </div>
+                    ))}
+                    </div>
+                    {errors.types && <p className="text-sm font-medium text-destructive">{errors.types.message}</p>}
+                </div>
+
+                {/* --- Componente MultiSelect con manejo manual --- */}
+                {showInterestedProperties && (
+                    <div className="space-y-2">
+                    <Label>Propiedades de Interés</Label>
+                    <MultiSelect
+                        options={properties.map(p => ({ value: p.id, label: p.title }))}
+                        selected={watchedInterestedProperties}
+                        onChange={(newSelection) => form.setValue('interestedPropertyIds', newSelection)}
+                        className="w-full"
+                        placeholder="Seleccionar propiedades..."
+                    />
+                    {errors.interestedPropertyIds && <p className="text-sm font-medium text-destructive">{errors.interestedPropertyIds.message}</p>}
+                    </div>
+                )}
+            </div>
             
             <DialogFooter className='pt-4'>
                 <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
                 <Button type="submit">Guardar</Button>
             </DialogFooter>
-            </form>
-        </div>
+        </form>
       </DialogContent>
     </Dialog>
   );
@@ -226,12 +226,14 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
             <CommandList>
               <CommandEmpty>No se encontraron propiedades.</CommandEmpty>
               <CommandGroup>
-                {options.map((option) => (
-                  <CommandItem key={option.value} onSelect={() => handleSelect(option.value)}>
-                    <Checkbox className="mr-2" checked={selected.includes(option.value)} onCheckedChange={() => handleSelect(option.value)} id={`multi-select-${option.value}`} />
-                    <label htmlFor={`multi-select-${option.value}`} className='cursor-pointer w-full'>{option.label}</label>
-                  </CommandItem>
-                ))}
+                <ScrollArea className="h-48">
+                    {options.map((option) => (
+                    <CommandItem key={option.value} onSelect={() => handleSelect(option.value)}>
+                        <Checkbox className="mr-2" checked={selected.includes(option.value)} onCheckedChange={() => handleSelect(option.value)} id={`multi-select-${option.value}`} />
+                        <label htmlFor={`multi-select-${option.value}`} className='cursor-pointer w-full'>{option.label}</label>
+                    </CommandItem>
+                    ))}
+                </ScrollArea>
               </CommandGroup>
             </CommandList>
           </Command>
