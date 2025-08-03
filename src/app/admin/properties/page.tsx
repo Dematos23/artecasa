@@ -115,7 +115,7 @@ export default function AdminPropertiesPage() {
           {/* Mobile View - Cards */}
           <div className="md:hidden space-y-4">
             {properties.map((property) => (
-              <Card key={property.id} className="w-full">
+              <Card key={property.id}>
                 <CardHeader>
                   <CardTitle className="text-base font-bold truncate">{property.title}</CardTitle>
                   <CardDescription className="capitalize">{property.modality} - ${Number(property.price).toLocaleString()}</CardDescription>
