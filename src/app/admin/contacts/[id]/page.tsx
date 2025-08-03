@@ -17,6 +17,68 @@ const getFullName = (contact: Pick<Contact, 'firstname' | 'secondname' | 'firstl
 }
 
 
+function PropertyListView({ properties }: { properties: Property[] }) {
+    return (
+        <>
+            {/* Mobile View */}
+            <div className="md:hidden space-y-4">
+                {properties.map((property) => (
+                    <Card key={property.id}>
+                        <CardHeader>
+                            <CardTitle className="text-base">
+                                <Link href={`/admin/properties/${property.id}`} className="font-bold hover:underline">
+                                    {property.title}
+                                </Link>
+                            </CardTitle>
+                            <CardDescription className="capitalize">
+                                {property.modality} - ${Number(property.price).toLocaleString()}
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="flex justify-end">
+                             <Button asChild variant="outline" size="sm">
+                                <Link href={`/admin/properties/${property.id}`}>Ver Detalles</Link>
+                            </Button>
+                        </CardContent>
+                    </Card>
+                ))}
+            </div>
+
+            {/* Desktop View */}
+            <div className="hidden md:block overflow-x-auto">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Título</TableHead>
+                            <TableHead>Modalidad</TableHead>
+                            <TableHead>Precio</TableHead>
+                            <TableHead>Acciones</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {properties.map((property) => (
+                            <TableRow key={property.id}>
+                                <TableCell>
+                                    <Link href={`/admin/properties/${property.id}`} className="font-bold hover:underline">
+                                        {property.title}
+                                    </Link>
+                                    <p className="text-xs text-muted-foreground">{property.address}</p>
+                                </TableCell>
+                                <TableCell className="capitalize">{property.modality}</TableCell>
+                                <TableCell>${Number(property.price).toLocaleString()}</TableCell>
+                                <TableCell>
+                                    <Button asChild variant="outline" size="sm">
+                                        <Link href={`/admin/properties/${property.id}`}>Ver Detalles</Link>
+                                    </Button>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </div>
+        </>
+    )
+}
+
 export default function ContactDetailsPage({ params }: { params: { id: string } }) {
   const contactId = params.id;
   const [contact, setContact] = useState<Contact | null>(null);
@@ -118,66 +180,4 @@ export default function ContactDetailsPage({ params }: { params: { id: string } 
         )}
     </div>
   );
-}
-
-function PropertyListView({ properties }: { properties: Property[] }) {
-    return (
-        <>
-            {/* Mobile View */}
-            <div className="md:hidden space-y-4">
-                {properties.map((property) => (
-                    <Card key={property.id}>
-                        <CardHeader>
-                            <CardTitle className="text-base">
-                                <Link href={`/admin/properties/${property.id}`} className="font-bold hover:underline">
-                                    {property.title}
-                                </Link>
-                            </CardTitle>
-                            <CardDescription className="capitalize">
-                                {property.modality} - ${Number(property.price).toLocaleString()}
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="flex justify-end">
-                             <Button asChild variant="outline" size="sm">
-                                <Link href={`/admin/properties/${property.id}`}>Ver Detalles</Link>
-                            </Button>
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
-
-            {/* Desktop View */}
-            <div className="hidden md:block overflow-x-auto">
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Título</TableHead>
-                            <TableHead>Modalidad</TableHead>
-                            <TableHead>Precio</TableHead>
-                            <TableHead>Acciones</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {properties.map((property) => (
-                            <TableRow key={property.id}>
-                                <TableCell>
-                                    <Link href={`/admin/properties/${property.id}`} className="font-bold hover:underline">
-                                        {property.title}
-                                    </Link>
-                                    <p className="text-xs text-muted-foreground">{property.address}</p>
-                                </TableCell>
-                                <TableCell className="capitalize">{property.modality}</TableCell>
-                                <TableCell>${Number(property.price).toLocaleString()}</TableCell>
-                                <TableCell>
-                                    <Button asChild variant="outline" size="sm">
-                                        <Link href={`/admin/properties/${property.id}`}>Ver Detalles</Link>
-                                    </Button>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </div>
-        </>
-    )
 }

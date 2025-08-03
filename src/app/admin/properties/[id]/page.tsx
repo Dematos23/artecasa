@@ -13,7 +13,8 @@ import { useEffect, useState } from 'react';
 import { getPropertyById } from '@/services/properties';
 
 
-function PropertyDetailsView({ propertyId }: { propertyId: string }) {
+export default function AdminPropertyDetailsPage({ params }: { params: { id: string } }) {
+  const propertyId = params.id;
   const router = useRouter();
 
   const [property, setProperty] = useState<Property | null>(null);
@@ -135,9 +136,4 @@ function PropertyDetailsView({ propertyId }: { propertyId: string }) {
         </div>
     </div>
   );
-}
-
-
-export default function AdminPropertyDetailsPage({ params }: { params: { id: string } }) {
-  return <PropertyDetailsView propertyId={params.id} />;
 }
