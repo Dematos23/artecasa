@@ -33,6 +33,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Home } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Controller } from 'react-hook-form';
 
 const contactSchema = z.object({
   firstname: z.string().min(1, { message: 'El primer nombre es obligatorio.' }),
@@ -123,41 +124,27 @@ export function ContactForm({ isOpen, onClose, onSave, contact, properties }: Co
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         {contactTypes.map((item) => (
-                          <FormField
-                            key={item}
-                            control={form.control}
-                            name="types"
-                            render={({ field }) => {
-                              return (
-                                <FormItem
-                                  key={item}
-                                  className="flex flex-row items-start space-x-3 space-y-0"
-                                >
-                                  <FormControl>
-                                    <Checkbox
-                                      checked={field.value?.includes(item)}
-                                      onCheckedChange={(checked) => {
-                                        return checked
-                                          ? field.onChange([...field.value, item])
-                                          : field.onChange(
-                                              field.value?.filter(
-                                                (value) => value !== item
-                                              )
-                                            )
-                                      }}
-                                    />
-                                  </FormControl>
-                                  <FormLabel className="font-normal capitalize">{item}</FormLabel>
-                                </FormItem>
-                              )
-                            }}
-                          />
+                           <FormItem key={item} className="flex flex-row items-start space-x-3 space-y-0">
+                               <FormControl>
+                                  <Checkbox
+                                    checked={field.value?.includes(item)}
+                                    onCheckedChange={(checked) => {
+                                      const newValue = checked
+                                        ? [...field.value, item]
+                                        : field.value?.filter((value) => value !== item);
+                                      field.onChange(newValue);
+                                    }}
+                                  />
+                               </FormControl>
+                               <FormLabel className="font-normal capitalize">{item}</FormLabel>
+                           </FormItem>
                         ))}
                       </div>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
                 
                 {showInterestedProperties && (
                   <FormField
