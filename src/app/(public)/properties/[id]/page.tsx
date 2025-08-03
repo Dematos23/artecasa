@@ -63,7 +63,7 @@ export default function PropertyDetailsPage({ params }: { params: { id: string }
           <div className="lg:col-span-2">
             <Card className="overflow-hidden mb-8">
               <Image
-                src={property.imageUrls[0]}
+                src={property.imageUrls[0] ?? '/appartment.webp'}
                 data-ai-hint="luxury property interior"
                 alt={property.title}
                 width={1200}

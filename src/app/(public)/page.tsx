@@ -73,7 +73,7 @@ export default function Home() {
             <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
               <div className="md:w-1/2 relative rounded-lg overflow-hidden shadow-2xl">
                 <Image 
-                  src={featuredProperty.imageUrls[0]} 
+                  src={featuredProperty.imageUrls[0] ?? '/appartment.webp'}
                   data-ai-hint="modern living room"
                   alt={featuredProperty.title} 
                   width={800} 

@@ -92,9 +92,13 @@ export default function AdminPropertyDetailsPage({ params }: { params: { id: str
                         </div>
                     </CardHeader>
                      <CardContent>
-                        {property.imageUrls.length > 0 && (
+                        {property.imageUrls.length > 0 ? (
                             <div className="relative w-full h-96 rounded-lg overflow-hidden mb-6">
                                 <Image src={property.imageUrls[0]} alt={property.title} fill style={{objectFit: 'cover'}} />
+                            </div>
+                        ) : (
+                            <div className="relative w-full h-96 rounded-lg overflow-hidden mb-6">
+                                <Image src="/appartment.webp" alt="Default property image" fill style={{objectFit: 'cover'}} />
                             </div>
                         )}
 

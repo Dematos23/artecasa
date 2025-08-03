@@ -454,7 +454,7 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
                     <Button type="button" variant="outline" onClick={onClose}>
                         Cancelar
                     </Button>
-                    <Button type="submit">Guardar Cambios</Button>
+                    <Button type="submit">Guardar</Button>
                 </DialogFooter>
             </form>
         </Form>
