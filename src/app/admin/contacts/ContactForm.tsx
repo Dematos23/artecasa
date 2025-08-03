@@ -77,6 +77,7 @@ export function ContactForm({ isOpen, onClose, onSave, contact, properties }: Co
     form.reset(contact || defaultValues);
   }, [contact, form, isOpen]);
 
+  // --- Manejador para el envío del formulario ---
   const onSubmit = (values: z.infer<typeof contactSchema>) => {
     onSave(values as Omit<Contact, 'id' | 'date'>);
   };
@@ -242,3 +243,5 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
     );
   });
 MultiSelect.displayName = "MultiSelect";
+
+    
