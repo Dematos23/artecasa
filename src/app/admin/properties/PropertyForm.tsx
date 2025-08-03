@@ -42,7 +42,7 @@ import { peruLocations } from '@/lib/peru-locations';
 
 const propertySchema = z.object({
   title: z.string().min(1, { message: 'El título es obligatorio.' }),
-  price: z.coerce.number().min(0, { message: 'El precio debe ser un número positivo.' }).optional(),
+  price: z.coerce.number().min(0, { message: 'El precio debe ser un número positivo.' }),
   currency: z.enum(['USD', 'PEN'], {
     required_error: 'Debes seleccionar una moneda.',
   }),
@@ -165,10 +165,10 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
   useEffect(() => {
     const defaultVals = property ? {
         ...property,
-        price: Number(property.price?.replace(/,/g, '')),
+        price: Number(property.price?.toString().replace(/,/g, '')),
     } : {
         title: '',
-        price: 0,
+        price: undefined,
         currency: 'USD' as const,
         modality: 'venta' as const,
         region: '',
@@ -176,11 +176,11 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
         district: '',
         address: '',
         description: '',
-        bedrooms: 0,
-        bathrooms: 0,
-        garage: 0,
-        area_m2: 0,
-        antiquity: 0,
+        bedrooms: undefined,
+        bathrooms: undefined,
+        garage: undefined,
+        area_m2: undefined,
+        antiquity: undefined,
         imageUrls: [],
         featured: false,
         newImages: [],
@@ -250,7 +250,7 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
                     name="title"
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel>Título</FormLabel>
+                        <FormLabel>Título <span className="text-primary">*</span></FormLabel>
                         <FormControl>
                             <Input placeholder="Ej. Villa Moderna..." {...field} />
                         </FormControl>
@@ -264,7 +264,7 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
                         name="price"
                         render={({ field }) => (
                             <FormItem className="sm:col-span-1">
-                            <FormLabel>Precio</FormLabel>
+                            <FormLabel>Precio <span className="text-primary">*</span></FormLabel>
                             <FormControl>
                                 <Input type="number" placeholder="Ej. 2500000" {...field} />
                             </FormControl>
@@ -277,7 +277,7 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
                         name="currency"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Moneda</FormLabel>
+                                <FormLabel>Moneda <span className="text-primary">*</span></FormLabel>
                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                                     <FormControl>
                                         <SelectTrigger>
@@ -298,7 +298,7 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
                         name="modality"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Modalidad</FormLabel>
+                                <FormLabel>Modalidad <span className="text-primary">*</span></FormLabel>
                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                                     <FormControl>
                                         <SelectTrigger>

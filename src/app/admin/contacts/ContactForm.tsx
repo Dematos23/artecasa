@@ -101,7 +101,7 @@ export function ContactForm({ isOpen, onClose, onSave, contact }: ContactFormPro
             <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                        <Label htmlFor="firstname">Primer Nombre</Label>
+                        <Label htmlFor="firstname">Primer Nombre <span className="text-primary">*</span></Label>
                         <Input id="firstname" placeholder="Ej. Juan" {...form.register('firstname')} />
                         {errors.firstname && <p className="text-sm font-medium text-destructive">{errors.firstname.message}</p>}
                     </div>
@@ -112,7 +112,7 @@ export function ContactForm({ isOpen, onClose, onSave, contact }: ContactFormPro
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                        <Label htmlFor="firstlastname">Primer Apellido</Label>
+                        <Label htmlFor="firstlastname">Primer Apellido <span className="text-primary">*</span></Label>
                         <Input id="firstlastname" placeholder="Ej. Pérez" {...form.register('firstlastname')} />
                         {errors.firstlastname && <p className="text-sm font-medium text-destructive">{errors.firstlastname.message}</p>}
                     </div>
@@ -127,7 +127,7 @@ export function ContactForm({ isOpen, onClose, onSave, contact }: ContactFormPro
                     {errors.email && <p className="text-sm font-medium text-destructive">{errors.email.message}</p>}
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="phone">Teléfono</Label>
+                    <Label htmlFor="phone">Teléfono <span className="text-primary">*</span></Label>
                     <Input id="phone" type="tel" placeholder="Ej. 987654321" {...form.register('phone')} />
                     {errors.phone && <p className="text-sm font-medium text-destructive">{errors.phone.message}</p>}
                 </div>
@@ -137,7 +137,7 @@ export function ContactForm({ isOpen, onClose, onSave, contact }: ContactFormPro
                     {errors.notes && <p className="text-sm font-medium text-destructive">{errors.notes.message}</p>}
                 </div>
                 <div className="space-y-2">
-                    <Label>Tipo</Label>
+                    <Label>Tipo <span className="text-primary">*</span></Label>
                     <div className="grid grid-cols-2 gap-4 pt-2">
                     {contactTypes.map((item) => (
                         <div key={item} className="flex flex-row items-start space-x-3 space-y-0">
