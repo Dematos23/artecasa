@@ -24,7 +24,7 @@ const defaultCenter = {
 };
 
 export default function PropertyDetailsPage({ params }: { params: { id: string } }) {
-  const { id: propertyId } = params;
+  const propertyId = params.id;
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
   const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;

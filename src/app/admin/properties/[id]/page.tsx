@@ -14,7 +14,7 @@ import { getPropertyById } from '@/services/properties';
 
 
 export default function AdminPropertyDetailsPage({ params }: { params: { id: string } }) {
-  const { id: propertyId } = params;
+  const propertyId = params.id;
   const router = useRouter();
 
   const [property, setProperty] = useState<Property | null>(null);
