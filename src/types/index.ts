@@ -1,3 +1,4 @@
+
 export interface Property {
   id: string;
   title: string;
@@ -14,7 +15,8 @@ export interface Property {
   antiquity?: string;
 }
 
-export type ContactStatus = 'Nuevo' | 'Contactado' | 'Resuelto';
+export const contactTypes = ['comprador', 'arrendatario', 'arrendador', 'vendedor'] as const;
+export type ContactType = (typeof contactTypes)[number];
 
 export interface Contact {
   id: string;
@@ -22,5 +24,5 @@ export interface Contact {
   email: string;
   notes: string;
   date: string;
-  status: ContactStatus;
+  types: ContactType[];
 }

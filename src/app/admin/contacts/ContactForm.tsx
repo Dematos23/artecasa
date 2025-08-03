@@ -4,7 +4,9 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import type { Contact, ContactStatus } from '@/types';
+import type { Contact, ContactType } from '@/types';
+import { contactTypes } from '@/types';
+
 import {
   Dialog,
   DialogContent,
@@ -21,24 +23,19 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import React, { useEffect } from 'react';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const contactSchema = z.object({
   name: z.string().min(1, { message: 'El nombre es obligatorio.' }),
   email: z.string().email({ message: 'Debe ser un correo electrónico válido.' }),
   notes: z.string().min(1, { message: 'Las notas son obligatorias.' }),
-  status: z.enum(['Nuevo', 'Contactado', 'Resuelto'], {
-    required_error: 'Debes seleccionar un estado.',
+  types: z.array(z.string()).refine((value) => value.some((item) => item), {
+    message: 'Debes seleccionar al menos un tipo.',
   }),
 });
 
@@ -56,7 +53,7 @@ export function ContactForm({ isOpen, onClose, onSave, contact }: ContactFormPro
         name: '',
         email: '',
         notes: '',
-        status: 'Nuevo',
+        types: [],
     },
   });
 
@@ -65,12 +62,12 @@ export function ContactForm({ isOpen, onClose, onSave, contact }: ContactFormPro
         name: '',
         email: '',
         notes: '',
-        status: 'Nuevo',
+        types: [],
     });
   }, [contact, form, isOpen]);
 
   const onSubmit = (values: z.infer<typeof contactSchema>) => {
-    onSave(values);
+    onSave(values as Omit<Contact, 'id' | 'date'>);
   };
 
   return (
@@ -125,22 +122,47 @@ export function ContactForm({ isOpen, onClose, onSave, contact }: ContactFormPro
                 />
                 <FormField
                     control={form.control}
-                    name="status"
-                    render={({ field }) => (
+                    name="types"
+                    render={() => (
                         <FormItem>
-                            <FormLabel>Estado</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Selecciona un estado" />
-                                </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                    <SelectItem value="Nuevo">Nuevo</SelectItem>
-                                    <SelectItem value="Contactado">Contactado</SelectItem>
-                                    <SelectItem value="Resuelto">Resuelto</SelectItem>
-                                </SelectContent>
-                            </Select>
+                            <div className="mb-4">
+                                <FormLabel className="text-base">Tipo</FormLabel>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                {contactTypes.map((item) => (
+                                <FormField
+                                    key={item}
+                                    control={form.control}
+                                    name="types"
+                                    render={({ field }) => {
+                                    return (
+                                        <FormItem
+                                        key={item}
+                                        className="flex flex-row items-start space-x-3 space-y-0"
+                                        >
+                                        <FormControl>
+                                            <Checkbox
+                                            checked={field.value?.includes(item)}
+                                            onCheckedChange={(checked) => {
+                                                return checked
+                                                ? field.onChange([...(field.value || []), item])
+                                                : field.onChange(
+                                                    field.value?.filter(
+                                                        (value) => value !== item
+                                                    )
+                                                    )
+                                            }}
+                                            />
+                                        </FormControl>
+                                        <FormLabel className="font-normal capitalize">
+                                            {item}
+                                        </FormLabel>
+                                        </FormItem>
+                                    )
+                                    }}
+                                />
+                                ))}
+                            </div>
                             <FormMessage />
                         </FormItem>
                     )}

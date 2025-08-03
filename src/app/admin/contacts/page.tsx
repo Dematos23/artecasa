@@ -14,15 +14,15 @@ import { MoreHorizontal, PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
-import type { Contact, ContactStatus } from '@/types';
+import type { Contact } from '@/types';
 import React, { useState } from 'react';
 import { ContactForm } from './ContactForm';
 
 
 const dummyContacts: Contact[] = [
-  { id: '1', name: 'John Doe', email: 'john.doe@example.com', notes: 'I am interested in the Modern Villa. Can I get more details?', date: '2024-05-20', status: 'Nuevo' },
-  { id: '2', name: 'Jane Smith', email: 'jane.smith@example.com', notes: 'Please schedule a viewing for the Downtown Penthouse.', date: '2024-05-19', status: 'Contactado' },
-  { id: '3', name: 'Sam Wilson', email: 'sam.wilson@example.com', notes: 'What are the financing options available?', date: '2024-05-18', status: 'Resuelto' },
+  { id: '1', name: 'John Doe', email: 'john.doe@example.com', notes: 'I am interested in the Modern Villa. Can I get more details?', date: '2024-05-20', types: ['comprador'] },
+  { id: '2', name: 'Jane Smith', email: 'jane.smith@example.com', notes: 'Please schedule a viewing for the Downtown Penthouse.', date: '2024-05-19', types: ['arrendatario'] },
+  { id: '3', name: 'Sam Wilson', email: 'sam.wilson@example.com', notes: 'What are the financing options available?', date: '2024-05-18', types: ['vendedor', 'arrendador'] },
 ];
 
 export default function AdminContactsPage() {
@@ -86,7 +86,7 @@ export default function AdminContactsPage() {
                 <TableHead>Nombre</TableHead>
                 <TableHead>Correo Electrónico</TableHead>
                 <TableHead>Fecha</TableHead>
-                <TableHead>Estado</TableHead>
+                <TableHead>Tipo</TableHead>
                 <TableHead>Acciones</TableHead>
               </TableRow>
             </TableHeader>
@@ -97,9 +97,11 @@ export default function AdminContactsPage() {
                   <TableCell>{contact.email}</TableCell>
                   <TableCell>{contact.date}</TableCell>
                   <TableCell>
-                    <Badge variant={contact.status === 'Nuevo' ? 'destructive' : contact.status === 'Contactado' ? 'secondary' : 'default'}>
-                      {contact.status}
-                    </Badge>
+                    <div className="flex gap-1 flex-wrap">
+                      {contact.types.map(type => (
+                         <Badge key={type} variant="secondary" className="capitalize">{type}</Badge>
+                      ))}
+                    </div>
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>
