@@ -139,6 +139,7 @@ export function ContactForm({ isOpen, onClose, onSave, contact, properties }: Co
                           <FormLabel>Propiedades de Interés</FormLabel>
                           <FormControl>
                             <MultiSelect
+                              {...field}
                               options={properties.map(p => ({ value: p.id, label: p.title }))}
                               selected={field.value || []}
                               onChange={field.onChange}
@@ -173,7 +174,8 @@ interface MultiSelectProps {
     placeholder?: string;
 }
 
-function MultiSelect({ options, selected, onChange, className, placeholder="Seleccionar..." }: MultiSelectProps) {
+const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>(
+  ({ options, selected, onChange, className, placeholder="Seleccionar...", ...props }, ref) => {
     const [open, setOpen] = useState(false);
 
     const handleSelect = (value: string) => {
@@ -190,7 +192,7 @@ function MultiSelect({ options, selected, onChange, className, placeholder="Sele
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-                <Button variant="outline" role="combobox" aria-expanded={open} className={cn("w-full justify-between", className)}>
+                <Button ref={ref} variant="outline" role="combobox" aria-expanded={open} className={cn("w-full justify-between", className)} {...props}>
                     <span className="truncate">{selectedLabels.length > 0 ? selectedLabels.join(', ') : placeholder}</span>
                     <Home className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
@@ -213,6 +215,5 @@ function MultiSelect({ options, selected, onChange, className, placeholder="Sele
             </PopoverContent>
         </Popover>
     );
-}
-
-    
+});
+MultiSelect.displayName = "MultiSelect";

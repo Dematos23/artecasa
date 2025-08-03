@@ -457,6 +457,7 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
                           <FormLabel>Contactos Interesados</FormLabel>
                           <FormControl>
                             <MultiSelect
+                              {...field}
                               options={interestedContacts.map(c => ({ value: c.id, label: getFullName(c) }))}
                               selected={field.value || []}
                               onChange={field.onChange}
@@ -512,7 +513,8 @@ interface MultiSelectProps {
     placeholder?: string;
 }
 
-function MultiSelect({ options, selected, onChange, className, placeholder="Seleccionar..." }: MultiSelectProps) {
+const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>(
+  ({ options, selected, onChange, className, placeholder = "Seleccionar...", ...props }, ref) => {
     const [open, setOpen] = useState(false);
 
     const handleSelect = (value: string) => {
@@ -530,10 +532,12 @@ function MultiSelect({ options, selected, onChange, className, placeholder="Sele
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
                 <Button
+                    ref={ref}
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
                     className={cn("w-full justify-between", className)}
+                    {...props}
                 >
                     <span className="truncate">
                         {selectedLabels.length > 0 ? selectedLabels.join(', ') : placeholder}
@@ -569,6 +573,5 @@ function MultiSelect({ options, selected, onChange, className, placeholder="Sele
             </PopoverContent>
         </Popover>
     );
-}
-
-    
+});
+MultiSelect.displayName = "MultiSelect";
