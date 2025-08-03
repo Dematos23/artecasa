@@ -20,9 +20,9 @@ import { ContactForm } from './ContactForm';
 
 
 const dummyContacts: Contact[] = [
-  { id: '1', name: 'John Doe', email: 'john.doe@example.com', message: 'I am interested in the Modern Villa. Can I get more details?', date: '2024-05-20', status: 'Nuevo' },
-  { id: '2', name: 'Jane Smith', email: 'jane.smith@example.com', message: 'Please schedule a viewing for the Downtown Penthouse.', date: '2024-05-19', status: 'Contactado' },
-  { id: '3', name: 'Sam Wilson', email: 'sam.wilson@example.com', message: 'What are the financing options available?', date: '2024-05-18', status: 'Resuelto' },
+  { id: '1', name: 'John Doe', email: 'john.doe@example.com', notes: 'I am interested in the Modern Villa. Can I get more details?', date: '2024-05-20', status: 'Nuevo' },
+  { id: '2', name: 'Jane Smith', email: 'jane.smith@example.com', notes: 'Please schedule a viewing for the Downtown Penthouse.', date: '2024-05-19', status: 'Contactado' },
+  { id: '3', name: 'Sam Wilson', email: 'sam.wilson@example.com', notes: 'What are the financing options available?', date: '2024-05-18', status: 'Resuelto' },
 ];
 
 export default function AdminContactsPage() {
@@ -110,7 +110,7 @@ export default function AdminContactsPage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>Ver Mensaje</DropdownMenuItem>
+                        <DropdownMenuItem>Ver Notas</DropdownMenuItem>
                         <DropdownMenuItem onClick={() => openFormForEdit(contact)}>Editar</DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handleDelete(contact.id)} className="text-destructive">Eliminar</DropdownMenuItem>
                       </DropdownMenuContent>

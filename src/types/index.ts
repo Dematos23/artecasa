@@ -20,7 +20,7 @@ export interface Contact {
   id: string;
   name: string;
   email: string;
-  message: string;
+  notes: string;
   date: string;
   status: ContactStatus;
 }

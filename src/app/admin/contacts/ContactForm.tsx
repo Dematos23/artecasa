@@ -36,7 +36,7 @@ import React, { useEffect } from 'react';
 const contactSchema = z.object({
   name: z.string().min(1, { message: 'El nombre es obligatorio.' }),
   email: z.string().email({ message: 'Debe ser un correo electrónico válido.' }),
-  message: z.string().min(1, { message: 'El mensaje es obligatorio.' }),
+  notes: z.string().min(1, { message: 'Las notas son obligatorias.' }),
   status: z.enum(['Nuevo', 'Contactado', 'Resuelto'], {
     required_error: 'Debes seleccionar un estado.',
   }),
@@ -55,7 +55,7 @@ export function ContactForm({ isOpen, onClose, onSave, contact }: ContactFormPro
     defaultValues: contact || {
         name: '',
         email: '',
-        message: '',
+        notes: '',
         status: 'Nuevo',
     },
   });
@@ -64,7 +64,7 @@ export function ContactForm({ isOpen, onClose, onSave, contact }: ContactFormPro
     form.reset(contact || {
         name: '',
         email: '',
-        message: '',
+        notes: '',
         status: 'Nuevo',
     });
   }, [contact, form, isOpen]);
@@ -112,12 +112,12 @@ export function ContactForm({ isOpen, onClose, onSave, contact }: ContactFormPro
                 />
                  <FormField
                     control={form.control}
-                    name="message"
+                    name="notes"
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel>Mensaje</FormLabel>
+                        <FormLabel>Notas</FormLabel>
                         <FormControl>
-                            <Textarea placeholder="Escribe el mensaje del contacto..." {...field} />
+                            <Textarea placeholder="Escribe las notas del contacto..." {...field} />
                         </FormControl>
                         <FormMessage />
                         </FormItem>
