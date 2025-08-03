@@ -6,7 +6,19 @@ import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from '@/components/ui/sheet';
-import { Menu } from 'lucide-react';
+import { Menu, LogOut, User } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import { auth } from '@/lib/firebase';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+
 
 const navLinks = [
   { href: '/', label: 'Inicio' },
@@ -16,6 +28,12 @@ const navLinks = [
 
 export function Header() {
   const pathname = usePathname();
+  const { user } = useAuth();
+
+  const handleLogout = async () => {
+    await auth.signOut();
+  };
+
 
   const NavItems = ({ className }: { className?: string }) => (
     <nav className={cn('flex items-center gap-4 lg:gap-6', className)}>
@@ -35,7 +53,7 @@ export function Header() {
   );
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center px-4 md:px-6">
         <Link href="/" className="mr-6 flex items-center">
           <Image src="/logo.png" alt="Artecasa Logo" width={120} height={30} className="h-12 w-auto" />
@@ -46,9 +64,36 @@ export function Header() {
         </div>
 
         <div className="flex flex-1 items-center justify-end gap-2">
-          <Button asChild variant="outline">
-            <Link href="/login">Login</Link>
-          </Button>
+          {user ? (
+             <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <Avatar className="h-8 w-8">
+                       <AvatarFallback>{user.email?.[0].toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">Admin</p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {user.email}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Cerrar Sesión</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+          ) : (
+             <Button asChild variant="outline">
+              <Link href="/login">Login</Link>
+            </Button>
+          )}
           <div className="md:hidden">
             <Sheet>
               <SheetTrigger asChild>
@@ -58,10 +103,10 @@ export function Header() {
                 </Button>
               </SheetTrigger>
               <SheetContent side="right">
-                <SheetTitle className="sr-only">Menú de Navegación</SheetTitle>
-                <SheetDescription className="sr-only">
-                  Menú principal de navegación del sitio Artecasa.
-                </SheetDescription>
+                 <SheetTitle className="sr-only">Menú de Navegación</SheetTitle>
+                 <SheetDescription className="sr-only">
+                   Menú principal de navegación del sitio Artecasa.
+                 </SheetDescription>
                 <div className="flex flex-col gap-4 p-4">
                   <Link href="/" className="mr-6 flex items-center mb-4">
                     <Image src="/logo.png" alt="Artecasa Logo" width={120} height={30} className="h-8 w-auto" />

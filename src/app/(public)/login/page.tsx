@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
-import { useAuthState } from 'react-firebase-hooks/auth';
 import { app } from '@/lib/firebase';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -11,11 +10,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/context/AuthContext';
 
 const auth = getAuth(app);
 
 export default function LoginPage() {
-  const [user, loading] = useAuthState(auth);
+  const { user, loading } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -23,10 +23,10 @@ export default function LoginPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (user) {
+    if (!loading && user) {
       router.push('/admin');
     }
-  }, [user, router]);
+  }, [user, loading, router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,7 +57,7 @@ export default function LoginPage() {
     }
   };
 
-  if (loading) {
+  if (loading || user) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-secondary p-4">
         <p>Cargando...</p>
@@ -70,7 +70,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
           <div className="mx-auto mb-4">
-            <Image src="/logo.png" alt="Artecasa Logo" width={240} height={60} className="h-16 w-auto" />
+            <Image src="/logo.png" alt="Artecasa Logo" width={240} height={60} className="h-20 w-auto" />
           </div>
           <CardTitle className="font-headline text-2xl">Acceso de Administrador</CardTitle>
           <CardDescription>Ingresa tus credenciales para acceder al panel.</CardDescription>
