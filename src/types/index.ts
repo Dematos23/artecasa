@@ -5,6 +5,7 @@ export interface Property {
   id: string;
   title: string;
   price: string;
+  currency: 'USD' | 'PEN';
   modality: 'venta' | 'alquiler';
   region: string;
   province: string;
@@ -18,8 +19,6 @@ export interface Property {
   description?: string;
   featured?: boolean;
   antiquity?: string;
-  ownerId?: string;
-  interestedContactIds?: string[];
 }
 
 export const contactTypes = ['comprador', 'arrendatario', 'arrendador', 'vendedor'] as const;

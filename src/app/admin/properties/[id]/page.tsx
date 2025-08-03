@@ -61,6 +61,8 @@ export default function AdminPropertyDetailsPage({ params }: { params: { id: str
     );
   }
 
+  const currencySymbol = property.currency === 'USD' ? '$' : 'S/';
+
   return (
     <div>
         <div className="flex justify-between items-center mb-6">
@@ -110,7 +112,7 @@ export default function AdminPropertyDetailsPage({ params }: { params: { id: str
                                 </CardHeader>
                                 <CardContent>
                                     <div className="flex items-baseline gap-2">
-                                        <span className="text-3xl font-bold text-primary">${Number(property.price).toLocaleString()}</span>
+                                        <span className="text-3xl font-bold text-primary">{currencySymbol}{Number(property.price).toLocaleString()}</span>
                                     </div>
                                     <div className="text-sm text-muted-foreground capitalize mt-1">{property.modality === 'alquiler' ? '/ mes' : `en ${property.modality}`}</div>
                                 </CardContent>

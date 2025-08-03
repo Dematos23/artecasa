@@ -54,7 +54,7 @@ export default function AdminPropertiesPage() {
   }, [editPropertyId, properties, router]);
 
 
-  const handleSave = async (propertyData: Omit<Property, 'id' | 'ownerId' | 'interestedContactIds'>, newImages: File[]) => {
+  const handleSave = async (propertyData: Omit<Property, 'id'>, newImages: File[]) => {
     setIsSaving(true);
 
     try {
@@ -69,8 +69,6 @@ export default function AdminPropertiesPage() {
 
         const finalPropertyData: Omit<Property, 'id'> = {
             ...propertyData,
-            ownerId: undefined,
-            interestedContactIds: [],
             imageUrls: [...(propertyData.imageUrls || []), ...uploadedImageUrls],
         };
 
@@ -140,7 +138,7 @@ export default function AdminPropertiesPage() {
                   {property.title}
                 </Link>
               </CardTitle>
-              <CardDescription className="capitalize">{property.modality} - ${Number(property.price).toLocaleString()}</CardDescription>
+              <CardDescription className="capitalize">{property.modality} - {property.currency === 'USD' ? '$' : 'S/'}{Number(property.price).toLocaleString()}</CardDescription>
             </CardHeader>
             <CardContent className="flex justify-between items-center">
                 <Badge variant={property.featured ? 'default' : 'secondary'}>
@@ -183,7 +181,7 @@ export default function AdminPropertiesPage() {
                     {property.title}
                   </Link>
                 </TableCell>
-                <TableCell>${Number(property.price).toLocaleString()}</TableCell>
+                <TableCell>{property.currency === 'USD' ? '$' : 'S/'}{Number(property.price).toLocaleString()}</TableCell>
                 <TableCell className="capitalize">{property.modality}</TableCell>
                 <TableCell>
                   <Badge variant={property.featured ? 'default' : 'secondary'}>

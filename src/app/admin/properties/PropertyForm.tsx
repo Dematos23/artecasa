@@ -43,6 +43,9 @@ import { peruLocations } from '@/lib/peru-locations';
 const propertySchema = z.object({
   title: z.string().min(1, { message: 'El título es obligatorio.' }),
   price: z.coerce.number().min(1, { message: 'El precio es obligatorio.' }),
+  currency: z.enum(['USD', 'PEN'], {
+    required_error: 'Debes seleccionar una moneda.',
+  }),
   modality: z.enum(['venta', 'alquiler'], {
     required_error: 'Debes seleccionar una modalidad.',
   }),
@@ -65,7 +68,7 @@ const propertySchema = z.object({
 interface PropertyFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (property: Omit<Property, 'id' | 'ownerId' | 'interestedContactIds'>, newImages: File[]) => void;
+  onSave: (property: Omit<Property, 'id'>, newImages: File[]) => void;
   property?: Property;
   googleMapsApiKey: string | undefined;
 }
@@ -143,6 +146,7 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
     } : {
         title: '',
         price: 0,
+        currency: 'USD' as const,
         modality: 'venta' as const,
         region: '',
         province: '',
@@ -197,7 +201,7 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
   const onSubmit = async (values: z.infer<typeof propertySchema>) => {
     const { newImages, ...propertyData } = values;
     
-    const finalProperty: Omit<Property, 'id' | 'ownerId' | 'interestedContactIds'> = {
+    const finalProperty: Omit<Property, 'id'> = {
         ...propertyData,
         price: propertyData.price.toString(),
         imageUrls: values.imageUrls || [],
@@ -231,17 +235,38 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
                         </FormItem>
                     )}
                 />
-                 <div className="grid grid-cols-2 gap-4">
+                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <FormField
                         control={form.control}
                         name="price"
                         render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Precio (USD)</FormLabel>
+                            <FormItem className="sm:col-span-1">
+                            <FormLabel>Precio</FormLabel>
                             <FormControl>
                                 <Input type="number" placeholder="Ej. 2500000" {...field} />
                             </FormControl>
                             <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                     <FormField
+                        control={form.control}
+                        name="currency"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Moneda</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Selecciona una moneda" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                    <SelectItem value="USD">Dólares (USD)</SelectItem>
+                                    <SelectItem value="PEN">Soles (PEN)</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
                             </FormItem>
                         )}
                     />

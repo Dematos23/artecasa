@@ -1,3 +1,4 @@
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
@@ -10,6 +11,8 @@ interface PropertyCardProps {
 }
 
 export function PropertyCard({ property }: PropertyCardProps) {
+  const currencySymbol = property.currency === 'USD' ? '$' : 'S/';
+
   return (
     <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 group">
       <Link href={`/properties/${property.id}`}>
@@ -33,7 +36,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
           </h3>
           <p className="text-sm text-muted-foreground mt-1 truncate">{property.address}</p>
           <div className="mt-4 flex justify-between items-center">
-             <p className="text-xl font-bold text-primary">${Number(property.price).toLocaleString()}{property.modality === 'alquiler' && <span className="text-sm font-normal text-muted-foreground"> / mes</span>}</p>
+             <p className="text-xl font-bold text-primary">{currencySymbol}{Number(property.price).toLocaleString()}{property.modality === 'alquiler' && <span className="text-sm font-normal text-muted-foreground"> / mes</span>}</p>
           </div>
           <div className="mt-4 pt-4 border-t border-border flex justify-around text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
