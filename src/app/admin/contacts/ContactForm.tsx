@@ -15,14 +15,6 @@ import {
   DialogFooter,
   DialogDescription,
 } from '@/components/ui/dialog';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
 
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -33,7 +25,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Home } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Controller } from 'react-hook-form';
+import { Label } from '@/components/ui/label';
 
 const contactSchema = z.object({
   firstname: z.string().min(1, { message: 'El primer nombre es obligatorio.' }),
@@ -58,15 +50,15 @@ interface ContactFormProps {
 }
 
 const defaultValues = {
-    firstname: '',
-    secondname: '',
-    firstlastname: '',
-    secondlastname: '',
-    email: '',
-    phone: '',
-    notes: '',
-    types: [],
-    interestedPropertyIds: [],
+  firstname: '',
+  secondname: '',
+  firstlastname: '',
+  secondlastname: '',
+  email: '',
+  phone: '',
+  notes: '',
+  types: [],
+  interestedPropertyIds: [],
 };
 
 export function ContactForm({ isOpen, onClose, onSave, contact, properties }: ContactFormProps) {
@@ -74,7 +66,10 @@ export function ContactForm({ isOpen, onClose, onSave, contact, properties }: Co
     resolver: zodResolver(contactSchema),
   });
 
-  const watchedTypes = useWatch({ control: form.control, name: 'types', defaultValue: contact?.types || [] });
+  const { formState: { errors } } = form;
+
+  const watchedTypes = form.watch('types', contact?.types || []);
+  const watchedInterestedProperties = form.watch('interestedPropertyIds', contact?.interestedPropertyIds || []);
   const showInterestedProperties = watchedTypes.includes('comprador') || watchedTypes.includes('arrendatario');
 
   useEffect(() => {
@@ -84,6 +79,15 @@ export function ContactForm({ isOpen, onClose, onSave, contact, properties }: Co
   const onSubmit = (values: z.infer<typeof contactSchema>) => {
     onSave(values as Omit<Contact, 'id' | 'date'>);
   };
+  
+  // --- Manejador manual para los checkboxes de 'types' ---
+  const handleTypeChange = (item: ContactType, checked: boolean | 'indeterminate') => {
+      const currentTypes = form.getValues('types') || [];
+      const newTypes = checked 
+          ? [...currentTypes, item]
+          : currentTypes.filter(type => type !== item);
+      form.setValue('types', newTypes, { shouldValidate: true });
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -94,141 +98,143 @@ export function ContactForm({ isOpen, onClose, onSave, contact, properties }: Co
             {contact ? 'Actualiza los detalles del contacto.' : 'Completa el formulario para crear un nuevo contacto.'}
           </DialogDescription>
         </DialogHeader>
-        <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4 max-h-[70vh] overflow-y-auto px-2">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <FormField control={form.control} name="firstname" render={({ field }) => ( 
-                      <FormItem> 
-                        <FormLabel>Primer Nombre</FormLabel> 
-                        <FormControl><Input placeholder="Ej. Juan" {...field} /></FormControl> 
-                        <FormMessage /> 
-                      </FormItem> 
-                    )}/>
-                    <FormField control={form.control} name="secondname" render={({ field }) => ( <FormItem> <FormLabel>Segundo Nombre</FormLabel> <FormControl> <Input placeholder="Ej. Carlos" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
-                </div>
-                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <FormField control={form.control} name="firstlastname" render={({ field }) => ( <FormItem> <FormLabel>Primer Apellido</FormLabel> <FormControl> <Input placeholder="Ej. Pérez" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
-                    <FormField control={form.control} name="secondlastname" render={({ field }) => ( <FormItem> <FormLabel>Segundo Apellido</FormLabel> <FormControl> <Input placeholder="Ej. Gonzales" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
-                </div>
-                <FormField control={form.control} name="email" render={({ field }) => ( <FormItem> <FormLabel>Correo Electrónico</FormLabel> <FormControl> <Input type="email" placeholder="Ej. john@example.com" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
-                <FormField control={form.control} name="phone" render={({ field }) => ( <FormItem> <FormLabel>Teléfono</FormLabel> <FormControl> <Input type="tel" placeholder="Ej. 987654321" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
-                <FormField control={form.control} name="notes" render={({ field }) => ( <FormItem> <FormLabel>Notas</FormLabel> <FormControl> <Textarea placeholder="Escribe las notas del contacto..." {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
-                
-                <FormField
-                  control={form.control}
-                  name="types"
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="mb-4">
-                        <FormLabel className="text-base">Tipo</FormLabel>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        {contactTypes.map((item) => (
-                           <FormItem key={item} className="flex flex-row items-start space-x-3 space-y-0">
-                               <FormControl>
-                                  <Checkbox
-                                    checked={field.value?.includes(item)}
-                                    onCheckedChange={(checked) => {
-                                      const newValue = checked
-                                        ? [...field.value, item]
-                                        : field.value?.filter((value) => value !== item);
-                                      field.onChange(newValue);
-                                    }}
-                                  />
-                               </FormControl>
-                               <FormLabel className="font-normal capitalize">{item}</FormLabel>
-                           </FormItem>
-                        ))}
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+        {/* --- Formulario gestionado manualmente con react-hook-form --- */}
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4 max-h-[70vh] overflow-y-auto px-2">
+          {/* --- Campos de texto con form.register --- */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+             <div className="space-y-2">
+                <Label htmlFor="firstname">Primer Nombre</Label>
+                <Input id="firstname" placeholder="Ej. Juan" {...form.register('firstname')} />
+                {errors.firstname && <p className="text-sm font-medium text-destructive">{errors.firstname.message}</p>}
+             </div>
+             <div className="space-y-2">
+                <Label htmlFor="secondname">Segundo Nombre</Label>
+                <Input id="secondname" placeholder="Ej. Carlos" {...form.register('secondname')} />
+             </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+             <div className="space-y-2">
+                <Label htmlFor="firstlastname">Primer Apellido</Label>
+                <Input id="firstlastname" placeholder="Ej. Pérez" {...form.register('firstlastname')} />
+                {errors.firstlastname && <p className="text-sm font-medium text-destructive">{errors.firstlastname.message}</p>}
+             </div>
+             <div className="space-y-2">
+                <Label htmlFor="secondlastname">Segundo Apellido</Label>
+                <Input id="secondlastname" placeholder="Ej. Gonzales" {...form.register('secondlastname')} />
+             </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="email">Correo Electrónico</Label>
+            <Input id="email" type="email" placeholder="Ej. john@example.com" {...form.register('email')} />
+            {errors.email && <p className="text-sm font-medium text-destructive">{errors.email.message}</p>}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="phone">Teléfono</Label>
+            <Input id="phone" type="tel" placeholder="Ej. 987654321" {...form.register('phone')} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="notes">Notas</Label>
+            <Textarea id="notes" placeholder="Escribe las notas del contacto..." {...form.register('notes')} />
+            {errors.notes && <p className="text-sm font-medium text-destructive">{errors.notes.message}</p>}
+          </div>
 
-                
-                {showInterestedProperties && (
-                  <FormField
-                    control={form.control}
-                    name="interestedPropertyIds"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Propiedades de Interés</FormLabel>
-                         <FormControl>
-                           <MultiSelect
-                              options={properties.map(p => ({ value: p.id, label: p.title }))}
-                              selected={field.value || []}
-                              onChange={field.onChange}
-                              className="w-full"
-                              placeholder="Seleccionar propiedades..."
-                            />
-                         </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
+          {/* --- Grupo de Checkboxes con manejo manual --- */}
+          <div className="space-y-2">
+            <Label>Tipo</Label>
+            <div className="grid grid-cols-2 gap-4 pt-2">
+              {contactTypes.map((item) => (
+                 <div key={item} className="flex flex-row items-start space-x-3 space-y-0">
+                   <Checkbox
+                     id={`type-${item}`}
+                     checked={watchedTypes.includes(item)}
+                     onCheckedChange={(checked) => handleTypeChange(item, checked)}
+                   />
+                   <Label htmlFor={`type-${item}`} className="font-normal capitalize cursor-pointer">
+                     {item}
+                   </Label>
+                 </div>
+              ))}
+            </div>
+            {errors.types && <p className="text-sm font-medium text-destructive">{errors.types.message}</p>}
+          </div>
 
-                <DialogFooter>
-                    <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
-                    <Button type="submit">Guardar</Button>
-                </DialogFooter>
-            </form>
-        </Form>
+          {/* --- Componente MultiSelect con manejo manual --- */}
+          {showInterestedProperties && (
+            <div className="space-y-2">
+              <Label>Propiedades de Interés</Label>
+              <MultiSelect
+                options={properties.map(p => ({ value: p.id, label: p.title }))}
+                selected={watchedInterestedProperties}
+                onChange={(newSelection) => form.setValue('interestedPropertyIds', newSelection)}
+                className="w-full"
+                placeholder="Seleccionar propiedades..."
+              />
+              {errors.interestedPropertyIds && <p className="text-sm font-medium text-destructive">{errors.interestedPropertyIds.message}</p>}
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
+            <Button type="submit">Guardar</Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );
 }
 
 
-// MultiSelect Component
+// MultiSelect Component (refactorizado para recibir props directamente)
 interface MultiSelectProps {
-    options: { label: string; value: string }[];
-    selected: string[];
-    onChange: (selected: string[]) => void;
-    className?: string;
-    placeholder?: string;
+  options: { label: string; value: string }[];
+  selected: string[];
+  onChange: (selected: string[]) => void;
+  className?: string;
+  placeholder?: string;
 }
 
 export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>(
-  ({ options, selected, onChange, className, placeholder="Seleccionar...", ...props }, ref) => {
+  ({ options, selected, onChange, className, placeholder = "Seleccionar...", ...props }, ref) => {
     const [open, setOpen] = useState(false);
 
     const handleSelect = (value: string) => {
-        const newSelected = selected.includes(value)
-            ? selected.filter((item) => item !== value)
-            : [...selected, value];
-        onChange(newSelected);
+      const newSelected = selected.includes(value)
+        ? selected.filter((item) => item !== value)
+        : [...selected, value];
+      onChange(newSelected);
     };
 
     const selectedLabels = options
-        .filter(option => selected.includes(option.value))
-        .map(option => option.label);
+      .filter(option => selected.includes(option.value))
+      .map(option => option.label);
 
     return (
-        <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-                <Button ref={ref} variant="outline" role="combobox" aria-expanded={open} className={cn("w-full justify-between", className)} {...props}>
-                    <span className="truncate">{selectedLabels.length > 0 ? selectedLabels.join(', ') : placeholder}</span>
-                    <Home className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                <Command>
-                    <CommandInput placeholder="Buscar propiedad..." />
-                    <CommandList>
-                        <CommandEmpty>No se encontraron propiedades.</CommandEmpty>
-                        <CommandGroup>
-                            {options.map((option) => (
-                                <CommandItem key={option.value} onSelect={() => handleSelect(option.value)}>
-                                    <Checkbox className="mr-2" checked={selected.includes(option.value)} onCheckedChange={() => handleSelect(option.value)} id={`multi-select-${option.value}`} />
-                                    <label htmlFor={`multi-select-${option.value}`} className='cursor-pointer w-full'>{option.label}</label>
-                                </CommandItem>
-                            ))}
-                        </CommandGroup>
-                    </CommandList>
-                </Command>
-            </PopoverContent>
-        </Popover>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button ref={ref} variant="outline" role="combobox" aria-expanded={open} className={cn("w-full justify-between", className)} {...props} onClick={() => setOpen(!open)}>
+            <span className="truncate">{selectedLabels.length > 0 ? selectedLabels.join(', ') : placeholder}</span>
+            <Home className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+          <Command>
+            <CommandInput placeholder="Buscar propiedad..." />
+            <CommandList>
+              <CommandEmpty>No se encontraron propiedades.</CommandEmpty>
+              <CommandGroup>
+                {options.map((option) => (
+                  <CommandItem key={option.value} onSelect={() => handleSelect(option.value)}>
+                    <Checkbox className="mr-2" checked={selected.includes(option.value)} onCheckedChange={() => handleSelect(option.value)} id={`multi-select-${option.value}`} />
+                    <label htmlFor={`multi-select-${option.value}`} className='cursor-pointer w-full'>{option.label}</label>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
     );
-});
+  });
 MultiSelect.displayName = "MultiSelect";
+
+    
