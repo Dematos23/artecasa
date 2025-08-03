@@ -168,9 +168,14 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
     const defaultVals = property ? {
         ...property,
         price: Number(property.price?.toString().replace(/,/g, '')),
+        bedrooms: property.bedrooms ?? '',
+        bathrooms: property.bathrooms ?? '',
+        garage: property.garage ?? '',
+        area_m2: property.area_m2 ?? '',
+        antiquity: property.antiquity ?? '',
     } : {
         title: '',
-        price: undefined,
+        price: '',
         currency: 'USD' as const,
         modality: 'venta' as const,
         region: '',
@@ -178,16 +183,16 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
         district: '',
         address: '',
         description: '',
-        bedrooms: undefined,
-        bathrooms: undefined,
-        garage: undefined,
-        area_m2: undefined,
-        antiquity: undefined,
+        bedrooms: '',
+        bathrooms: '',
+        garage: '',
+        area_m2: '',
+        antiquity: '',
         imageUrls: [],
         featured: false,
         newImages: [],
     };
-    form.reset(defaultVals);
+    form.reset(defaultVals as any);
     setImagePreviews(property?.imageUrls || []);
   }, [property, form, isOpen]);
 
@@ -491,3 +496,5 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
     </Dialog>
   );
 }
+
+    
