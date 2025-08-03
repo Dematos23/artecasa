@@ -25,7 +25,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
 
 const propertySchema = z.object({
@@ -113,8 +113,7 @@ export function PropertyForm({ isOpen, onClose, onSave, property }: PropertyForm
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: googleMapsApiKey || "",
-    // Do not load the script if the key is not provided
-    preventGoogleFontsLoading: !googleMapsApiKey,
+    preventGoogleFontsLoading: true,
   });
 
 
@@ -276,7 +275,7 @@ export function PropertyForm({ isOpen, onClose, onSave, property }: PropertyForm
                         <MapView address={watchedAddress} />
                     </div>
                   ) : <div>Cargando mapa...</div>
-                ) : <div className="text-sm text-muted-foreground">Para mostrar el mapa, por favor, añade tu clave de API de Google Maps a las variables de entorno.</div>}
+                ) : <div className="text-sm text-muted-foreground">Para mostrar el mapa, por favor, añade tu clave de API de Google Maps (NEXT_PUBLIC_GOOGLE_MAPS_API_KEY) a tus variables de entorno.</div>}
 
                  <FormField
                     control={form.control}
