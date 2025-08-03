@@ -20,10 +20,14 @@ import { ContactForm } from './ContactForm';
 
 
 const dummyContacts: Contact[] = [
-  { id: '1', name: 'John Doe', email: 'john.doe@example.com', notes: 'I am interested in the Modern Villa. Can I get more details?', date: '2024-05-20', types: ['comprador'] },
-  { id: '2', name: 'Jane Smith', email: 'jane.smith@example.com', notes: 'Please schedule a viewing for the Downtown Penthouse.', date: '2024-05-19', types: ['arrendatario'] },
-  { id: '3', name: 'Sam Wilson', email: 'sam.wilson@example.com', notes: 'What are the financing options available?', date: '2024-05-18', types: ['vendedor', 'arrendador'] },
+  { id: '1', firstname: 'John', firstlastname: 'Doe', email: 'john.doe@example.com', notes: 'I am interested in the Modern Villa. Can I get more details?', date: '2024-05-20', types: ['comprador'], phone: '987654321' },
+  { id: '2', firstname: 'Jane', firstlastname: 'Smith', email: 'jane.smith@example.com', notes: 'Please schedule a viewing for the Downtown Penthouse.', date: '2024-05-19', types: ['arrendatario'], phone: '987654322' },
+  { id: '3', firstname: 'Sam', firstlastname: 'Wilson', email: 'sam.wilson@example.com', notes: 'What are the financing options available?', date: '2024-05-18', types: ['vendedor', 'arrendador'], phone: '987654323' },
 ];
+
+const getFullName = (contact: Pick<Contact, 'firstname' | 'secondname' | 'firstlastname' | 'secondlastname'>) => {
+    return [contact.firstname, contact.secondname, contact.firstlastname, contact.secondlastname].filter(Boolean).join(' ');
+}
 
 export default function AdminContactsPage() {
   const [contacts, setContacts] = useState<Contact[]>(dummyContacts);
@@ -86,7 +90,7 @@ export default function AdminContactsPage() {
                 <TableRow>
                   <TableHead>Nombre</TableHead>
                   <TableHead>Correo Electrónico</TableHead>
-                  <TableHead>Fecha</TableHead>
+                  <TableHead>Teléfono</TableHead>
                   <TableHead>Tipo</TableHead>
                   <TableHead>Acciones</TableHead>
                 </TableRow>
@@ -94,9 +98,9 @@ export default function AdminContactsPage() {
               <TableBody>
                 {contacts.map((contact) => (
                   <TableRow key={contact.id}>
-                    <TableCell className="font-medium">{contact.name}</TableCell>
+                    <TableCell className="font-medium">{getFullName(contact)}</TableCell>
                     <TableCell>{contact.email}</TableCell>
-                    <TableCell>{contact.date}</TableCell>
+                    <TableCell>{contact.phone || '-'}</TableCell>
                     <TableCell>
                       <div className="flex gap-1 flex-wrap">
                         {contact.types.map(type => (

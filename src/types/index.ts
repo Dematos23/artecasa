@@ -20,8 +20,12 @@ export type ContactType = (typeof contactTypes)[number];
 
 export interface Contact {
   id: string;
-  name: string;
+  firstname: string;
+  secondname?: string;
+  firstlastname: string;
+  secondlastname?: string;
   email: string;
+  phone?: string;
   notes: string;
   date: string;
   types: ContactType[];

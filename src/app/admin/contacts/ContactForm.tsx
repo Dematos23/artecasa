@@ -31,8 +31,12 @@ import React, { useEffect } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 
 const contactSchema = z.object({
-  name: z.string().min(1, { message: 'El nombre es obligatorio.' }),
+  firstname: z.string().min(1, { message: 'El primer nombre es obligatorio.' }),
+  secondname: z.string().optional(),
+  firstlastname: z.string().min(1, { message: 'El primer apellido es obligatorio.' }),
+  secondlastname: z.string().optional(),
   email: z.string().email({ message: 'Debe ser un correo electrónico válido.' }),
+  phone: z.string().optional(),
   notes: z.string().min(1, { message: 'Las notas son obligatorias.' }),
   types: z.array(z.string()).refine((value) => value.some((item) => item), {
     message: 'Debes seleccionar al menos un tipo.',
@@ -46,24 +50,25 @@ interface ContactFormProps {
   contact?: Contact;
 }
 
+const defaultValues = {
+    firstname: '',
+    secondname: '',
+    firstlastname: '',
+    secondlastname: '',
+    email: '',
+    phone: '',
+    notes: '',
+    types: [],
+};
+
 export function ContactForm({ isOpen, onClose, onSave, contact }: ContactFormProps) {
   const form = useForm<z.infer<typeof contactSchema>>({
     resolver: zodResolver(contactSchema),
-    defaultValues: contact || {
-        name: '',
-        email: '',
-        notes: '',
-        types: [],
-    },
+    defaultValues: contact || defaultValues,
   });
 
   useEffect(() => {
-    form.reset(contact || {
-        name: '',
-        email: '',
-        notes: '',
-        types: [],
-    });
+    form.reset(contact || defaultValues);
   }, [contact, form, isOpen]);
 
   const onSubmit = (values: z.infer<typeof contactSchema>) => {
@@ -80,20 +85,63 @@ export function ContactForm({ isOpen, onClose, onSave, contact }: ContactFormPro
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
-                <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Nombre</FormLabel>
-                        <FormControl>
-                            <Input placeholder="Ej. John Doe" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                />
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4 max-h-[70vh] overflow-y-auto px-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <FormField
+                        control={form.control}
+                        name="firstname"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Primer Nombre</FormLabel>
+                            <FormControl>
+                                <Input placeholder="Ej. Juan" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="secondname"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Segundo Nombre</FormLabel>
+                            <FormControl>
+                                <Input placeholder="Ej. Carlos" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
+                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <FormField
+                        control={form.control}
+                        name="firstlastname"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Primer Apellido</FormLabel>
+                            <FormControl>
+                                <Input placeholder="Ej. Pérez" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="secondlastname"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Segundo Apellido</FormLabel>
+                            <FormControl>
+                                <Input placeholder="Ej. Gonzales" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
                 <FormField
                     control={form.control}
                     name="email"
@@ -102,6 +150,19 @@ export function ContactForm({ isOpen, onClose, onSave, contact }: ContactFormPro
                         <FormLabel>Correo Electrónico</FormLabel>
                         <FormControl>
                             <Input type="email" placeholder="Ej. john@example.com" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Teléfono</FormLabel>
+                        <FormControl>
+                            <Input type="tel" placeholder="Ej. 987654321" {...field} />
                         </FormControl>
                         <FormMessage />
                         </FormItem>
