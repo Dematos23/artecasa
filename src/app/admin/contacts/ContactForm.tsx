@@ -173,7 +173,7 @@ interface MultiSelectProps {
     placeholder?: string;
 }
 
-const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>(
+export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>(
   ({ options, selected, onChange, className, placeholder="Seleccionar...", ...props }, ref) => {
     const [open, setOpen] = useState(false);
 

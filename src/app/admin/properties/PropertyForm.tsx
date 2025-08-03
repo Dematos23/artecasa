@@ -34,12 +34,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import React, { useEffect, useState, useMemo } from 'react';
 import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
-import { UploadCloud, X, User, Home } from 'lucide-react';
+import { UploadCloud, X, User } from 'lucide-react';
 import Image from 'next/image';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { cn } from '@/lib/utils';
 import { peruLocations } from '@/lib/peru-locations';
+import { MultiSelect } from '../contacts/ContactForm';
 
 
 const getFullName = (contact: Pick<Contact, 'firstname' | 'secondname' | 'firstlastname' | 'secondlastname'>) => {
@@ -502,77 +501,5 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
     </Dialog>
   );
 }
-
-// MultiSelect Component
-interface MultiSelectProps {
-    options: { label: string; value: string }[];
-    selected: string[];
-    onChange: (selected: string[]) => void;
-    className?: string;
-    placeholder?: string;
-}
-
-const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>(
-  ({ options, selected, onChange, className, placeholder = "Seleccionar...", ...props }, ref) => {
-    const [open, setOpen] = useState(false);
-
-    const handleSelect = (value: string) => {
-        const newSelected = selected.includes(value)
-            ? selected.filter((item) => item !== value)
-            : [...selected, value];
-        onChange(newSelected);
-    };
-
-    const selectedLabels = options
-        .filter(option => selected.includes(option.value))
-        .map(option => option.label);
-
-    return (
-        <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-                <Button
-                    ref={ref}
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={open}
-                    className={cn("w-full justify-between", className)}
-                    {...props}
-                >
-                    <span className="truncate">
-                        {selectedLabels.length > 0 ? selectedLabels.join(', ') : placeholder}
-                    </span>
-                    <User className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                <Command>
-                    <CommandInput placeholder="Buscar contacto..." />
-                    <CommandList>
-                        <CommandEmpty>No se encontraron contactos.</CommandEmpty>
-                        <CommandGroup>
-                            {options.map((option) => (
-                                <CommandItem
-                                    key={option.value}
-                                    onSelect={() => {
-                                        handleSelect(option.value)
-                                    }}
-                                >
-                                    <Checkbox
-                                        className="mr-2"
-                                        checked={selected.includes(option.value)}
-                                        onCheckedChange={() => handleSelect(option.value)}
-                                        id={`multi-select-${option.value}`}
-                                    />
-                                    <label htmlFor={`multi-select-${option.value}`} className='cursor-pointer w-full'>{option.label}</label>
-                                </CommandItem>
-                            ))}
-                        </CommandGroup>
-                    </CommandList>
-                </Command>
-            </PopoverContent>
-        </Popover>
-    );
-});
-MultiSelect.displayName = "MultiSelect";
 
     
