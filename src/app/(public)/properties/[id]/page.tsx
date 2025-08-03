@@ -9,11 +9,8 @@ import type { Property } from '@/types';
 import { BedDouble, Bath, Car, Maximize, MapPin, Phone, CalendarClock } from 'lucide-react';
 import Link from 'next/link';
 import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
+import { getPropertyById } from '@/services/properties';
 
-// TODO: Replace with actual data fetching logic from Firestore
-const getPropertyById = async (id: string): Promise<Property | undefined> => {
-  return undefined;
-};
 
 const containerStyle = {
   width: '100%',

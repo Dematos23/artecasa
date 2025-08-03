@@ -10,11 +10,8 @@ import { ArrowLeft, Home, DollarSign, FileText, BedDouble, Bath, Car, Maximize, 
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { getPropertyById } from '@/services/properties';
 
-// TODO: Replace with actual data fetching logic from Firestore
-const getPropertyById = async (id: string): Promise<Property | undefined> => {
-    return undefined;
-};
 
 export default function AdminPropertyDetailsPage({ params }: { params: { id: string } }) {
   const { id: propertyId } = params;

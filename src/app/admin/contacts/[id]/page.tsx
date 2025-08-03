@@ -9,17 +9,8 @@ import Link from 'next/link';
 import { ArrowLeft, Mail, Phone, Calendar, User, Tag, FileText, Home } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-
-// TODO: Replace with actual data fetching logic from Firestore
-const getContactById = async (id: string): Promise<Contact | undefined> => {
-    return undefined;
-};
-const getPropertiesByOwnerId = async (id: string): Promise<Property[]> => {
-    return [];
-}
-const getPropertiesByIds = async (ids: string[]): Promise<Property[]> => {
-    return [];
-}
+import { getContactById } from '@/services/contacts';
+import { getPropertiesByOwnerId, getPropertiesByIds } from '@/services/properties';
 
 const getFullName = (contact: Pick<Contact, 'firstname' | 'secondname' | 'firstlastname' | 'secondlastname'>) => {
     return [contact.firstname, contact.secondname, contact.firstlastname, contact.secondlastname].filter(Boolean).join(' ');
@@ -44,7 +35,7 @@ export default function ContactDetailsPage({ params }: { params: { id: string } 
           const owned = await getPropertiesByOwnerId(contactData.id);
           setOwnedProperties(owned);
         }
-        if ((contactData.types.includes('comprador') || contactData.types.includes('arrendatario')) && contactData.interestedPropertyIds) {
+        if ((contactData.types.includes('comprador') || contactData.types.includes('arrendatario')) && contactData.interestedPropertyIds && contactData.interestedPropertyIds.length > 0) {
           const interested = await getPropertiesByIds(contactData.interestedPropertyIds);
           setInterestedProperties(interested);
         }
@@ -93,7 +84,7 @@ export default function ContactDetailsPage({ params }: { params: { id: string } 
                         <CardDescription>Detalles del contacto y actividad.</CardDescription>
                     </div>
                     <div className="text-sm text-muted-foreground flex items-center gap-2 pt-1">
-                       <Calendar size={16} /><span>Contactado el: {new Date(contact.date).toLocaleDateString()}</span>
+                       <Calendar size={16} /><span>Contactado el: {contact.date ? new Date(contact.date as any).toLocaleDateString() : 'N/A'}</span>
                     </div>
                 </div>
             </CardHeader>

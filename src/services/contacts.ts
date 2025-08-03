@@ -1,6 +1,6 @@
 
 import { db } from '@/lib/firebase';
-import { collection, getDocs, addDoc, serverTimestamp, query, orderBy, doc, deleteDoc, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, serverTimestamp, query, orderBy, doc, deleteDoc, updateDoc, getDoc } from 'firebase/firestore';
 import type { Contact } from '@/types';
 
 const contactsCollection = collection(db, 'contacts');
@@ -23,6 +23,23 @@ export async function getContacts(): Promise<Contact[]> {
       date: data.date?.toDate ? data.date.toDate().toISOString() : data.date,
     } as Contact;
   });
+}
+
+// Function to get a single contact by ID
+export async function getContactById(id: string): Promise<Contact | undefined> {
+    const contactDoc = doc(db, 'contacts', id);
+    const docSnap = await getDoc(contactDoc);
+
+    if (docSnap.exists()) {
+        const data = docSnap.data();
+        return {
+            id: docSnap.id,
+            ...data,
+            date: data.date?.toDate ? data.date.toDate().toISOString() : data.date,
+        } as Contact;
+    } else {
+        return undefined;
+    }
 }
 
 
