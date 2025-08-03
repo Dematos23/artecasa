@@ -4,7 +4,7 @@
 import { useForm, useWatch, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import type { Property } from '@/types';
+import type { Property, Contact } from '@/types';
 import {
   Dialog,
   DialogContent,
@@ -34,8 +34,16 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import React, { useEffect, useState, useMemo } from 'react';
 import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
-import { UploadCloud, X } from 'lucide-react';
+import { UploadCloud, X, User, Home } from 'lucide-react';
 import Image from 'next/image';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { cn } from '@/lib/utils';
+
+
+const getFullName = (contact: Pick<Contact, 'firstname' | 'secondname' | 'firstlastname' | 'secondlastname'>) => {
+    return [contact.firstname, contact.secondname, contact.firstlastname, contact.secondlastname].filter(Boolean).join(' ');
+}
 
 const propertySchema = z.object({
   title: z.string().min(1, { message: 'El título es obligatorio.' }),
@@ -52,7 +60,8 @@ const propertySchema = z.object({
   antiquity: z.string().optional(),
   imageUrls: z.array(z.string()).optional().default([]),
   featured: z.boolean().default(false),
-  // Campo temporal para manejar los archivos subidos
+  ownerId: z.string().optional(),
+  interestedContactIds: z.array(z.string()).optional().default([]),
   newImages: z.any().optional(),
 });
 
@@ -63,6 +72,7 @@ interface PropertyFormProps {
   onSave: (property: Omit<Property, 'id'>, newImages: File[]) => void;
   property?: Property;
   googleMapsApiKey: string | undefined;
+  contacts: Contact[];
 }
 
 const containerStyle = {
@@ -104,26 +114,9 @@ function MapView({ address }: { address: string }) {
     );
 }
 
-export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiKey }: PropertyFormProps) {
+export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiKey, contacts }: PropertyFormProps) {
   const form = useForm<z.infer<typeof propertySchema>>({
     resolver: zodResolver(propertySchema),
-    defaultValues: property ? {
-        ...property,
-        price: Number(property.price.replace(/,/g, '')),
-    } : {
-        title: '',
-        price: 0,
-        modality: 'venta',
-        address: '',
-        description: '',
-        bedrooms: 0,
-        bathrooms: 0,
-        garage: 0,
-        area_m2: 0,
-        antiquity: '',
-        imageUrls: [],
-        featured: false,
-    },
   });
   
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
@@ -136,10 +129,21 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
     preventGoogleFontsLoading: true,
   });
 
+  const ownerContacts = useMemo(() => 
+    contacts.filter(c => c.types.includes('vendedor') || c.types.includes('arrendador')),
+    [contacts]
+  );
+  
+  const interestedContacts = useMemo(() => 
+    contacts.filter(c => c.types.includes('comprador') || c.types.includes('arrendatario')),
+    [contacts]
+  );
+
   useEffect(() => {
     const defaultVals = property ? {
         ...property,
         price: Number(property.price.replace(/,/g, '')),
+        interestedContactIds: property.interestedContactIds || [],
     } : {
         title: '',
         price: 0,
@@ -153,6 +157,8 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
         antiquity: '',
         imageUrls: [],
         featured: false,
+        ownerId: undefined,
+        interestedContactIds: [],
         newImages: [],
     };
     form.reset(defaultVals);
@@ -172,11 +178,7 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
   };
 
   const removeImage = (index: number, isNew: boolean) => {
-    // This is a simplified removal logic. A more robust implementation would
-    // track new and existing images separately with unique IDs.
     const currentPreviews = [...imagePreviews];
-    
-    // Revoke object URL for new images to prevent memory leaks
     if (isNew) {
         const newImageIndex = index - (property?.imageUrls?.length ?? 0);
         const newImages = [...(form.getValues('newImages') || [])];
@@ -282,71 +284,11 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
                     )}
                 />
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                    <FormField
-                        control={form.control}
-                        name="bedrooms"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Dormitorios</FormLabel>
-                            <FormControl>
-                                <Input type="number" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                     <FormField
-                        control={form.control}
-                        name="bathrooms"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Baños</FormLabel>
-                            <FormControl>
-                                <Input type="number" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                     <FormField
-                        control={form.control}
-                        name="garage"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Cochera (autos)</FormLabel>
-                            <FormControl>
-                                <Input type="number" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                     <FormField
-                        control={form.control}
-                        name="area_m2"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Área (m²)</FormLabel>
-                            <FormControl>
-                                <Input type="number" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="antiquity"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Antigüedad (años)</FormLabel>
-                            <FormControl>
-                                <Input placeholder="Ej: 5, o 'A estrenar'" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+                    <FormField control={form.control} name="bedrooms" render={({ field }) => ( <FormItem><FormLabel>Dormitorios</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                    <FormField control={form.control} name="bathrooms" render={({ field }) => ( <FormItem><FormLabel>Baños</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                    <FormField control={form.control} name="garage" render={({ field }) => ( <FormItem><FormLabel>Cochera (autos)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                    <FormField control={form.control} name="area_m2" render={({ field }) => ( <FormItem><FormLabel>Área (m²)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                    <FormField control={form.control} name="antiquity" render={({ field }) => ( <FormItem><FormLabel>Antigüedad (años)</FormLabel><FormControl><Input placeholder="Ej: 5, o 'A estrenar'" {...field} /></FormControl><FormMessage /></FormItem> )} />
                 </div>
                  
                 <div>
@@ -356,10 +298,7 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
                         <div className="text-center">
                             <UploadCloud className="mx-auto h-12 w-12 text-gray-300" />
                             <div className="mt-4 flex text-sm leading-6 text-gray-600">
-                                <label
-                                    htmlFor="file-upload"
-                                    className="relative cursor-pointer rounded-md bg-white font-semibold text-primary focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2 hover:text-accent-foreground"
-                                >
+                                <label htmlFor="file-upload" className="relative cursor-pointer rounded-md bg-white font-semibold text-primary focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2 hover:text-accent-foreground" >
                                     <span>Sube tus archivos</span>
                                     <input id="file-upload" name="newImages" type="file" className="sr-only" multiple onChange={handleImageChange} accept="image/*" />
                                 </label>
@@ -373,18 +312,8 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
                      <div className="mt-4 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
                         {imagePreviews.map((previewUrl, index) => (
                            <div key={index} className="relative group">
-                             <Image
-                                src={previewUrl}
-                                alt={`Vista previa de imagen ${index + 1}`}
-                                width={150}
-                                height={150}
-                                className="h-24 w-24 object-cover rounded-md"
-                              />
-                              <button
-                                type="button"
-                                onClick={() => removeImage(index, index >= existingImageCount)}
-                                className="absolute top-0 right-0 -mt-2 -mr-2 h-6 w-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                               >
+                             <Image src={previewUrl} alt={`Vista previa de imagen ${index + 1}`} width={150} height={150} className="h-24 w-24 object-cover rounded-md" />
+                              <button type="button" onClick={() => removeImage(index, index >= existingImageCount)} className="absolute top-0 right-0 -mt-2 -mr-2 h-6 w-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" >
                                 <X className="h-4 w-4" />
                                </button>
                            </div>
@@ -414,6 +343,55 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
                     </div>
                   ) : <div>Cargando mapa...</div>
                 ) : <div className="text-sm text-muted-foreground">Para mostrar el mapa, por favor, añade tu clave de API de Google Maps (NEXT_PUBLIC_GOOGLE_MAPS_API_KEY) a tus variables de entorno.</div>}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <FormField
+                        control={form.control}
+                        name="ownerId"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Propietario</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Seleccionar propietario..." />
+                                    </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                    {ownerContacts.map(contact => (
+                                        <SelectItem key={contact.id} value={contact.id}>{getFullName(contact)}</SelectItem>
+                                    ))}
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="interestedContactIds"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Contactos Interesados</FormLabel>
+                                <Controller
+                                    control={form.control}
+                                    name="interestedContactIds"
+                                    render={({ field: { onChange, value } }) => (
+                                        <MultiSelect
+                                            options={interestedContacts.map(c => ({ value: c.id, label: getFullName(c) }))}
+                                            selected={value || []}
+                                            onChange={onChange}
+                                            className="w-full"
+                                            placeholder="Seleccionar interesados..."
+                                        />
+                                    )}
+                                />
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
+
 
                  <FormField
                     control={form.control}
@@ -448,4 +426,70 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
   );
 }
 
-    
+// MultiSelect Component
+interface MultiSelectProps {
+    options: { label: string; value: string }[];
+    selected: string[];
+    onChange: (selected: string[]) => void;
+    className?: string;
+    placeholder?: string;
+}
+
+function MultiSelect({ options, selected, onChange, className, placeholder="Seleccionar..." }: MultiSelectProps) {
+    const [open, setOpen] = useState(false);
+
+    const handleSelect = (value: string) => {
+        const newSelected = selected.includes(value)
+            ? selected.filter((item) => item !== value)
+            : [...selected, value];
+        onChange(newSelected);
+    };
+
+    const selectedLabels = options
+        .filter(option => selected.includes(option.value))
+        .map(option => option.label);
+
+    return (
+        <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+                <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={open}
+                    className={cn("w-full justify-between", className)}
+                >
+                    <span className="truncate">
+                        {selectedLabels.length > 0 ? selectedLabels.join(', ') : placeholder}
+                    </span>
+                    <User className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                <Command>
+                    <CommandInput placeholder="Buscar contacto..." />
+                    <CommandList>
+                        <CommandEmpty>No se encontraron contactos.</CommandEmpty>
+                        <CommandGroup>
+                            {options.map((option) => (
+                                <CommandItem
+                                    key={option.value}
+                                    onSelect={() => {
+                                        handleSelect(option.value)
+                                    }}
+                                >
+                                    <Checkbox
+                                        className="mr-2"
+                                        checked={selected.includes(option.value)}
+                                        onCheckedChange={() => handleSelect(option.value)}
+                                        id={`multi-select-${option.value}`}
+                                    />
+                                    <label htmlFor={`multi-select-${option.value}`} className='cursor-pointer w-full'>{option.label}</label>
+                                </CommandItem>
+                            ))}
+                        </CommandGroup>
+                    </CommandList>
+                </Command>
+            </PopoverContent>
+        </Popover>
+    );
+}

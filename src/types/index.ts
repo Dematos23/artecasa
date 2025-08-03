@@ -13,6 +13,8 @@ export interface Property {
   description?: string;
   featured?: boolean;
   antiquity?: string;
+  ownerId?: string;
+  interestedContactIds?: string[];
 }
 
 export const contactTypes = ['comprador', 'arrendatario', 'arrendador', 'vendedor'] as const;
@@ -29,4 +31,5 @@ export interface Contact {
   notes: string;
   date: string;
   types: ContactType[];
+  interestedPropertyIds?: string[];
 }

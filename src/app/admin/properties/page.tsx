@@ -12,13 +12,13 @@ import {
 } from '@/components/ui/table';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { PlusCircle, MoreHorizontal } from 'lucide-react';
-import type { Property } from '@/types';
+import type { Property, Contact } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import React, { useState } from 'react';
 import { PropertyForm } from './PropertyForm';
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { app } from '@/lib/firebase'; // Assuming you have firebase initialized here
+import { app } from '@/lib/firebase';
 import Link from 'next/link';
 
 
@@ -26,13 +26,21 @@ const storage = getStorage(app);
 
 
 const dummyProperties: Property[] = [
-  { id: '1', title: 'Villa Moderna en Condominio Privado', price: '2,500,000', modality: 'venta', address: '123 Luxury Lane, Beverly Hills, CA', bedrooms: 5, bathrooms: 6, garage: 3, area_m2: 5800, imageUrls: [], featured: true },
-  { id: '2', title: 'Penthouse en el Centro con Vistas a la Ciudad', price: '3,200,000', modality: 'venta', address: '456 High Rise, New York, NY', bedrooms: 3, bathrooms: 4, garage: 2, area_m2: 3500, imageUrls: [], featured: true },
-  { id: '3', title: 'Acogedora Casa de Playa', price: '1,800,000', modality: 'alquiler', address: '789 Ocean Drive, Malibu, CA', bedrooms: 4, bathrooms: 3, garage: 1, area_m2: 2200, imageUrls: [], featured: false },
+  { id: '1', title: 'Villa Moderna en Condominio Privado', price: '2,500,000', modality: 'venta', address: '123 Luxury Lane, Beverly Hills, CA', bedrooms: 5, bathrooms: 6, garage: 3, area_m2: 5800, imageUrls: [], featured: true, ownerId: '3' },
+  { id: '2', title: 'Penthouse en el Centro con Vistas a la Ciudad', price: '3,200,000', modality: 'venta', address: '456 High Rise, New York, NY', bedrooms: 3, bathrooms: 4, garage: 2, area_m2: 3500, imageUrls: [], featured: true, ownerId: '3' },
+  { id: '3', title: 'Acogedora Casa de Playa', price: '1,800,000', modality: 'alquiler', address: '789 Ocean Drive, Malibu, CA', bedrooms: 4, bathrooms: 3, garage: 1, area_m2: 2200, imageUrls: [], featured: false, ownerId: '3' },
 ];
+
+const dummyContacts: Contact[] = [
+  { id: '1', firstname: 'John', firstlastname: 'Doe', email: 'john.doe@example.com', notes: 'I am interested in the Modern Villa. Can I get more details?', date: '2024-05-20', types: ['comprador'], phone: '987654321' },
+  { id: '2', firstname: 'Jane', firstlastname: 'Smith', email: 'jane.smith@example.com', notes: 'Please schedule a viewing for the Downtown Penthouse.', date: '2024-05-19', types: ['arrendatario'], phone: '987654322' },
+  { id: '3', firstname: 'Sam', firstlastname: 'Wilson', email: 'sam.wilson@example.com', notes: 'What are the financing options available?', date: '2024-05-18', types: ['vendedor', 'arrendador'], phone: '987654323' },
+];
+
 
 export default function AdminPropertiesPage() {
   const [properties, setProperties] = useState<Property[]>(dummyProperties);
+  const [contacts, setContacts] = useState<Contact[]>(dummyContacts);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<Property | undefined>(undefined);
   const [isSaving, setIsSaving] = useState(false);
@@ -100,6 +108,7 @@ export default function AdminPropertiesPage() {
         onSave={handleSave}
         property={selectedProperty}
         googleMapsApiKey={googleMapsApiKey}
+        contacts={contacts}
       />
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
