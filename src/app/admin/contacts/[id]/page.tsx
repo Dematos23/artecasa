@@ -27,7 +27,7 @@ const getFullName = (contact: Pick<Contact, 'firstname' | 'secondname' | 'firstl
 
 
 export default function ContactDetailsPage({ params }: { params: { id: string } }) {
-  const contactId = params.id;
+  const { id: contactId } = params;
   const [contact, setContact] = useState<Contact | null>(null);
   const [ownedProperties, setOwnedProperties] = useState<Property[]>([]);
   const [interestedProperties, setInterestedProperties] = useState<Property[]>([]);

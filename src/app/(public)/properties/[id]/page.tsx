@@ -15,7 +15,7 @@ const getPropertyById = async (id: string): Promise<Property | undefined> => {
 };
 
 export default function PropertyDetailsPage({ params }: { params: { id: string } }) {
-  const propertyId = params.id;
+  const { id: propertyId } = params;
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
   

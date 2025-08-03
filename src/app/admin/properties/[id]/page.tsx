@@ -30,7 +30,7 @@ const getFullName = (contact: Pick<Contact, 'firstname' | 'secondname' | 'firstl
 
 
 export default function AdminPropertyDetailsPage({ params }: { params: { id: string } }) {
-  const propertyId = params.id;
+  const { id: propertyId } = params;
   const router = useRouter();
 
   const [property, setProperty] = useState<Property | null>(null);
