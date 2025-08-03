@@ -15,10 +15,12 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import type { Contact, Property } from '@/types';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ContactForm } from './ContactForm';
 import Link from 'next/link';
-
+import { getContacts, addContact } from '@/services/contacts';
+import { getProperties } from '@/services/properties';
+import { useToast } from '@/hooks/use-toast';
 
 const getFullName = (contact: Pick<Contact, 'firstname' | 'secondname' | 'firstlastname' | 'secondlastname'>) => {
     return [contact.firstname, contact.secondname, contact.firstlastname, contact.secondlastname].filter(Boolean).join(' ');
@@ -29,24 +31,58 @@ export default function AdminContactsPage() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedContact, setSelectedContact] = useState<Contact | undefined>(undefined);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  const fetchContactsAndProperties = useCallback(async () => {
+    try {
+      setLoading(true);
+      const [contactsData, propertiesData] = await Promise.all([
+        getContacts(),
+        getProperties(),
+      ]);
+      setContacts(contactsData);
+      setProperties(propertiesData);
+    } catch (error) {
+      console.error(error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "No se pudieron cargar los datos.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [toast]);
 
   useEffect(() => {
-    // TODO: Fetch contacts and properties from Firestore
-  }, []);
+    fetchContactsAndProperties();
+  }, [fetchContactsAndProperties]);
 
-  const handleSave = (contactData: Omit<Contact, 'id' | 'date'>) => {
-    // TODO: Implement Firestore save logic
-    if (selectedContact) {
-      // Edit
-      const updatedContact = { ...selectedContact, ...contactData };
-      setContacts(contacts.map(c => c.id === selectedContact.id ? updatedContact : c));
-    } else {
-      // Create
-      const newContact = { ...contactData, id: Date.now().toString(), date: new Date().toISOString().split('T')[0] };
-      setContacts([...contacts, newContact]);
+  const handleSave = async (contactData: Omit<Contact, 'id' | 'date'>) => {
+    try {
+      if (selectedContact) {
+        // TODO: Implement edit logic
+        // const updatedContact = { ...selectedContact, ...contactData };
+        // setContacts(contacts.map(c => c.id === selectedContact.id ? updatedContact : c));
+      } else {
+        await addContact(contactData);
+        toast({
+            title: "Éxito",
+            description: "El contacto se ha creado correctamente.",
+        });
+      }
+      await fetchContactsAndProperties(); // Refetch data
+      setIsFormOpen(false);
+      setSelectedContact(undefined);
+    } catch (error) {
+       console.error("Error guardando contacto: ", error);
+       toast({
+        variant: "destructive",
+        title: "Error",
+        description: "No se pudo guardar el contacto.",
+      });
     }
-    setIsFormOpen(false);
-    setSelectedContact(undefined);
   };
 
   const openFormForEdit = (contact: Contact) => {
@@ -84,71 +120,28 @@ export default function AdminContactsPage() {
         </Button>
       </div>
 
-      {/* Mobile View - Cards */}
-      <div className="md:hidden space-y-4">
-          {contacts.map((contact) => (
-          <Card key={contact.id}>
-            <CardHeader>
-              <CardTitle className="text-base truncate">
-                <Link href={`/admin/contacts/${contact.id}`} className="font-bold">
-                    {getFullName(contact)}
-                </Link>
-              </CardTitle>
-              <CardDescription>{contact.email}</CardDescription>
-            </CardHeader>
-            <CardContent className="flex justify-between items-center">
-                <div className="flex gap-1 flex-wrap">
-                  {contact.types.map(type => (
-                      <Badge key={type} variant="secondary" className="capitalize">{type}</Badge>
-                  ))}
-                </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="h-8 w-8 p-0">
-                    <span className="sr-only">Abrir menú</span>
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => openFormForEdit(contact)}>Editar</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleDelete(contact.id)} className="text-destructive">Eliminar</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </CardContent>
-          </Card>
-          ))}
-      </div>
-
-      {/* Desktop View - Table */}
-      <div className="hidden md:block overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nombre</TableHead>
-              <TableHead>Correo Electrónico</TableHead>
-              <TableHead>Teléfono</TableHead>
-              <TableHead>Tipo</TableHead>
-              <TableHead>Acciones</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {contacts.map((contact) => (
-              <TableRow key={contact.id}>
-                <TableCell className="font-medium">
-                  <Link href={`/admin/contacts/${contact.id}`} className="font-bold">
-                    {getFullName(contact)}
-                  </Link>
-                </TableCell>
-                <TableCell>{contact.email}</TableCell>
-                <TableCell>{contact.phone || '-'}</TableCell>
-                <TableCell>
-                  <div className="flex gap-1 flex-wrap">
-                    {contact.types.map(type => (
-                        <Badge key={type} variant="secondary" className="capitalize">{type}</Badge>
-                    ))}
-                  </div>
-                </TableCell>
-                <TableCell>
+       {loading ? (
+        <p>Cargando contactos...</p>
+      ) : (
+        <>
+          {/* Mobile View - Cards */}
+          <div className="md:hidden space-y-4">
+              {contacts.map((contact) => (
+              <Card key={contact.id}>
+                <CardHeader>
+                  <CardTitle className="text-base truncate">
+                    <Link href={`/admin/contacts/${contact.id}`} className="font-bold">
+                        {getFullName(contact)}
+                    </Link>
+                  </CardTitle>
+                  <CardDescription>{contact.email}</CardDescription>
+                </CardHeader>
+                <CardContent className="flex justify-between items-center">
+                    <div className="flex gap-1 flex-wrap">
+                      {contact.types.map(type => (
+                          <Badge key={type} variant="secondary" className="capitalize">{type}</Badge>
+                      ))}
+                    </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" className="h-8 w-8 p-0">
@@ -161,12 +154,61 @@ export default function AdminContactsPage() {
                       <DropdownMenuItem onClick={() => handleDelete(contact.id)} className="text-destructive">Eliminar</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+                </CardContent>
+              </Card>
+              ))}
+          </div>
+
+          {/* Desktop View - Table */}
+          <div className="hidden md:block overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nombre</TableHead>
+                  <TableHead>Correo Electrónico</TableHead>
+                  <TableHead>Teléfono</TableHead>
+                  <TableHead>Tipo</TableHead>
+                  <TableHead>Acciones</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {contacts.map((contact) => (
+                  <TableRow key={contact.id}>
+                    <TableCell className="font-medium">
+                      <Link href={`/admin/contacts/${contact.id}`} className="font-bold">
+                        {getFullName(contact)}
+                      </Link>
+                    </TableCell>
+                    <TableCell>{contact.email}</TableCell>
+                    <TableCell>{contact.phone || '-'}</TableCell>
+                    <TableCell>
+                      <div className="flex gap-1 flex-wrap">
+                        {contact.types.map(type => (
+                            <Badge key={type} variant="secondary" className="capitalize">{type}</Badge>
+                        ))}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <span className="sr-only">Abrir menú</span>
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => openFormForEdit(contact)}>Editar</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleDelete(contact.id)} className="text-destructive">Eliminar</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </>
+      )}
     </>
   );
 }
