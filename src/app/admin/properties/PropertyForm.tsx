@@ -32,7 +32,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
 import { UploadCloud, X } from 'lucide-react';
 import Image from 'next/image';
@@ -62,6 +62,7 @@ interface PropertyFormProps {
   onClose: () => void;
   onSave: (property: Omit<Property, 'id'>, newImages: File[]) => void;
   property?: Property;
+  googleMapsApiKey: string | undefined;
 }
 
 const containerStyle = {
@@ -103,7 +104,7 @@ function MapView({ address }: { address: string }) {
     );
 }
 
-export function PropertyForm({ isOpen, onClose, onSave, property }: PropertyFormProps) {
+export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiKey }: PropertyFormProps) {
   const form = useForm<z.infer<typeof propertySchema>>({
     resolver: zodResolver(propertySchema),
     defaultValues: property ? {
@@ -128,7 +129,6 @@ export function PropertyForm({ isOpen, onClose, onSave, property }: PropertyForm
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   
   const watchedAddress = useWatch({ control: form.control, name: 'address' });
-  const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
@@ -447,3 +447,5 @@ export function PropertyForm({ isOpen, onClose, onSave, property }: PropertyForm
     </Dialog>
   );
 }
+
+    

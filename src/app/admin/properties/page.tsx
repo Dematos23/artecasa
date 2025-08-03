@@ -34,6 +34,7 @@ export default function AdminPropertiesPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<Property | undefined>(undefined);
   const [isSaving, setIsSaving] = useState(false);
+  const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
   const handleSave = async (propertyData: Omit<Property, 'id'>, newImages: File[]) => {
     setIsSaving(true);
@@ -96,6 +97,7 @@ export default function AdminPropertiesPage() {
         onClose={() => setIsFormOpen(false)}
         onSave={handleSave}
         property={selectedProperty}
+        googleMapsApiKey={googleMapsApiKey}
       />
       <Card>
         <CardHeader>
@@ -154,3 +156,5 @@ export default function AdminPropertiesPage() {
     </>
   );
 }
+
+    
