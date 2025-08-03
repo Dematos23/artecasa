@@ -450,27 +450,23 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
                         )}
                     />
                     <FormField
-                        control={form.control}
-                        name="interestedContactIds"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Contactos Interesados</FormLabel>
-                                <Controller
-                                    control={form.control}
-                                    name="interestedContactIds"
-                                    render={({ field: { onChange, value } }) => (
-                                        <MultiSelect
-                                            options={interestedContacts.map(c => ({ value: c.id, label: getFullName(c) }))}
-                                            selected={value || []}
-                                            onChange={onChange}
-                                            className="w-full"
-                                            placeholder="Seleccionar interesados..."
-                                        />
-                                    )}
-                                />
-                                <FormMessage />
-                            </FormItem>
-                        )}
+                      control={form.control}
+                      name="interestedContactIds"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Contactos Interesados</FormLabel>
+                          <FormControl>
+                            <MultiSelect
+                              options={interestedContacts.map(c => ({ value: c.id, label: getFullName(c) }))}
+                              selected={field.value || []}
+                              onChange={field.onChange}
+                              className="w-full"
+                              placeholder="Seleccionar interesados..."
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
                 </div>
 
@@ -575,3 +571,5 @@ function MultiSelect({ options, selected, onChange, className, placeholder="Sele
         </Popover>
     );
 }
+
+    
