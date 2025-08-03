@@ -21,6 +21,11 @@ export interface Property {
   antiquity?: number;
 }
 
+// Type for new property data, omitting id which will be generated
+export type NewPropertyData = Omit<Property, 'id'>;
+export type UpdatePropertyData = Partial<NewPropertyData>;
+
+
 export const contactTypes = ['comprador', 'arrendatario', 'arrendador', 'vendedor'] as const;
 export type ContactType = (typeof contactTypes)[number];
 

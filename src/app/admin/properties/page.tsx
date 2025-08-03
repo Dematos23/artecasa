@@ -12,16 +12,27 @@ import {
 } from '@/components/ui/table';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { PlusCircle, MoreHorizontal } from 'lucide-react';
-import type { Property } from '@/types';
+import type { Property, NewPropertyData, UpdatePropertyData } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { PropertyForm } from './PropertyForm';
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { app } from '@/lib/firebase';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
-
+import { getProperties, addProperty, updateProperty, deleteProperty } from '@/services/properties';
+import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 const storage = getStorage(app);
 
@@ -31,15 +42,37 @@ export default function AdminPropertiesPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<Property | undefined>(undefined);
   const [isSaving, setIsSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [propertyToDelete, setPropertyToDelete] = useState<Property | null>(null);
+
+  const { toast } = useToast();
   const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
   const searchParams = useSearchParams();
   const router = useRouter();
   const editPropertyId = searchParams.get('edit');
 
+  const fetchProperties = useCallback(async () => {
+    try {
+      setLoading(true);
+      const propertiesData = await getProperties();
+      setProperties(propertiesData);
+    } catch (error) {
+      console.error(error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "No se pudieron cargar las propiedades.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [toast]);
+
   useEffect(() => {
-    // TODO: Fetch properties from Firestore
-  }, []);
+    fetchProperties();
+  }, [fetchProperties]);
 
   useEffect(() => {
     if (editPropertyId) {
@@ -56,9 +89,7 @@ export default function AdminPropertiesPage() {
 
   const handleSave = async (propertyData: Omit<Property, 'id'>, newImages: File[]) => {
     setIsSaving(true);
-
     try {
-        // TODO: Replace with actual Firestore save logic
         const uploadedImageUrls = await Promise.all(
             newImages.map(async (file) => {
                 const storageRef = ref(storage, `properties/${Date.now()}_${file.name}`);
@@ -66,29 +97,67 @@ export default function AdminPropertiesPage() {
                 return getDownloadURL(storageRef);
             })
         );
-
-        const finalPropertyData: Omit<Property, 'id'> = {
+        
+        const finalPropertyData = {
             ...propertyData,
             imageUrls: [...(propertyData.imageUrls || []), ...uploadedImageUrls],
         };
 
         if (selectedProperty) {
-            // Edit
-            const updatedProperty = { ...finalPropertyData, id: selectedProperty.id };
-            setProperties(properties.map(p => p.id === selectedProperty.id ? updatedProperty : p));
+            await updateProperty(selectedProperty.id, finalPropertyData as UpdatePropertyData);
+            toast({
+                title: "Éxito",
+                description: "La propiedad se ha actualizado correctamente.",
+            });
         } else {
-            // Create
-            const newProperty = { ...finalPropertyData, id: Date.now().toString() };
-            setProperties([...properties, newProperty]);
+            await addProperty(finalPropertyData as NewPropertyData);
+             toast({
+                title: "Éxito",
+                description: "La propiedad se ha creado correctamente.",
+            });
         }
 
+        await fetchProperties();
         setIsFormOpen(false);
         setSelectedProperty(undefined);
     } catch (error) {
-        console.error("Error saving property or uploading images: ", error);
-        // You would typically show a toast notification here
+        console.error("Error guardando propiedad: ", error);
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "No se pudo guardar la propiedad.",
+        });
     } finally {
         setIsSaving(false);
+    }
+  };
+
+
+  const handleDeleteClick = (property: Property) => {
+    setPropertyToDelete(property);
+    setIsAlertOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (propertyToDelete) {
+        try {
+            await deleteProperty(propertyToDelete.id, propertyToDelete.imageUrls);
+            toast({
+                title: "Éxito",
+                description: "La propiedad se ha eliminado correctamente.",
+            });
+            await fetchProperties();
+        } catch (error) {
+            console.error("Error eliminando propiedad: ", error);
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "No se pudo eliminar la propiedad.",
+            });
+        } finally {
+            setIsAlertOpen(false);
+            setPropertyToDelete(null);
+        }
     }
   };
 
@@ -103,14 +172,24 @@ export default function AdminPropertiesPage() {
     setIsFormOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    // Here you would also delete images from Firebase Storage and the document from Firestore
-    setProperties(properties.filter(p => p.id !== id));
-  };
-
 
   return (
     <>
+      <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Estás absolutamente seguro?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. Esto eliminará permanentemente
+              la propiedad y todas sus imágenes de la base de datos.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setPropertyToDelete(null)}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>Continuar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <PropertyForm 
         isOpen={isFormOpen}
         onClose={() => setIsFormOpen(false)}
@@ -128,85 +207,91 @@ export default function AdminPropertiesPage() {
         </Button>
       </div>
       
-      {/* Mobile View - Cards */}
-      <div className="md:hidden space-y-4">
-        {properties.map((property) => (
-          <Card key={property.id}>
-            <CardHeader>
-              <CardTitle className="text-base truncate">
-                <Link href={`/admin/properties/${property.id}`} className="font-bold">
-                  {property.title}
-                </Link>
-              </CardTitle>
-              <CardDescription className="capitalize">{property.modality} - {property.currency === 'USD' ? '$' : 'S/'}{Number(property.price).toLocaleString()}</CardDescription>
-            </CardHeader>
-            <CardContent className="flex justify-between items-center">
-                <Badge variant={property.featured ? 'default' : 'secondary'}>
-                  {property.featured ? 'Destacada' : 'Estándar'}
-                </Badge>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-8 w-8 p-0">
-                      <span className="sr-only">Abrir menú</span>
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => openFormForEdit(property)}>Editar</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleDelete(property.id)} className="text-destructive">Eliminar</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-        
-      {/* Desktop View - Table */}
-      <div className="hidden md:block overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Título</TableHead>
-              <TableHead>Precio</TableHead>
-              <TableHead>Modalidad</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead>Acciones</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
+      {loading ? (
+        <p>Cargando propiedades...</p>
+      ) : (
+        <>
+          {/* Mobile View - Cards */}
+          <div className="md:hidden space-y-4">
             {properties.map((property) => (
-              <TableRow key={property.id}>
-                <TableCell>
-                  <Link href={`/admin/properties/${property.id}`} className="font-bold">
-                    {property.title}
-                  </Link>
-                </TableCell>
-                <TableCell>{property.currency === 'USD' ? '$' : 'S/'}{Number(property.price).toLocaleString()}</TableCell>
-                <TableCell className="capitalize">{property.modality}</TableCell>
-                <TableCell>
-                  <Badge variant={property.featured ? 'default' : 'secondary'}>
-                    {property.featured ? 'Destacada' : 'Estándar'}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0">
-                        <span className="sr-only">Abrir menú</span>
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => openFormForEdit(property)}>Editar</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleDelete(property.id)} className="text-destructive">Eliminar</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
+              <Card key={property.id}>
+                <CardHeader>
+                  <CardTitle className="text-base truncate">
+                    <Link href={`/admin/properties/${property.id}`} className="font-bold">
+                      {property.title}
+                    </Link>
+                  </CardTitle>
+                  <CardDescription className="capitalize">{property.modality} - {property.currency === 'USD' ? '$' : 'S/'}{Number(property.price).toLocaleString()}</CardDescription>
+                </CardHeader>
+                <CardContent className="flex justify-between items-center">
+                    <Badge variant={property.featured ? 'default' : 'secondary'}>
+                      {property.featured ? 'Destacada' : 'Estándar'}
+                    </Badge>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <span className="sr-only">Abrir menú</span>
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => openFormForEdit(property)}>Editar</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDeleteClick(property)} className="text-destructive">Eliminar</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                </CardContent>
+              </Card>
             ))}
-          </TableBody>
-        </Table>
-      </div>
+          </div>
+            
+          {/* Desktop View - Table */}
+          <div className="hidden md:block overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Título</TableHead>
+                  <TableHead>Precio</TableHead>
+                  <TableHead>Modalidad</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead>Acciones</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {properties.map((property) => (
+                  <TableRow key={property.id}>
+                    <TableCell>
+                      <Link href={`/admin/properties/${property.id}`} className="font-bold">
+                        {property.title}
+                      </Link>
+                    </TableCell>
+                    <TableCell>{property.currency === 'USD' ? '$' : 'S/'}{Number(property.price).toLocaleString()}</TableCell>
+                    <TableCell className="capitalize">{property.modality}</TableCell>
+                    <TableCell>
+                      <Badge variant={property.featured ? 'default' : 'secondary'}>
+                        {property.featured ? 'Destacada' : 'Estándar'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <span className="sr-only">Abrir menú</span>
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => openFormForEdit(property)}>Editar</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleDeleteClick(property)} className="text-destructive">Eliminar</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </>
+      )}
     </>
   );
 }
