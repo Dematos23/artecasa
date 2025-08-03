@@ -6,13 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import type { Contact, Property } from '@/types';
 import Link from 'next/link';
-import { ArrowLeft, User, Users, Home, Building2, DollarSign, Tag, FileText, BedDouble, Bath, Car, Maximize, CalendarClock } from 'lucide-react';
+import { ArrowLeft, User, Users, Home, Building2, DollarSign, Tag, FileText, BedDouble, Bath, Car, Maximize, CalendarClock, MapPin } from 'lucide-react';
 import Image from 'next/image';
 
 const dummyProperties: Property[] = [
-    { id: '1', title: 'Villa Moderna en Condominio Privado', price: '2,500,000', modality: 'venta', address: '123 Luxury Lane, Beverly Hills, CA', bedrooms: 5, bathrooms: 6, garage: 3, area_m2: 5800, imageUrls: ['https://placehold.co/1200x800.png'], featured: true, ownerId: '3', interestedContactIds: ['1'], description: 'Experimenta un lujo sin igual en esta impresionante villa moderna. Con un espacio de vida de concepto abierto, cocina de última generación y una impresionante piscina infinita. Ubicada en un exclusivo condominio privado, esta casa ofrece privacidad y prestigio.', antiquity: "5" },
-    { id: '2', title: 'Penthouse en el Centro con Vistas a la Ciudad', price: '3,200,000', modality: 'venta', address: '456 High Rise, New York, NY', bedrooms: 3, bathrooms: 4, garage: 2, area_m2: 3500, imageUrls: ['https://placehold.co/1200x800.png'], featured: true, ownerId: '3', description: 'Un magnífico penthouse que ofrece vistas panorámicas del horizonte de la ciudad. Con ventanas de piso a techo, una terraza privada y acabados a medida, esta residencia es el epítome de la sofisticación urbana.', antiquity: "A estrenar" },
-    { id: '3', title: 'Acogedora Casa de Playa', price: '1,800,000', modality: 'alquiler', address: '789 Ocean Drive, Malibu, CA', bedrooms: 4, bathrooms: 3, garage: 1, area_m2: 2200, imageUrls: ['https://placehold.co/1200x800.png'], featured: false, ownerId: '3', interestedContactIds: ['2'], description: 'Encantadora y elegante casa de playa con acceso directo a la arena. Disfruta de espectaculares vistas al mar desde todas las habitaciones, una espaciosa terraza para el entretenimiento y los tranquilos sonidos de las olas.', antiquity: "10" },
+    { id: '1', title: 'Villa Moderna en Condominio Privado', price: '2,500,000', modality: 'venta', region: 'Lima', province: 'Lima', district: 'Miraflores', address: '123 Luxury Lane, Beverly Hills, CA', bedrooms: 5, bathrooms: 6, garage: 3, area_m2: 5800, imageUrls: ['https://placehold.co/1200x800.png'], featured: true, ownerId: '3', interestedContactIds: ['1'], description: 'Experimenta un lujo sin igual en esta impresionante villa moderna. Con un espacio de vida de concepto abierto, cocina de última generación y una impresionante piscina infinita. Ubicada en un exclusivo condominio privado, esta casa ofrece privacidad y prestigio.', antiquity: "5" },
+    { id: '2', title: 'Penthouse en el Centro con Vistas a la Ciudad', price: '3,200,000', modality: 'venta', region: 'Lima', province: 'Lima', district: 'San Isidro', address: '456 High Rise, New York, NY', bedrooms: 3, bathrooms: 4, garage: 2, area_m2: 3500, imageUrls: ['https://placehold.co/1200x800.png'], featured: true, ownerId: '3', description: 'Un magnífico penthouse que ofrece vistas panorámicas del horizonte de la ciudad. Con ventanas de piso a techo, una terraza privada y acabados a medida, esta residencia es el epítome de la sofisticación urbana.', antiquity: "A estrenar" },
+    { id: '3', title: 'Acogedora Casa de Playa', price: '1,800,000', modality: 'alquiler', region: 'Lima', province: 'Cañete', district: 'Asia', address: '789 Ocean Drive, Malibu, CA', bedrooms: 4, bathrooms: 3, garage: 1, area_m2: 2200, imageUrls: ['https://placehold.co/1200x800.png'], featured: false, ownerId: '3', interestedContactIds: ['2'], description: 'Encantadora y elegante casa de playa con acceso directo a la arena. Disfruta de espectaculares vistas al mar desde todas las habitaciones, una espaciosa terraza para el entretenimiento y los tranquilos sonidos de las olas.', antiquity: "10" },
 ];
 
 const dummyContacts: Contact[] = [
@@ -74,7 +74,7 @@ export default function AdminPropertyDetailsPage({ params }: { params: { id: str
                                 <CardTitle className="font-headline text-2xl flex items-center gap-3">
                                    <Home /> {property.title}
                                 </CardTitle>
-                                <CardDescription>{property.address}</CardDescription>
+                                <CardDescription className="flex items-center gap-2 pt-1"><MapPin size={14}/> {property.address}, {property.district}, {property.province}, {property.region}</CardDescription>
                             </div>
                             <Badge variant={property.featured ? 'default' : 'secondary'}>
                                 {property.featured ? 'Destacada' : 'Estándar'}
@@ -148,4 +148,3 @@ export default function AdminPropertyDetailsPage({ params }: { params: { id: str
     </div>
   );
 }
-

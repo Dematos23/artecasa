@@ -39,6 +39,7 @@ import Image from 'next/image';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { cn } from '@/lib/utils';
+import { peruLocations } from '@/lib/peru-locations';
 
 
 const getFullName = (contact: Pick<Contact, 'firstname' | 'secondname' | 'firstlastname' | 'secondlastname'>) => {
@@ -51,6 +52,9 @@ const propertySchema = z.object({
   modality: z.enum(['venta', 'alquiler'], {
     required_error: 'Debes seleccionar una modalidad.',
   }),
+  region: z.string().min(1, { message: 'La región es obligatoria.' }),
+  province: z.string().min(1, { message: 'La provincia es obligatoria.' }),
+  district: z.string().min(1, { message: 'El distrito es obligatorio.' }),
   address: z.string().min(1, { message: 'La dirección es obligatoria.' }),
   description: z.string().optional(),
   bedrooms: z.coerce.number().int().min(0, { message: 'Debe ser un número positivo.' }),
@@ -122,6 +126,17 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   
   const watchedAddress = useWatch({ control: form.control, name: 'address' });
+  const watchedRegion = useWatch({ control: form.control, name: 'region' });
+  const watchedProvince = useWatch({ control: form.control, name: 'province' });
+
+  const provinces = useMemo(() => {
+    return peruLocations.find(r => r.region === watchedRegion)?.provinces || [];
+  }, [watchedRegion]);
+
+  const districts = useMemo(() => {
+    return provinces.find(p => p.province === watchedProvince)?.districts || [];
+  }, [watchedProvince, provinces]);
+
 
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
@@ -148,6 +163,9 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
         title: '',
         price: 0,
         modality: 'venta' as const,
+        region: '',
+        province: '',
+        district: '',
         address: '',
         description: '',
         bedrooms: 0,
@@ -322,6 +340,70 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
                    )}
                 </div>
 
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <FormField
+                        control={form.control}
+                        name="region"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Región</FormLabel>
+                                <Select onValueChange={(value) => {
+                                    field.onChange(value);
+                                    form.setValue('province', '');
+                                    form.setValue('district', '');
+                                }} defaultValue={field.value}>
+                                    <FormControl>
+                                        <SelectTrigger><SelectValue placeholder="Seleccionar región..." /></SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        {peruLocations.map(r => (<SelectItem key={r.region} value={r.region}>{r.region}</SelectItem>))}
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                     <FormField
+                        control={form.control}
+                        name="province"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Provincia</FormLabel>
+                                <Select onValueChange={(value) => {
+                                    field.onChange(value);
+                                    form.setValue('district', '');
+                                }} value={field.value} disabled={!watchedRegion}>
+                                    <FormControl>
+                                        <SelectTrigger><SelectValue placeholder="Seleccionar provincia..." /></SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        {provinces.map(p => (<SelectItem key={p.province} value={p.province}>{p.province}</SelectItem>))}
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                     <FormField
+                        control={form.control}
+                        name="district"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Distrito</FormLabel>
+                                <Select onValueChange={field.onChange} value={field.value} disabled={!watchedProvince}>
+                                    <FormControl>
+                                        <SelectTrigger><SelectValue placeholder="Seleccionar distrito..." /></SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        {districts.map(d => (<SelectItem key={d} value={d}>{d}</SelectItem>))}
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
+
                 <FormField
                     control={form.control}
                     name="address"
@@ -329,7 +411,7 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
                         <FormItem>
                         <FormLabel>Dirección</FormLabel>
                         <FormControl>
-                            <Input placeholder="Ej. Av. Larco 123, Miraflores, Lima" {...field} />
+                            <Input placeholder="Ej. Av. Larco 123, Urb. San Antonio" {...field} />
                         </FormControl>
                         <FormMessage />
                         </FormItem>

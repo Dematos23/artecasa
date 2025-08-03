@@ -4,6 +4,9 @@ export interface Property {
   title: string;
   price: string;
   modality: 'venta' | 'alquiler';
+  region: string;
+  province: string;
+  district: string;
   address: string;
   bedrooms: number;
   bathrooms: number;
