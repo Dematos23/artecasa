@@ -91,7 +91,7 @@ export default function AdminContactsPage() {
               <Card key={contact.id}>
                 <CardHeader>
                   <CardTitle className="text-base font-bold truncate">
-                    <Link href={`/admin/contacts/${contact.id}`} className="hover:underline">
+                    <Link href={`/admin/contacts/${contact.id}`} className="font-bold">
                         {getFullName(contact)}
                     </Link>
                   </CardTitle>
@@ -136,7 +136,7 @@ export default function AdminContactsPage() {
                 {contacts.map((contact) => (
                   <TableRow key={contact.id}>
                     <TableCell className="font-medium">
-                      <Link href={`/admin/contacts/${contact.id}`} className="hover:underline">
+                      <Link href={`/admin/contacts/${contact.id}`} className="font-bold">
                         {getFullName(contact)}
                       </Link>
                     </TableCell>

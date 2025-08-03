@@ -120,7 +120,7 @@ export default function AdminPropertiesPage() {
               <Card key={property.id}>
                 <CardHeader>
                   <CardTitle className="text-base font-bold truncate">
-                    <Link href={`/properties/${property.id}`} className="hover:underline">
+                    <Link href={`/properties/${property.id}`} className="font-bold">
                       {property.title}
                     </Link>
                   </CardTitle>
@@ -162,7 +162,7 @@ export default function AdminPropertiesPage() {
                 {properties.map((property) => (
                   <TableRow key={property.id}>
                     <TableCell className="font-medium">
-                      <Link href={`/properties/${property.id}`} className="hover:underline">
+                      <Link href={`/properties/${property.id}`} className="font-bold">
                         {property.title}
                       </Link>
                     </TableCell>
