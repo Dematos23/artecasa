@@ -1,6 +1,6 @@
 
 import { db, storage } from '@/lib/firebase';
-import { collection, getDocs, query, orderBy, doc, addDoc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, doc, addDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { ref, deleteObject } from 'firebase/storage';
 import type { Property, NewPropertyData, UpdatePropertyData } from '@/types';
 
@@ -23,7 +23,6 @@ export async function getProperties(): Promise<Property[]> {
 export async function addProperty(propertyData: NewPropertyData): Promise<string> {
   const docRef = await addDoc(propertiesCollection, {
     ...propertyData,
-    createdAt: serverTimestamp(),
   });
   return docRef.id;
 }
@@ -33,7 +32,6 @@ export async function updateProperty(id: string, propertyData: UpdatePropertyDat
   const propertyDoc = doc(db, 'properties', id);
   await updateDoc(propertyDoc, {
     ...propertyData,
-    updatedAt: serverTimestamp(),
   });
 }
 
