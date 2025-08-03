@@ -15,22 +15,9 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import type { Contact, Property } from '@/types';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ContactForm } from './ContactForm';
 import Link from 'next/link';
-
-
-const dummyContacts: Contact[] = [
-  { id: '1', firstname: 'John', firstlastname: 'Doe', email: 'john.doe@example.com', notes: 'I am interested in the Modern Villa. Can I get more details?', date: '2024-05-20', types: ['comprador'], phone: '987654321', interestedPropertyIds: ['1', '2'] },
-  { id: '2', firstname: 'Jane', firstlastname: 'Smith', email: 'jane.smith@example.com', notes: 'Please schedule a viewing for the Downtown Penthouse.', date: '2024-05-19', types: ['arrendatario'], phone: '987654322', interestedPropertyIds: ['3'] },
-  { id: '3', firstname: 'Sam', firstlastname: 'Wilson', email: 'sam.wilson@example.com', notes: 'What are the financing options available?', date: '2024-05-18', types: ['vendedor', 'arrendador'], phone: '987654323' },
-];
-
-const dummyProperties: Property[] = [
-  { id: '1', title: 'Villa Moderna en Condominio Privado', price: '2,500,000', modality: 'venta', address: '123 Luxury Lane, Beverly Hills, CA', bedrooms: 5, bathrooms: 6, garage: 3, area_m2: 5800, imageUrls: [], featured: true, ownerId: '3' },
-  { id: '2', title: 'Penthouse en el Centro con Vistas a la Ciudad', price: '3,200,000', modality: 'venta', address: '456 High Rise, New York, NY', bedrooms: 3, bathrooms: 4, garage: 2, area_m2: 3500, imageUrls: [], featured: true, ownerId: '3' },
-  { id: '3', title: 'Acogedora Casa de Playa', price: '1,800,000', modality: 'alquiler', address: '789 Ocean Drive, Malibu, CA', bedrooms: 4, bathrooms: 3, garage: 1, area_m2: 2200, imageUrls: [], featured: false, ownerId: '3' },
-];
 
 
 const getFullName = (contact: Pick<Contact, 'firstname' | 'secondname' | 'firstlastname' | 'secondlastname'>) => {
@@ -38,12 +25,17 @@ const getFullName = (contact: Pick<Contact, 'firstname' | 'secondname' | 'firstl
 }
 
 export default function AdminContactsPage() {
-  const [contacts, setContacts] = useState<Contact[]>(dummyContacts);
-  const [properties, setProperties] = useState<Property[]>(dummyProperties);
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [properties, setProperties] = useState<Property[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedContact, setSelectedContact] = useState<Contact | undefined>(undefined);
 
+  useEffect(() => {
+    // TODO: Fetch contacts and properties from Firestore
+  }, []);
+
   const handleSave = (contactData: Omit<Contact, 'id' | 'date'>) => {
+    // TODO: Implement Firestore save logic
     if (selectedContact) {
       // Edit
       const updatedContact = { ...selectedContact, ...contactData };
@@ -68,6 +60,7 @@ export default function AdminContactsPage() {
   };
 
   const handleDelete = (id: string) => {
+    // TODO: Implement Firestore delete logic
     setContacts(contacts.filter(c => c.id !== id));
   };
 

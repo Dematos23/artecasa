@@ -6,34 +6,19 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import type { Contact, Property } from '@/types';
 import Link from 'next/link';
-import { ArrowLeft, Mail, Phone, Calendar, User, Tag, FileText, Home, MoreHorizontal } from 'lucide-react';
-import { useState } from 'react';
+import { ArrowLeft, Mail, Phone, Calendar, User, Tag, FileText, Home } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 
-const dummyContacts: Contact[] = [
-  { id: '1', firstname: 'John', firstlastname: 'Doe', email: 'john.doe@example.com', notes: 'Estoy interesado en la Villa Moderna. ¿Puedo obtener más detalles?', date: '2024-05-20', types: ['comprador'], phone: '987654321', interestedPropertyIds: ['1', '2'] },
-  { id: '2', firstname: 'Jane', firstlastname: 'Smith', email: 'jane.smith@example.com', notes: 'Por favor, programar una visita para el Penthouse del centro.', date: '2024-05-19', types: ['arrendatario'], phone: '987654322', interestedPropertyIds: ['3'] },
-  { id: '3', firstname: 'Sam', firstlastname: 'Wilson', email: 'sam.wilson@example.com', notes: '¿Cuáles son las opciones de financiamiento disponibles?', date: '2024-05-18', types: ['vendedor', 'arrendador'], phone: '987654323', interestedPropertyIds: [] },
-];
-
-const dummyProperties: Property[] = [
-  { id: '1', title: 'Villa Moderna en Condominio Privado', price: '2,500,000', modality: 'venta', region: 'Lima', province: 'Lima', district: 'Miraflores', address: '123 Luxury Lane, Beverly Hills, CA', bedrooms: 5, bathrooms: 6, garage: 3, area_m2: 5800, imageUrls: [], featured: true, ownerId: '3' },
-  { id: '2', title: 'Penthouse en el Centro con Vistas a la Ciudad', price: '3,200,000', modality: 'venta', region: 'Lima', province: 'Lima', district: 'San Isidro', address: '456 High Rise, New York, NY', bedrooms: 3, bathrooms: 4, garage: 2, area_m2: 3500, imageUrls: [], featured: true, ownerId: '3' },
-  { id: '3', title: 'Acogedora Casa de Playa', price: '1,800,000', modality: 'alquiler', region: 'Lima', province: 'Cañete', district: 'Asia', address: '789 Ocean Drive, Malibu, CA', bedrooms: 4, bathrooms: 3, garage: 1, area_m2: 2200, imageUrls: [], featured: false, ownerId: '3' },
-];
-
-
-const getContactById = (id: string): Contact | undefined => {
-  return dummyContacts.find(c => c.id === id);
+// TODO: Replace with actual data fetching logic from Firestore
+const getContactById = async (id: string): Promise<Contact | undefined> => {
+    return undefined;
 };
-
-const getPropertiesByOwnerId = (id: string): Property[] => {
-    return dummyProperties.filter(p => p.ownerId === id);
+const getPropertiesByOwnerId = async (id: string): Promise<Property[]> => {
+    return [];
 }
-
-const getPropertiesByIds = (ids: string[]): Property[] => {
-    return dummyProperties.filter(p => ids.includes(p.id));
+const getPropertiesByIds = async (ids: string[]): Promise<Property[]> => {
+    return [];
 }
 
 const getFullName = (contact: Pick<Contact, 'firstname' | 'secondname' | 'firstlastname' | 'secondlastname'>) => {
@@ -43,8 +28,39 @@ const getFullName = (contact: Pick<Contact, 'firstname' | 'secondname' | 'firstl
 
 export default function ContactDetailsPage({ params }: { params: { id: string } }) {
   const contactId = params.id;
-  const [contact] = useState(() => getContactById(contactId));
+  const [contact, setContact] = useState<Contact | null>(null);
+  const [ownedProperties, setOwnedProperties] = useState<Property[]>([]);
+  const [interestedProperties, setInterestedProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
   
+   useEffect(() => {
+    const fetchDetails = async () => {
+      setLoading(true);
+      const contactData = await getContactById(contactId);
+      if (contactData) {
+        setContact(contactData);
+        if (contactData.types.includes('vendedor') || contactData.types.includes('arrendador')) {
+          const owned = await getPropertiesByOwnerId(contactData.id);
+          setOwnedProperties(owned);
+        }
+        if ((contactData.types.includes('comprador') || contactData.types.includes('arrendatario')) && contactData.interestedPropertyIds) {
+          const interested = await getPropertiesByIds(contactData.interestedPropertyIds);
+          setInterestedProperties(interested);
+        }
+      }
+      setLoading(false);
+    };
+    fetchDetails();
+  }, [contactId]);
+
+  if (loading) {
+    return (
+      <div className="text-center">
+        <h1 className="text-2xl font-bold mb-4">Cargando contacto...</h1>
+      </div>
+    );
+  }
+
   if (!contact) {
     return (
       <div className="text-center">
@@ -57,14 +73,6 @@ export default function ContactDetailsPage({ params }: { params: { id: string } 
       </div>
     );
   }
-
-  const ownedProperties = (contact.types.includes('vendedor') || contact.types.includes('arrendador'))
-    ? getPropertiesByOwnerId(contact.id)
-    : [];
-  
-  const interestedProperties = (contact.types.includes('comprador') || contact.types.includes('arrendatario')) && contact.interestedPropertyIds
-    ? getPropertiesByIds(contact.interestedPropertyIds)
-    : [];
 
   return (
     <div className='space-y-8'>
@@ -181,7 +189,3 @@ function PropertyListView({ properties }: { properties: Property[] }) {
         </>
     )
 }
-
-    
-
-    

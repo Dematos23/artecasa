@@ -1,4 +1,7 @@
 
+"use client";
+
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,21 +9,32 @@ import type { Property } from '@/types';
 import { BedDouble, Bath, Car, Maximize, MapPin, Phone, CalendarClock } from 'lucide-react';
 import Link from 'next/link';
 
-// Dummy data fetching function. Replace with actual data fetching logic.
-const getPropertyById = (id: string): Property | undefined => {
-  const properties: Property[] = [
-    { id: '1', title: 'Villa Moderna en Condominio Privado', price: '2,500,000', modality: 'venta', address: '123 Luxury Lane, Beverly Hills, CA', bedrooms: 5, bathrooms: 6, garage: 3, area_m2: 5800, imageUrls: ['https://placehold.co/1200x800.png'], description: 'Experimenta un lujo sin igual en esta impresionante villa moderna. Con un espacio de vida de concepto abierto, cocina de última generación y una impresionante piscina infinita. Ubicada en un exclusivo condominio privado, esta casa ofrece privacidad y prestigio.', antiquity: "5" },
-    { id: '2', title: 'Penthouse en el Centro con Vistas a la Ciudad', price: '3,200,000', modality: 'venta', address: '456 High Rise, New York, NY', bedrooms: 3, bathrooms: 4, garage: 2, area_m2: 3500, imageUrls: ['https://placehold.co/1200x800.png'], description: 'Un magnífico penthouse que ofrece vistas panorámicas del horizonte de la ciudad. Con ventanas de piso a techo, una terraza privada y acabados a medida, esta residencia es el epítome de la sofisticación urbana.', antiquity: "A estrenar" },
-    { id: '3', title: 'Acogedora Casa de Playa', price: '1,800,000', modality: 'alquiler', address: '789 Ocean Drive, Malibu, CA', bedrooms: 4, bathrooms: 3, garage: 1, area_m2: 2200, imageUrls: ['https://placehold.co/1200x800.png'], description: 'Encantadora y elegante casa de playa con acceso directo a la arena. Disfruta de espectaculares vistas al mar desde todas las habitaciones, una espaciosa terraza para el entretenimiento y los tranquilos sonidos de las olas.', antiquity: "10" },
-    { id: '4', title: 'Rancho Extenso con Terreno', price: '4,500,000', modality: 'venta', address: '101 Country Road, Aspen, CO', bedrooms: 6, bathrooms: 7, garage: 4, area_m2: 8000, imageUrls: ['https://placehold.co/1200x800.png'], description: 'Un majestuoso rancho ubicado en 50 acres de tierra prístina. Esta extensa propiedad cuenta con una gran casa principal, cuartos de huéspedes e instalaciones ecuestres, todo con impresionantes fondos de montaña.', antiquity: "15" },
-    { id: '5', title: 'Histórica Casa de Piedra en la Ciudad', price: '2,100,000', modality: 'venta', address: '212 City Block, Boston, MA', bedrooms: 5, bathrooms: 4, garage: 0, area_m2: 3200, imageUrls: ['https://placehold.co/1200x800.png'], description: 'Una casa de piedra histórica bellamente conservada que combina el carácter atemporal con las comodidades modernas. Ubicada en una pintoresca calle arbolada en el corazón de la ciudad.', antiquity: "100" },
-    { id: '6', title: 'Casa Minimalista en el Desierto', price: '1,950,000', modality: 'alquiler', address: '321 Cactus Trail, Scottsdale, AZ', bedrooms: 3, bathrooms: 3, garage: 2, area_m2: 2800, imageUrls: ['https://placehold.co/1200x800.png'], description: 'Una obra maestra de diseño minimalista, esta casa en el desierto se integra a la perfección con su entorno natural. Líneas limpias, materiales naturales y un énfasis en la vida interior-exterior crean un refugio sereno.', antiquity: "2" },
-  ];
-  return properties.find(p => p.id === id);
+// TODO: Replace with actual data fetching logic from Firestore
+const getPropertyById = async (id: string): Promise<Property | undefined> => {
+  return undefined;
 };
 
 export default function PropertyDetailsPage({ params }: { params: { id: string } }) {
-  const property = getPropertyById(params.id);
+  const [property, setProperty] = useState<Property | null>(null);
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    const fetchProperty = async () => {
+      setLoading(true);
+      const fetchedProperty = await getPropertyById(params.id);
+      setProperty(fetchedProperty || null);
+      setLoading(false);
+    };
+    fetchProperty();
+  }, [params.id]);
+
+  if (loading) {
+     return (
+      <div className="container mx-auto py-24 text-center">
+        <h1 className="text-2xl font-bold">Cargando propiedad...</h1>
+      </div>
+    );
+  }
 
   if (!property) {
     return (

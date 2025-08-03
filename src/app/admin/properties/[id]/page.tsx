@@ -8,33 +8,21 @@ import type { Contact, Property } from '@/types';
 import Link from 'next/link';
 import { ArrowLeft, User, Users, Home, DollarSign, FileText, BedDouble, Bath, Car, Maximize, CalendarClock, MapPin, Edit } from 'lucide-react';
 import Image from 'next/image';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
-const dummyProperties: Property[] = [
-    { id: '1', title: 'Villa Moderna en Condominio Privado', price: '2,500,000', modality: 'venta', region: 'Lima', province: 'Lima', district: 'Miraflores', address: '123 Luxury Lane, Beverly Hills, CA', bedrooms: 5, bathrooms: 6, garage: 3, area_m2: 5800, imageUrls: ['https://placehold.co/1200x800.png'], featured: true, ownerId: '3', interestedContactIds: ['1'], description: 'Experimenta un lujo sin igual en esta impresionante villa moderna. Con un espacio de vida de concepto abierto, cocina de última generación y una impresionante piscina infinita. Ubicada en un exclusivo condominio privado, esta casa ofrece privacidad y prestigio.', antiquity: "5" },
-    { id: '2', title: 'Penthouse en el Centro con Vistas a la Ciudad', price: '3,200,000', modality: 'venta', region: 'Lima', province: 'Lima', district: 'San Isidro', address: '456 High Rise, New York, NY', bedrooms: 3, bathrooms: 4, garage: 2, area_m2: 3500, imageUrls: ['https://placehold.co/1200x800.png'], featured: true, ownerId: '3', description: 'Un magnífico penthouse que ofrece vistas panorámicas del horizonte de la ciudad. Con ventanas de piso a techo, una terraza privada y acabados a medida, esta residencia es el epítome de la sofisticación urbana.', antiquity: "A estrenar" },
-    { id: '3', title: 'Acogedora Casa de Playa', price: '1,800,000', modality: 'alquiler', region: 'Lima', province: 'Cañete', district: 'Asia', address: '789 Ocean Drive, Malibu, CA', bedrooms: 4, bathrooms: 3, garage: 1, area_m2: 2200, imageUrls: ['https://placehold.co/1200x800.png'], featured: false, ownerId: '3', interestedContactIds: ['2'], description: 'Encantadora y elegante casa de playa con acceso directo a la arena. Disfruta de espectaculares vistas al mar desde todas las habitaciones, una espaciosa terraza para el entretenimiento y los tranquilos sonidos de las olas.', antiquity: "10" },
-];
-
-const dummyContacts: Contact[] = [
-  { id: '1', firstname: 'John', firstlastname: 'Doe', email: 'john.doe@example.com', notes: 'Estoy interesado en la Villa Moderna.', date: '2024-05-20', types: ['comprador'], phone: '987654321' },
-  { id: '2', firstname: 'Jane', firstlastname: 'Smith', email: 'jane.smith@example.com', notes: 'Por favor, programar una visita para la casa de playa.', date: '2024-05-19', types: ['arrendatario'], phone: '987654322' },
-  { id: '3', firstname: 'Sam', firstlastname: 'Wilson', email: 'sam.wilson@example.com', notes: 'Soy el propietario de varias propiedades de lujo.', date: '2024-05-18', types: ['vendedor', 'arrendador'], phone: '987654323' },
-];
-
-const getPropertyById = (id: string): Property | undefined => {
-  return dummyProperties.find(p => p.id === id);
+// TODO: Replace with actual data fetching logic from Firestore
+const getPropertyById = async (id: string): Promise<Property | undefined> => {
+    return undefined;
 };
-
-const getContactById = (id: string): Contact | undefined => {
-    return dummyContacts.find(c => c.id === id);
+const getContactById = async (id: string): Promise<Contact | undefined> => {
+    return undefined;
+}
+const getContactsByIds = async (ids: string[]): Promise<Contact[]> => {
+    return [];
 }
 
-const getContactsByIds = (ids: string[]): Contact[] => {
-    return dummyContacts.filter(c => ids.includes(c.id));
-}
 
 const getFullName = (contact: Pick<Contact, 'firstname' | 'secondname' | 'firstlastname' | 'secondlastname'>) => {
     return [contact.firstname, contact.secondname, contact.firstlastname, contact.secondlastname].filter(Boolean).join(' ');
@@ -43,8 +31,44 @@ const getFullName = (contact: Pick<Contact, 'firstname' | 'secondname' | 'firstl
 
 export default function AdminPropertyDetailsPage({ params }: { params: { id: string } }) {
   const propertyId = params.id;
-  const property = getPropertyById(propertyId);
   const router = useRouter();
+
+  const [property, setProperty] = useState<Property | null>(null);
+  const [owner, setOwner] = useState<Contact | undefined>(undefined);
+  const [interestedContacts, setInterestedContacts] = useState<Contact[]>([]);
+  const [loading, setLoading] = useState(true);
+
+   useEffect(() => {
+    const fetchDetails = async () => {
+      setLoading(true);
+      const prop = await getPropertyById(propertyId);
+      if (prop) {
+        setProperty(prop);
+        if (prop.ownerId) {
+          const ownerContact = await getContactById(prop.ownerId);
+          setOwner(ownerContact);
+        }
+        if (prop.interestedContactIds && prop.interestedContactIds.length > 0) {
+          const interested = await getContactsByIds(prop.interestedContactIds);
+          setInterestedContacts(interested);
+        }
+      }
+      setLoading(false);
+    };
+    fetchDetails();
+  }, [propertyId]);
+
+  const handleEdit = () => {
+    router.push(`/admin/properties?edit=${property?.id}`);
+  }
+
+  if (loading) {
+    return (
+      <div className="text-center">
+        <h1 className="text-2xl font-bold mb-4">Cargando propiedad...</h1>
+      </div>
+    );
+  }
   
   if (!property) {
     return (
@@ -58,13 +82,6 @@ export default function AdminPropertyDetailsPage({ params }: { params: { id: str
       </div>
     );
   }
-
-  const handleEdit = () => {
-    router.push(`/admin/properties?edit=${property.id}`);
-  }
-  
-  const owner = property.ownerId ? getContactById(property.ownerId) : undefined;
-  const interestedContacts = property.interestedContactIds ? getContactsByIds(property.interestedContactIds) : [];
 
   return (
     <div>
@@ -94,9 +111,11 @@ export default function AdminPropertyDetailsPage({ params }: { params: { id: str
                         </div>
                     </CardHeader>
                      <CardContent>
-                        <div className="relative w-full h-96 rounded-lg overflow-hidden mb-6">
-                            <Image src={property.imageUrls[0]} alt={property.title} fill style={{objectFit: 'cover'}} />
-                        </div>
+                        {property.imageUrls.length > 0 && (
+                            <div className="relative w-full h-96 rounded-lg overflow-hidden mb-6">
+                                <Image src={property.imageUrls[0]} alt={property.title} fill style={{objectFit: 'cover'}} />
+                            </div>
+                        )}
 
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 text-center mb-6 py-4 border-y">
                             <div className="flex flex-col items-center gap-1"><BedDouble size={20} className="text-primary"/> <span className="font-semibold">{property.bedrooms}</span> <span className="text-xs text-muted-foreground">Dorms</span></div>
@@ -205,5 +224,3 @@ function ContactListView({ contacts }: { contacts: Contact[] }) {
         </>
     )
 }
-
-    

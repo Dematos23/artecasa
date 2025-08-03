@@ -12,55 +12,20 @@ import {
   CarouselItem,
 } from '@/components/ui/carousel';
 import Autoplay from "embla-carousel-autoplay"
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 const heroImages = ['/hero1.webp', '/hero2.webp'];
 
-const dummyProperties: Property[] = [
-  {
-    id: '1',
-    title: 'Villa Moderna en Condominio Privado',
-    price: '2,500,000',
-    modality: 'venta',
-    address: '123 Luxury Lane, Beverly Hills, CA',
-    bedrooms: 5,
-    bathrooms: 6,
-    garage: 3,
-    area_m2: 5800,
-    imageUrls: ['https://placehold.co/800x600.png'],
-    featured: true,
-  },
-  {
-    id: '2',
-    title: 'Penthouse en el Centro con Vistas a la Ciudad',
-    price: '3,200,000',
-    modality: 'venta',
-    address: '456 High Rise, New York, NY',
-    bedrooms: 3,
-    bathrooms: 4,
-    garage: 2,
-    area_m2: 3500,
-    imageUrls: ['https://placehold.co/800x600.png'],
-    featured: true,
-  },
-  {
-    id: '3',
-    title: 'Acogedora Casa de Playa',
-    price: '1,800,000',
-    modality: 'alquiler',
-    address: '789 Ocean Drive, Malibu, CA',
-    bedrooms: 4,
-    bathrooms: 3,
-    garage: 1,
-    area_m2: 2200,
-    imageUrls: ['https://placehold.co/800x600.png'],
-    featured: true,
-  },
-];
-
-
 export default function Home() {
-  const featuredProperty = dummyProperties[0];
+  const [properties, setProperties] = useState<Property[]>([]);
+
+  useEffect(() => {
+    // TODO: Fetch properties from Firestore
+  }, []);
+
+  const featuredProperty = properties.find(p => p.featured);
+  const recentProperties = properties.filter(p => !p.featured).slice(0, 3);
+
   const plugin = React.useRef(
     Autoplay({ delay: 5000, stopOnInteraction: true })
   )
@@ -102,39 +67,41 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-12 md:py-24 bg-secondary">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
-            <div className="md:w-1/2 relative rounded-lg overflow-hidden shadow-2xl">
-              <Image 
-                src={featuredProperty.imageUrls[0]} 
-                data-ai-hint="modern living room"
-                alt={featuredProperty.title} 
-                width={800} 
-                height={600} 
-                className="w-full h-auto" />
-            </div>
-            <div className="md:w-1/2">
-              <h2 className="text-2xl md:text-4xl font-bold font-headline mb-4">Propiedad Destacada</h2>
-              <h3 className="text-xl md:text-2xl font-semibold text-primary mb-2">{featuredProperty.title}</h3>
-              <p className="text-muted-foreground flex items-center gap-2 mb-4">
-                <MapPin size={16} /> {featuredProperty.address}
-              </p>
-              <p className="text-2xl md:text-3xl font-bold mb-6">${Number(featuredProperty.price).toLocaleString()}{featuredProperty.modality === 'alquiler' && ' / mes'}</p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6 text-foreground">
-                <div className="flex items-center gap-2"><BedDouble className="text-primary" /> <span>{featuredProperty.bedrooms} Dorms</span></div>
-                <div className="flex items-center gap-2"><Bath className="text-primary" /> <span>{featuredProperty.bathrooms} Baños</span></div>
-                <div className="flex items-center gap-2"><Car className="text-primary" /> <span>{featuredProperty.garage} Cochera</span></div>
+      {featuredProperty && (
+        <section className="py-12 md:py-24 bg-secondary">
+          <div className="container mx-auto px-4 md:px-6">
+            <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
+              <div className="md:w-1/2 relative rounded-lg overflow-hidden shadow-2xl">
+                <Image 
+                  src={featuredProperty.imageUrls[0]} 
+                  data-ai-hint="modern living room"
+                  alt={featuredProperty.title} 
+                  width={800} 
+                  height={600} 
+                  className="w-full h-auto" />
               </div>
-              <Button asChild>
-                <Link href={`/properties/${featuredProperty.id}`}>
-                  Ver Detalles
-                </Link>
-              </Button>
+              <div className="md:w-1/2">
+                <h2 className="text-2xl md:text-4xl font-bold font-headline mb-4">Propiedad Destacada</h2>
+                <h3 className="text-xl md:text-2xl font-semibold text-primary mb-2">{featuredProperty.title}</h3>
+                <p className="text-muted-foreground flex items-center gap-2 mb-4">
+                  <MapPin size={16} /> {featuredProperty.address}
+                </p>
+                <p className="text-2xl md:text-3xl font-bold mb-6">${Number(featuredProperty.price).toLocaleString()}{featuredProperty.modality === 'alquiler' && ' / mes'}</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6 text-foreground">
+                  <div className="flex items-center gap-2"><BedDouble className="text-primary" /> <span>{featuredProperty.bedrooms} Dorms</span></div>
+                  <div className="flex items-center gap-2"><Bath className="text-primary" /> <span>{featuredProperty.bathrooms} Baños</span></div>
+                  <div className="flex items-center gap-2"><Car className="text-primary" /> <span>{featuredProperty.garage} Cochera</span></div>
+                </div>
+                <Button asChild>
+                  <Link href={`/properties/${featuredProperty.id}`}>
+                    Ver Detalles
+                  </Link>
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       <section className="py-12 md:py-24">
         <div className="container mx-auto px-4 md:px-6">
@@ -144,11 +111,17 @@ export default function Home() {
               Una cuidada selección de las mejores casas de lujo, adaptadas a tu estilo de vida.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-            {dummyProperties.map((property) => (
-              <PropertyCard key={property.id} property={property} />
-            ))}
-          </div>
+          {recentProperties.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+              {recentProperties.map((property) => (
+                <PropertyCard key={property.id} property={property} />
+              ))}
+            </div>
+          ) : (
+             <div className="text-center py-12">
+                <p className="text-muted-foreground">Actualmente no hay propiedades para mostrar. Vuelve a consultar pronto.</p>
+            </div>
+          )}
           <div className="text-center mt-12">
             <Button asChild size="lg">
               <Link href="/properties">
