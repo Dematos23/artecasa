@@ -59,14 +59,14 @@ export default function LoginPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-secondary p-4">
+      <div className="flex min-h-screen items-center justify-center bg-secondary p-4">
         <p>Cargando...</p>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-secondary p-4">
+    <div className="flex min-h-screen items-center justify-center bg-secondary p-4">
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
           <div className="mx-auto mb-4">
