@@ -54,15 +54,44 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto flex h-16 items-center px-4 md:px-6">
-        <Link href="/" className="mr-6 flex items-center">
-          <Image src="/logo.png" alt="Artecasa Logo" width={120} height={30} className="h-12 w-auto" />
-        </Link>
+      <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
+        {/* Mobile Menu Toggle (Left) */}
+        <div className="md:hidden flex-1 flex justify-start">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Menu className="h-6 w-6" />
+                <span className="sr-only">Alternar menú</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left">
+               <SheetTitle className="sr-only">Menú de Navegación</SheetTitle>
+               <SheetDescription className="sr-only">
+                 Menú principal de navegación del sitio Artecasa.
+               </SheetDescription>
+              <div className="flex flex-col gap-4 p-4">
+                <Link href="/" className="mr-6 flex items-center mb-4">
+                  <Image src="/logo.png" alt="Artecasa Logo" width={120} height={30} className="h-8 w-auto" />
+                </Link>
+                <NavItems className="flex-col items-start gap-4" />
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+        
+        {/* Logo */}
+        <div className="flex justify-center md:justify-start flex-1 md:flex-none">
+            <Link href="/" className="flex items-center">
+              <Image src="/logo.png" alt="Artecasa Logo" width={120} height={30} className="h-12 w-auto" />
+            </Link>
+        </div>
 
-        <div className="hidden md:flex flex-grow items-center">
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex flex-grow items-center justify-center">
           <NavItems />
         </div>
 
+        {/* Login/User Avatar (Right) */}
         <div className="flex flex-1 items-center justify-end gap-2">
           {user ? (
              <DropdownMenu>
@@ -83,6 +112,12 @@ export function Header() {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
+                   <DropdownMenuItem asChild>
+                     <Link href="/admin">
+                        <User className="mr-2 h-4 w-4" />
+                        <span>Panel Admin</span>
+                      </Link>
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4" />
                     <span>Cerrar Sesión</span>
@@ -94,28 +129,6 @@ export function Header() {
               <Link href="/login">Login</Link>
             </Button>
           )}
-          <div className="md:hidden">
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <Menu className="h-6 w-6" />
-                  <span className="sr-only">Alternar menú</span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right">
-                 <SheetTitle className="sr-only">Menú de Navegación</SheetTitle>
-                 <SheetDescription className="sr-only">
-                   Menú principal de navegación del sitio Artecasa.
-                 </SheetDescription>
-                <div className="flex flex-col gap-4 p-4">
-                  <Link href="/" className="mr-6 flex items-center mb-4">
-                    <Image src="/logo.png" alt="Artecasa Logo" width={120} height={30} className="h-8 w-auto" />
-                  </Link>
-                  <NavItems className="flex-col items-start gap-4" />
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
         </div>
       </div>
     </header>
