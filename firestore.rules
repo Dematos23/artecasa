@@ -3,17 +3,21 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // This rule allows anyone with your Firestore database reference to view, edit,
-    // and delete all data in your Firestore database. It is useful for getting
-    // started, but it is configured to expire after 30 days because it
-    // leaves your app open to attackers. At that time, all client
-    // requests to your Firestore database will be denied.
-    //
-    // Make sure to write security rules for your app before that time, or else
-    // all client requests to your Firestore database will be denied until you Update
-    // your rules
+    // Regla para la colección 'contacts': permite crear y leer documentos
+    // solo si el usuario está autenticado
+    match /contacts/{contactId} {
+      allow create: if request.auth != null;
+      allow read: if request.auth != null; // Añadimos la regla de lectura
+      // Puedes añadir reglas para actualización y eliminación si es necesario
+      // allow update: if request.auth != null;
+      // allow delete: if request.auth != null;
+    }
+
+    // Mantener una regla para otras colecciones si las tienes,
+    // o una regla por defecto más restrictiva
     match /{document=**} {
-      allow read, write: if request.time < timestamp.date(2025, 9, 1);
+       // Por defecto, denegar todas las operaciones a menos que se especifique lo contrario
+       allow read, write: if false;
     }
   }
 }

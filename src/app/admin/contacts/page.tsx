@@ -14,13 +14,13 @@ import { MoreHorizontal, PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
-import type { Contact, Property } from '@/types';
+import type { Contact } from '@/types';
 import React, { useState, useEffect, useCallback } from 'react';
 import { ContactForm } from './ContactForm';
 import Link from 'next/link';
-import { getContacts, addContact } from '@/services/contacts';
-import { getProperties } from '@/services/properties';
+import { getContacts, addContact, NewContactData } from '@/services/contacts';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/context/AuthContext'; // Import useAuth
 
 const getFullName = (contact: Pick<Contact, 'firstname' | 'secondname' | 'firstlastname' | 'secondlastname'>) => {
     return [contact.firstname, contact.secondname, contact.firstlastname, contact.secondlastname].filter(Boolean).join(' ');
@@ -28,27 +28,23 @@ const getFullName = (contact: Pick<Contact, 'firstname' | 'secondname' | 'firstl
 
 export default function AdminContactsPage() {
   const [contacts, setContacts] = useState<Contact[]>([]);
-  const [properties, setProperties] = useState<Property[]>([]);
+  const { user, loading: authLoading } = useAuth();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedContact, setSelectedContact] = useState<Contact | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  const fetchContactsAndProperties = useCallback(async () => {
+  const fetchContacts = useCallback(async () => {
     try {
       setLoading(true);
-      const [contactsData, propertiesData] = await Promise.all([
-        getContacts(),
-        getProperties(),
-      ]);
+      const contactsData = await getContacts();
       setContacts(contactsData);
-      setProperties(propertiesData);
     } catch (error) {
       console.error(error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "No se pudieron cargar los datos.",
+        description: "No se pudieron cargar los contactos.",
       });
     } finally {
       setLoading(false);
@@ -56,15 +52,18 @@ export default function AdminContactsPage() {
   }, [toast]);
 
   useEffect(() => {
-    fetchContactsAndProperties();
-  }, [fetchContactsAndProperties]);
+    if (!authLoading && user) {
+      fetchContacts();
+    } else if (!authLoading && !user) {
+      setLoading(false);
+      console.log("User not authenticated. Cannot fetch contacts.");
+    }
+  }, [authLoading, user, fetchContacts]);
 
-  const handleSave = async (contactData: Omit<Contact, 'id' | 'date'>) => {
+  const handleSave = async (contactData: Omit<Contact, 'id' | 'date' | 'interestedPropertyIds'>) => {
     try {
       if (selectedContact) {
         // TODO: Implement edit logic
-        // const updatedContact = { ...selectedContact, ...contactData };
-        // setContacts(contacts.map(c => c.id === selectedContact.id ? updatedContact : c));
       } else {
         await addContact(contactData);
         toast({
@@ -72,7 +71,7 @@ export default function AdminContactsPage() {
             description: "El contacto se ha creado correctamente.",
         });
       }
-      await fetchContactsAndProperties(); // Refetch data
+      await fetchContacts(); // Refetch data
       setIsFormOpen(false);
       setSelectedContact(undefined);
     } catch (error) {
@@ -108,7 +107,6 @@ export default function AdminContactsPage() {
         onClose={() => setIsFormOpen(false)}
         onSave={handleSave}
         contact={selectedContact}
-        properties={properties}
       />
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>

@@ -6,7 +6,7 @@ import type { Contact } from '@/types';
 const contactsCollection = collection(db, 'contacts');
 
 // Type for new contact data, omitting id and date which will be generated
-export type NewContactData = Omit<Contact, 'id' | 'date'>;
+export type NewContactData = Omit<Contact, 'id' | 'date' | 'interestedPropertyIds'>;
 
 // Function to get all contacts from Firestore
 export async function getContacts(): Promise<Contact[]> {
@@ -28,6 +28,7 @@ export async function getContacts(): Promise<Contact[]> {
 export async function addContact(contactData: NewContactData): Promise<string> {
   const docRef = await addDoc(contactsCollection, {
     ...contactData,
+    interestedPropertyIds: [], // Always initialize with an empty array
     date: serverTimestamp(),
   });
   return docRef.id;

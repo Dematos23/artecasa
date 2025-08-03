@@ -4,7 +4,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import type { Contact, ContactType, Property } from '@/types';
+import type { Contact, ContactType } from '@/types';
 import { contactTypes } from '@/types';
 
 import {
@@ -19,14 +19,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
-import { Home } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 const contactSchema = z.object({
   firstname: z.string().min(1, { message: 'El primer nombre es obligatorio.' }),
@@ -39,15 +34,13 @@ const contactSchema = z.object({
   types: z.array(z.string()).refine((value) => value.some((item) => item), {
     message: 'Debes seleccionar al menos un tipo.',
   }),
-  interestedPropertyIds: z.array(z.string()).optional().default([]),
 });
 
 interface ContactFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (contact: Omit<Contact, 'id' | 'date'>) => void;
+  onSave: (contact: Omit<Contact, 'id' | 'date' | 'interestedPropertyIds'>) => Promise<void>;
   contact?: Contact;
-  properties: Property[];
 }
 
 const defaultValues = {
@@ -59,10 +52,9 @@ const defaultValues = {
   phone: '',
   notes: '',
   types: [],
-  interestedPropertyIds: [],
 };
 
-export function ContactForm({ isOpen, onClose, onSave, contact, properties }: ContactFormProps) {
+export function ContactForm({ isOpen, onClose, onSave, contact }: ContactFormProps) {
   const form = useForm<z.infer<typeof contactSchema>>({
     resolver: zodResolver(contactSchema),
     defaultValues,
@@ -71,16 +63,17 @@ export function ContactForm({ isOpen, onClose, onSave, contact, properties }: Co
   const { formState: { errors } } = form;
 
   const watchedTypes = form.watch('types', contact?.types || []);
-  const watchedInterestedProperties = form.watch('interestedPropertyIds', contact?.interestedPropertyIds || []);
-  const showInterestedProperties = watchedTypes.includes('comprador') || watchedTypes.includes('arrendatario');
 
   useEffect(() => {
-    form.reset(contact || defaultValues);
+    form.reset(contact ? {
+        ...contact,
+        types: contact.types || [],
+    } : defaultValues);
   }, [contact, form, isOpen]);
 
   // --- Manejador para el envío del formulario ---
   const onSubmit = (values: z.infer<typeof contactSchema>) => {
-    onSave(values as Omit<Contact, 'id' | 'date'>);
+    onSave(values);
   };
   
   // --- Manejador manual para los checkboxes de 'types' ---
@@ -162,21 +155,6 @@ export function ContactForm({ isOpen, onClose, onSave, contact, properties }: Co
                     </div>
                     {errors.types && <p className="text-sm font-medium text-destructive">{errors.types.message}</p>}
                 </div>
-
-                {/* --- Componente MultiSelect con manejo manual --- */}
-                {showInterestedProperties && (
-                    <div className="space-y-2">
-                    <Label>Propiedades de Interés</Label>
-                    <MultiSelect
-                        options={properties.map(p => ({ value: p.id, label: p.title }))}
-                        selected={watchedInterestedProperties}
-                        onChange={(newSelection) => form.setValue('interestedPropertyIds', newSelection)}
-                        className="w-full"
-                        placeholder="Seleccionar propiedades..."
-                    />
-                    {errors.interestedPropertyIds && <p className="text-sm font-medium text-destructive">{errors.interestedPropertyIds.message}</p>}
-                    </div>
-                )}
             </div>
             
             <DialogFooter className='pt-4'>
@@ -188,63 +166,3 @@ export function ContactForm({ isOpen, onClose, onSave, contact, properties }: Co
     </Dialog>
   );
 }
-
-
-// MultiSelect Component (refactorizado para recibir props directamente)
-interface MultiSelectProps {
-  options: { label: string; value: string }[];
-  selected: string[];
-  onChange: (selected: string[]) => void;
-  className?: string;
-  placeholder?: string;
-}
-
-export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>(
-  ({ options, selected, onChange, className, placeholder = "Seleccionar...", ...props }, ref) => {
-    const [open, setOpen] = useState(false);
-
-    const handleSelect = (value: string) => {
-      const newSelected = selected.includes(value)
-        ? selected.filter((item) => item !== value)
-        : [...selected, value];
-      onChange(newSelected);
-    };
-
-    const selectedLabels = options
-      .filter(option => selected.includes(option.value))
-      .map(option => option.label);
-
-    return (
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button ref={ref} variant="outline" role="combobox" aria-expanded={open} className={cn("w-full justify-between", className)} {...props} onClick={() => setOpen(!open)}>
-            <span className="truncate">{selectedLabels.length > 0 ? selectedLabels.join(', ') : placeholder}</span>
-            <Home className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-          <Command>
-            <CommandInput placeholder="Buscar propiedad..." />
-            <CommandList>
-              <CommandEmpty>No se encontraron propiedades.</CommandEmpty>
-              <CommandGroup>
-                <ScrollArea className="h-48">
-                    {options.map((option) => (
-                    <CommandItem key={option.value} onSelect={() => handleSelect(option.value)}>
-                        <Checkbox className="mr-2" checked={selected.includes(option.value)} onCheckedChange={() => handleSelect(option.value)} id={`multi-select-${option.value}`} />
-                        <label htmlFor={`multi-select-${option.value}`} className='cursor-pointer w-full'>{option.label}</label>
-                    </CommandItem>
-                    ))}
-                </ScrollArea>
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
-    );
-  });
-MultiSelect.displayName = "MultiSelect";
-
-    
-
-    

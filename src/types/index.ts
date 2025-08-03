@@ -1,4 +1,6 @@
 
+import { Timestamp } from "firebase/firestore";
+
 export interface Property {
   id: string;
   title: string;
@@ -29,10 +31,10 @@ export interface Contact {
   secondname?: string;
   firstlastname: string;
   secondlastname?: string;
-  email: string;
-  phone?: string;
-  notes: string;
-  date: string;
+  email?: string;
+  phone: string;
+  notes?: string;
   types: ContactType[];
   interestedPropertyIds?: string[];
+  date?: Date | Timestamp | null | undefined;
 }
