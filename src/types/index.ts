@@ -11,4 +11,5 @@ export interface Property {
   imageUrls: string[];
   description?: string;
   featured?: boolean;
+  antiquity?: string;
 }

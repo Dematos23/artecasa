@@ -32,7 +32,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
 import { UploadCloud, X } from 'lucide-react';
 import Image from 'next/image';
@@ -49,6 +49,7 @@ const propertySchema = z.object({
   bathrooms: z.coerce.number().int().min(0, { message: 'Debe ser un número positivo.' }),
   garage: z.coerce.number().int().min(0, { message: 'Debe ser un número positivo.' }),
   area_m2: z.coerce.number().int().min(0, { message: 'Debe ser un número positivo.' }),
+  antiquity: z.string().optional(),
   imageUrls: z.array(z.string()).optional().default([]),
   featured: z.boolean().default(false),
   // Campo temporal para manejar los archivos subidos
@@ -118,6 +119,7 @@ export function PropertyForm({ isOpen, onClose, onSave, property }: PropertyForm
         bathrooms: 0,
         garage: 0,
         area_m2: 0,
+        antiquity: '',
         imageUrls: [],
         featured: false,
     },
@@ -148,6 +150,7 @@ export function PropertyForm({ isOpen, onClose, onSave, property }: PropertyForm
         bathrooms: 0,
         garage: 0,
         area_m2: 0,
+        antiquity: '',
         imageUrls: [],
         featured: false,
         newImages: [],
@@ -198,8 +201,6 @@ export function PropertyForm({ isOpen, onClose, onSave, property }: PropertyForm
     const finalProperty: Omit<Property, 'id'> = {
         ...propertyData,
         price: propertyData.price.toString(),
-        // This combines existing imageUrls with placeholders for new images.
-        // The parent component will handle the actual upload and URL replacement.
         imageUrls: values.imageUrls || [],
     }
     onSave(finalProperty, newImages || []);
@@ -280,7 +281,7 @@ export function PropertyForm({ isOpen, onClose, onSave, property }: PropertyForm
                         </FormItem>
                     )}
                 />
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                     <FormField
                         control={form.control}
                         name="bedrooms"
@@ -328,6 +329,19 @@ export function PropertyForm({ isOpen, onClose, onSave, property }: PropertyForm
                             <FormLabel>Área (m²)</FormLabel>
                             <FormControl>
                                 <Input type="number" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="antiquity"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Antigüedad (años)</FormLabel>
+                            <FormControl>
+                                <Input placeholder="Ej: 5, o 'A estrenar'" {...field} />
                             </FormControl>
                             <FormMessage />
                             </FormItem>
