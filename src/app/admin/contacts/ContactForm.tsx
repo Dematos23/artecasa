@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useForm, useWatch } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import type { Contact, ContactType, Property } from '@/types';
@@ -65,6 +65,7 @@ const defaultValues = {
 export function ContactForm({ isOpen, onClose, onSave, contact, properties }: ContactFormProps) {
   const form = useForm<z.infer<typeof contactSchema>>({
     resolver: zodResolver(contactSchema),
+    defaultValues,
   });
 
   const { formState: { errors } } = form;
