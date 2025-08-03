@@ -13,3 +13,14 @@ export interface Property {
   featured?: boolean;
   antiquity?: string;
 }
+
+export type ContactStatus = 'Nuevo' | 'Contactado' | 'Resuelto';
+
+export interface Contact {
+  id: string;
+  name: string;
+  email: string;
+  message: string;
+  date: string;
+  status: ContactStatus;
+}
