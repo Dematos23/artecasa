@@ -6,8 +6,8 @@ export interface Property {
   bedrooms: number;
   bathrooms: number;
   garage: number;
-  sqft: number;
-  imageUrl: string;
+  area_m2: number;
+  imageUrls: string[];
   description?: string;
   featured?: boolean;
 }

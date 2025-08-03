@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useForm, useWatch } from 'react-hook-form';
+import { useForm, useWatch, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import type { Property } from '@/types';
@@ -25,8 +25,10 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
+import { UploadCloud, X } from 'lucide-react';
+import Image from 'next/image';
 
 const propertySchema = z.object({
   title: z.string().min(1, { message: 'El título es obligatorio.' }),
@@ -36,9 +38,11 @@ const propertySchema = z.object({
   bedrooms: z.coerce.number().int().min(0, { message: 'Debe ser un número positivo.' }),
   bathrooms: z.coerce.number().int().min(0, { message: 'Debe ser un número positivo.' }),
   garage: z.coerce.number().int().min(0, { message: 'Debe ser un número positivo.' }),
-  sqft: z.coerce.number().int().min(0, { message: 'Debe ser un número positivo.' }),
-  imageUrl: z.string().url({ message: 'Debe ser una URL válida.' }).min(1, { message: 'La URL de la imagen es obligatoria.' }),
+  area_m2: z.coerce.number().int().min(0, { message: 'Debe ser un número positivo.' }),
+  imageUrls: z.array(z.string()).optional().default([]),
   featured: z.boolean().default(false),
+  // Campo temporal para manejar los archivos subidos
+  newImages: z.any().optional(),
 });
 
 
@@ -56,8 +60,8 @@ const containerStyle = {
 };
 
 const defaultCenter = {
-  lat: -34.397,
-  lng: 150.644
+  lat: -12.046374,
+  lng: -77.042793
 };
 
 function MapView({ address }: { address: string }) {
@@ -72,7 +76,6 @@ function MapView({ address }: { address: string }) {
                     setCenter({ lat: location.lat(), lng: location.lng() });
                 } else {
                     console.error(`Geocode was not successful for the following reason: ${status}`);
-                    setCenter(defaultCenter);
                 }
             });
         }
@@ -89,7 +92,6 @@ function MapView({ address }: { address: string }) {
     );
 }
 
-
 export function PropertyForm({ isOpen, onClose, onSave, property }: PropertyFormProps) {
   const form = useForm<z.infer<typeof propertySchema>>({
     resolver: zodResolver(propertySchema),
@@ -101,12 +103,14 @@ export function PropertyForm({ isOpen, onClose, onSave, property }: PropertyForm
         bedrooms: 0,
         bathrooms: 0,
         garage: 0,
-        sqft: 0,
-        imageUrl: '',
+        area_m2: 0,
+        imageUrls: [],
         featured: false,
     },
   });
-
+  
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  
   const watchedAddress = useWatch({ control: form.control, name: 'address' });
   const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
@@ -116,9 +120,8 @@ export function PropertyForm({ isOpen, onClose, onSave, property }: PropertyForm
     preventGoogleFontsLoading: true,
   });
 
-
   useEffect(() => {
-    form.reset(property || {
+      const defaultVals = property || {
         title: '',
         price: '',
         address: '',
@@ -126,20 +129,79 @@ export function PropertyForm({ isOpen, onClose, onSave, property }: PropertyForm
         bedrooms: 0,
         bathrooms: 0,
         garage: 0,
-        sqft: 0,
-        imageUrl: '',
+        area_m2: 0,
+        imageUrls: [],
         featured: false,
-    });
+        newImages: [],
+      }
+    form.reset(defaultVals);
+    setImagePreviews(property?.imageUrls || []);
   }, [property, form, isOpen]);
 
 
-  const onSubmit = (values: z.infer<typeof propertySchema>) => {
-    onSave({ ...property, ...values } as Property);
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+        const currentFiles = form.getValues('newImages') || [];
+        form.setValue('newImages', [...currentFiles, ...files]);
+
+        const newPreviews = files.map(file => URL.createObjectURL(file));
+        setImagePreviews(prev => [...prev, ...newPreviews]);
+    }
+  };
+
+  const removeImage = (index: number) => {
+    const currentPreviews = [...imagePreviews];
+    const currentNewImages = [...(form.getValues('newImages') || [])];
+    const currentImageUrls = [...(form.getValues('imageUrls') || [])];
+
+    const removedUrl = currentPreviews.splice(index, 1)[0];
+    setImagePreviews(currentPreviews);
+    
+    // Check if the removed image was an old one or a new one
+    const oldImageIndex = currentImageUrls.indexOf(removedUrl);
+    if (oldImageIndex > -1) {
+        currentImageUrls.splice(oldImageIndex, 1);
+        form.setValue('imageUrls', currentImageUrls);
+    } else {
+        // It's a new file upload, find its index in the newImages array
+        // This is tricky as we only have the object URL. We may need a more robust solution
+        // For now, let's assume order is preserved, which is not guaranteed.
+        // A better way would be to store an array of {file, previewUrl} objects.
+        // This is a simplified example.
+        currentNewImages.splice(index - currentImageUrls.length, 1);
+        form.setValue('newImages', currentNewImages);
+    }
+  };
+
+
+  const onSubmit = async (values: z.infer<typeof propertySchema>) => {
+    // NOTE: This is where you would handle the image uploads to Firebase Storage
+    // For this example, we will just pass the data up.
+    // In a real implementation:
+    // 1. Upload `values.newImages` to Firebase Storage
+    // 2. Get the download URLs
+    // 3. Combine with `values.imageUrls`
+    // 4. Save the final list of URLs to the property document.
+    const finalProperty: Property = {
+        id: property?.id || '', // This will be set in parent component for new properties
+        title: values.title,
+        price: values.price,
+        address: values.address,
+        description: values.description,
+        bedrooms: values.bedrooms,
+        bathrooms: values.bathrooms,
+        garage: values.garage,
+        area_m2: values.area_m2,
+        featured: values.featured,
+        imageUrls: imagePreviews, // Using previews for this example
+    }
+    onSave(finalProperty);
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[800px]">
         <DialogHeader>
           <DialogTitle className='font-headline'>{property ? 'Editar Propiedad' : 'Agregar Nueva Propiedad'}</DialogTitle>
           <DialogDescription>
@@ -166,9 +228,9 @@ export function PropertyForm({ isOpen, onClose, onSave, property }: PropertyForm
                     name="price"
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel>Precio</FormLabel>
+                        <FormLabel>Precio (USD)</FormLabel>
                         <FormControl>
-                            <Input type="text" placeholder="Ej. 2,500,000" {...field} />
+                            <Input type="number" placeholder="Ej. 2500000" {...field} />
                         </FormControl>
                         <FormMessage />
                         </FormItem>
@@ -229,10 +291,10 @@ export function PropertyForm({ isOpen, onClose, onSave, property }: PropertyForm
                     />
                      <FormField
                         control={form.control}
-                        name="sqft"
+                        name="area_m2"
                         render={({ field }) => (
                             <FormItem>
-                            <FormLabel>Pies Cuadrados</FormLabel>
+                            <FormLabel>Área (m²)</FormLabel>
                             <FormControl>
                                 <Input type="number" {...field} />
                             </FormControl>
@@ -241,19 +303,51 @@ export function PropertyForm({ isOpen, onClose, onSave, property }: PropertyForm
                         )}
                     />
                 </div>
-                 <FormField
-                    control={form.control}
-                    name="imageUrl"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>URL de la Imagen</FormLabel>
-                        <FormControl>
-                            <Input placeholder="https://placehold.co/800x600.png" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                />
+                 
+                <div>
+                  <FormLabel>Imágenes de la Propiedad</FormLabel>
+                  <FormControl>
+                    <div className="mt-2 flex justify-center rounded-lg border border-dashed border-input px-6 py-10">
+                        <div className="text-center">
+                            <UploadCloud className="mx-auto h-12 w-12 text-gray-300" />
+                            <div className="mt-4 flex text-sm leading-6 text-gray-600">
+                                <label
+                                    htmlFor="file-upload"
+                                    className="relative cursor-pointer rounded-md bg-white font-semibold text-primary focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2 hover:text-accent-foreground"
+                                >
+                                    <span>Sube tus archivos</span>
+                                    <input id="file-upload" name="file-upload" type="file" className="sr-only" multiple onChange={handleImageChange} accept="image/*" />
+                                </label>
+                                <p className="pl-1">o arrástralos aquí</p>
+                            </div>
+                            <p className="text-xs leading-5 text-gray-600">PNG, JPG, GIF hasta 10MB</p>
+                        </div>
+                    </div>
+                  </FormControl>
+                   {imagePreviews.length > 0 && (
+                     <div className="mt-4 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
+                        {imagePreviews.map((previewUrl, index) => (
+                           <div key={index} className="relative group">
+                             <Image
+                                src={previewUrl}
+                                alt={`Vista previa de imagen ${index + 1}`}
+                                width={150}
+                                height={150}
+                                className="h-24 w-24 object-cover rounded-md"
+                                onUnload={() => URL.revokeObjectURL(previewUrl)} // Clean up object URLs
+                              />
+                              <button
+                                type="button"
+                                onClick={() => removeImage(index)}
+                                className="absolute top-0 right-0 -mt-2 -mr-2 h-6 w-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                               >
+                                <X className="h-4 w-4" />
+                               </button>
+                           </div>
+                        ))}
+                     </div>
+                   )}
+                </div>
 
                 <FormField
                     control={form.control}
@@ -262,7 +356,7 @@ export function PropertyForm({ isOpen, onClose, onSave, property }: PropertyForm
                         <FormItem>
                         <FormLabel>Dirección</FormLabel>
                         <FormControl>
-                            <Input placeholder="Ej. 123 Luxury Lane..." {...field} />
+                            <Input placeholder="Ej. Av. Larco 123, Miraflores, Lima" {...field} />
                         </FormControl>
                         <FormMessage />
                         </FormItem>

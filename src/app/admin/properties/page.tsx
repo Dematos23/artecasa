@@ -19,9 +19,9 @@ import React, { useState } from 'react';
 import { PropertyForm } from './PropertyForm';
 
 const dummyProperties: Property[] = [
-  { id: '1', title: 'Villa Moderna en Condominio Privado', price: '2,500,000', address: '123 Luxury Lane, Beverly Hills, CA', bedrooms: 5, bathrooms: 6, garage: 3, sqft: 5800, imageUrl: '', featured: true },
-  { id: '2', title: 'Penthouse en el Centro con Vistas a la Ciudad', price: '3,200,000', address: '456 High Rise, New York, NY', bedrooms: 3, bathrooms: 4, garage: 2, sqft: 3500, imageUrl: '', featured: true },
-  { id: '3', title: 'Acogedora Casa de Playa', price: '1,800,000', address: '789 Ocean Drive, Malibu, CA', bedrooms: 4, bathrooms: 3, garage: 1, sqft: 2200, imageUrl: '', featured: false },
+  { id: '1', title: 'Villa Moderna en Condominio Privado', price: '2,500,000', address: '123 Luxury Lane, Beverly Hills, CA', bedrooms: 5, bathrooms: 6, garage: 3, area_m2: 5800, imageUrls: [], featured: true },
+  { id: '2', title: 'Penthouse en el Centro con Vistas a la Ciudad', price: '3,200,000', address: '456 High Rise, New York, NY', bedrooms: 3, bathrooms: 4, garage: 2, area_m2: 3500, imageUrls: [], featured: true },
+  { id: '3', title: 'Acogedora Casa de Playa', price: '1,800,000', address: '789 Ocean Drive, Malibu, CA', bedrooms: 4, bathrooms: 3, garage: 1, area_m2: 2200, imageUrls: [], featured: false },
 ];
 
 export default function AdminPropertiesPage() {

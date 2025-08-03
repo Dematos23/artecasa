@@ -15,7 +15,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
       <Link href={`/properties/${property.id}`}>
         <div className="relative">
           <Image
-            src={property.imageUrl}
+            src={property.imageUrls[0] ?? 'https://placehold.co/400x300.png'}
             data-ai-hint="house exterior"
             alt={property.title}
             width={400}

@@ -25,8 +25,8 @@ const dummyProperties: Property[] = [
     bedrooms: 5,
     bathrooms: 6,
     garage: 3,
-    sqft: 5800,
-    imageUrl: 'https://placehold.co/800x600.png',
+    area_m2: 5800,
+    imageUrls: ['https://placehold.co/800x600.png'],
     featured: true,
   },
   {
@@ -37,8 +37,8 @@ const dummyProperties: Property[] = [
     bedrooms: 3,
     bathrooms: 4,
     garage: 2,
-    sqft: 3500,
-    imageUrl: 'https://placehold.co/800x600.png',
+    area_m2: 3500,
+    imageUrls: ['https://placehold.co/800x600.png'],
     featured: true,
   },
   {
@@ -49,8 +49,8 @@ const dummyProperties: Property[] = [
     bedrooms: 4,
     bathrooms: 3,
     garage: 1,
-    sqft: 2200,
-    imageUrl: 'https://placehold.co/800x600.png',
+    area_m2: 2200,
+    imageUrls: ['https://placehold.co/800x600.png'],
     featured: true,
   },
 ];
@@ -104,7 +104,7 @@ export default function Home() {
           <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
             <div className="md:w-1/2 relative rounded-lg overflow-hidden shadow-2xl">
               <Image 
-                src={featuredProperty.imageUrl} 
+                src={featuredProperty.imageUrls[0]} 
                 data-ai-hint="modern living room"
                 alt={featuredProperty.title} 
                 width={800} 
