@@ -21,6 +21,7 @@ const dummyProperties: Property[] = [
     id: '1',
     title: 'Villa Moderna en Condominio Privado',
     price: '2,500,000',
+    modality: 'venta',
     address: '123 Luxury Lane, Beverly Hills, CA',
     bedrooms: 5,
     bathrooms: 6,
@@ -33,6 +34,7 @@ const dummyProperties: Property[] = [
     id: '2',
     title: 'Penthouse en el Centro con Vistas a la Ciudad',
     price: '3,200,000',
+    modality: 'venta',
     address: '456 High Rise, New York, NY',
     bedrooms: 3,
     bathrooms: 4,
@@ -45,6 +47,7 @@ const dummyProperties: Property[] = [
     id: '3',
     title: 'Acogedora Casa de Playa',
     price: '1,800,000',
+    modality: 'alquiler',
     address: '789 Ocean Drive, Malibu, CA',
     bedrooms: 4,
     bathrooms: 3,
@@ -117,7 +120,7 @@ export default function Home() {
               <p className="text-muted-foreground flex items-center gap-2 mb-4">
                 <MapPin size={16} /> {featuredProperty.address}
               </p>
-              <p className="text-2xl md:text-3xl font-bold mb-6">${featuredProperty.price}</p>
+              <p className="text-2xl md:text-3xl font-bold mb-6">${Number(featuredProperty.price).toLocaleString()}{featuredProperty.modality === 'alquiler' && ' / mes'}</p>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6 text-foreground">
                 <div className="flex items-center gap-2"><BedDouble className="text-primary" /> <span>{featuredProperty.bedrooms} Dorms</span></div>
                 <div className="flex items-center gap-2"><Bath className="text-primary" /> <span>{featuredProperty.bathrooms} Baños</span></div>

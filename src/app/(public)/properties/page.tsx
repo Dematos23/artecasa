@@ -7,12 +7,12 @@ import { Search } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 
 const dummyProperties: Property[] = [
-  { id: '1', title: 'Villa Moderna en Condominio Privado', price: '2,500,000', address: '123 Luxury Lane, Beverly Hills, CA', bedrooms: 5, bathrooms: 6, garage: 3, area_m2: 5800, imageUrls: ['https://placehold.co/400x300.png'], featured: true },
-  { id: '2', title: 'Penthouse en el Centro con Vistas a la Ciudad', price: '3,200,000', address: '456 High Rise, New York, NY', bedrooms: 3, bathrooms: 4, garage: 2, area_m2: 3500, imageUrls: ['https://placehold.co/400x300.png'], featured: true },
-  { id: '3', title: 'Acogedora Casa de Playa', price: '1,800,000', address: '789 Ocean Drive, Malibu, CA', bedrooms: 4, bathrooms: 3, garage: 1, area_m2: 2200, imageUrls: ['https://placehold.co/400x300.png'], featured: true },
-  { id: '4', title: 'Rancho Extenso con Terreno', price: '4,500,000', address: '101 Country Road, Aspen, CO', bedrooms: 6, bathrooms: 7, garage: 4, area_m2: 8000, imageUrls: ['https://placehold.co/400x300.png'] },
-  { id: '5', title: 'Histórica Casa de Piedra en la Ciudad', price: '2,100,000', address: '212 City Block, Boston, MA', bedrooms: 5, bathrooms: 4, garage: 0, area_m2: 3200, imageUrls: ['https://placehold.co/400x300.png'] },
-  { id: '6', title: 'Casa Minimalista en el Desierto', price: '1,950,000', address: '321 Cactus Trail, Scottsdale, AZ', bedrooms: 3, bathrooms: 3, garage: 2, area_m2: 2800, imageUrls: ['https://placehold.co/400x300.png'] },
+  { id: '1', title: 'Villa Moderna en Condominio Privado', price: '2,500,000', modality: 'venta', address: '123 Luxury Lane, Beverly Hills, CA', bedrooms: 5, bathrooms: 6, garage: 3, area_m2: 5800, imageUrls: ['https://placehold.co/400x300.png'], featured: true },
+  { id: '2', title: 'Penthouse en el Centro con Vistas a la Ciudad', price: '3,200,000', modality: 'venta', address: '456 High Rise, New York, NY', bedrooms: 3, bathrooms: 4, garage: 2, area_m2: 3500, imageUrls: ['https://placehold.co/400x300.png'], featured: true },
+  { id: '3', title: 'Acogedora Casa de Playa', price: '1,800,000', modality: 'alquiler', address: '789 Ocean Drive, Malibu, CA', bedrooms: 4, bathrooms: 3, garage: 1, area_m2: 2200, imageUrls: ['https://placehold.co/400x300.png'], featured: true },
+  { id: '4', title: 'Rancho Extenso con Terreno', price: '4,500,000', modality: 'venta', address: '101 Country Road, Aspen, CO', bedrooms: 6, bathrooms: 7, garage: 4, area_m2: 8000, imageUrls: ['https://placehold.co/400x300.png'] },
+  { id: '5', title: 'Histórica Casa de Piedra en la Ciudad', price: '2,100,000', modality: 'venta', address: '212 City Block, Boston, MA', bedrooms: 5, bathrooms: 4, garage: 0, area_m2: 3200, imageUrls: ['https://placehold.co/400x300.png'] },
+  { id: '6', title: 'Casa Minimalista en el Desierto', price: '1,950,000', modality: 'alquiler', address: '321 Cactus Trail, Scottsdale, AZ', bedrooms: 3, bathrooms: 3, garage: 2, area_m2: 2800, imageUrls: ['https://placehold.co/400x300.png'] },
 ];
 
 export default function PropertiesPage() {

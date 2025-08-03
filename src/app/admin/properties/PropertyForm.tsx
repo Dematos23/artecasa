@@ -21,6 +21,13 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -32,7 +39,10 @@ import Image from 'next/image';
 
 const propertySchema = z.object({
   title: z.string().min(1, { message: 'El título es obligatorio.' }),
-  price: z.string().min(1, { message: 'El precio es obligatorio.' }),
+  price: z.coerce.number().min(1, { message: 'El precio es obligatorio.' }),
+  modality: z.enum(['venta', 'alquiler'], {
+    required_error: 'Debes seleccionar una modalidad.',
+  }),
   address: z.string().min(1, { message: 'La dirección es obligatoria.' }),
   description: z.string().optional(),
   bedrooms: z.coerce.number().int().min(0, { message: 'Debe ser un número positivo.' }),
@@ -49,7 +59,7 @@ const propertySchema = z.object({
 interface PropertyFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (property: Property) => void;
+  onSave: (property: Omit<Property, 'id'>, newImages: File[]) => void;
   property?: Property;
 }
 
@@ -95,9 +105,13 @@ function MapView({ address }: { address: string }) {
 export function PropertyForm({ isOpen, onClose, onSave, property }: PropertyFormProps) {
   const form = useForm<z.infer<typeof propertySchema>>({
     resolver: zodResolver(propertySchema),
-    defaultValues: property || {
+    defaultValues: property ? {
+        ...property,
+        price: Number(property.price.replace(/,/g, '')),
+    } : {
         title: '',
-        price: '',
+        price: 0,
+        modality: 'venta',
         address: '',
         description: '',
         bedrooms: 0,
@@ -121,9 +135,13 @@ export function PropertyForm({ isOpen, onClose, onSave, property }: PropertyForm
   });
 
   useEffect(() => {
-      const defaultVals = property || {
+    const defaultVals = property ? {
+        ...property,
+        price: Number(property.price.replace(/,/g, '')),
+    } : {
         title: '',
-        price: '',
+        price: 0,
+        modality: 'venta' as const,
         address: '',
         description: '',
         bedrooms: 0,
@@ -133,7 +151,7 @@ export function PropertyForm({ isOpen, onClose, onSave, property }: PropertyForm
         imageUrls: [],
         featured: false,
         newImages: [],
-      }
+    };
     form.reset(defaultVals);
     setImagePreviews(property?.imageUrls || []);
   }, [property, form, isOpen]);
@@ -150,54 +168,44 @@ export function PropertyForm({ isOpen, onClose, onSave, property }: PropertyForm
     }
   };
 
-  const removeImage = (index: number) => {
+  const removeImage = (index: number, isNew: boolean) => {
+    // This is a simplified removal logic. A more robust implementation would
+    // track new and existing images separately with unique IDs.
     const currentPreviews = [...imagePreviews];
-    const currentNewImages = [...(form.getValues('newImages') || [])];
-    const currentImageUrls = [...(form.getValues('imageUrls') || [])];
-
-    const removedUrl = currentPreviews.splice(index, 1)[0];
-    setImagePreviews(currentPreviews);
     
-    // Check if the removed image was an old one or a new one
-    const oldImageIndex = currentImageUrls.indexOf(removedUrl);
-    if (oldImageIndex > -1) {
-        currentImageUrls.splice(oldImageIndex, 1);
-        form.setValue('imageUrls', currentImageUrls);
+    // Revoke object URL for new images to prevent memory leaks
+    if (isNew) {
+        const newImageIndex = index - (property?.imageUrls?.length ?? 0);
+        const newImages = [...(form.getValues('newImages') || [])];
+        const removedPreview = imagePreviews[index];
+        URL.revokeObjectURL(removedPreview);
+        newImages.splice(newImageIndex, 1);
+        form.setValue('newImages', newImages);
     } else {
-        // It's a new file upload, find its index in the newImages array
-        // This is tricky as we only have the object URL. We may need a more robust solution
-        // For now, let's assume order is preserved, which is not guaranteed.
-        // A better way would be to store an array of {file, previewUrl} objects.
-        // This is a simplified example.
-        currentNewImages.splice(index - currentImageUrls.length, 1);
-        form.setValue('newImages', currentNewImages);
+        const imageUrls = [...(form.getValues('imageUrls') || [])];
+        imageUrls.splice(index, 1);
+        form.setValue('imageUrls', imageUrls);
     }
+    
+    currentPreviews.splice(index, 1);
+    setImagePreviews(currentPreviews);
   };
 
 
   const onSubmit = async (values: z.infer<typeof propertySchema>) => {
-    // NOTE: This is where you would handle the image uploads to Firebase Storage
-    // For this example, we will just pass the data up.
-    // In a real implementation:
-    // 1. Upload `values.newImages` to Firebase Storage
-    // 2. Get the download URLs
-    // 3. Combine with `values.imageUrls`
-    // 4. Save the final list of URLs to the property document.
-    const finalProperty: Property = {
-        id: property?.id || '', // This will be set in parent component for new properties
-        title: values.title,
-        price: values.price,
-        address: values.address,
-        description: values.description,
-        bedrooms: values.bedrooms,
-        bathrooms: values.bathrooms,
-        garage: values.garage,
-        area_m2: values.area_m2,
-        featured: values.featured,
-        imageUrls: imagePreviews, // Using previews for this example
+    const { newImages, ...propertyData } = values;
+    
+    const finalProperty: Omit<Property, 'id'> = {
+        ...propertyData,
+        price: propertyData.price.toString(),
+        // This combines existing imageUrls with placeholders for new images.
+        // The parent component will handle the actual upload and URL replacement.
+        imageUrls: values.imageUrls || [],
     }
-    onSave(finalProperty);
+    onSave(finalProperty, newImages || []);
   };
+
+  const existingImageCount = property?.imageUrls?.length ?? 0;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -223,19 +231,42 @@ export function PropertyForm({ isOpen, onClose, onSave, property }: PropertyForm
                         </FormItem>
                     )}
                 />
-                 <FormField
-                    control={form.control}
-                    name="price"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Precio (USD)</FormLabel>
-                        <FormControl>
-                            <Input type="number" placeholder="Ej. 2500000" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                />
+                 <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                        control={form.control}
+                        name="price"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Precio (USD)</FormLabel>
+                            <FormControl>
+                                <Input type="number" placeholder="Ej. 2500000" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                     <FormField
+                        control={form.control}
+                        name="modality"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Modalidad</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Selecciona una modalidad" />
+                                    </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                    <SelectItem value="venta">Venta</SelectItem>
+                                    <SelectItem value="alquiler">Alquiler</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                </div>
                 <FormField
                     control={form.control}
                     name="description"
@@ -316,7 +347,7 @@ export function PropertyForm({ isOpen, onClose, onSave, property }: PropertyForm
                                     className="relative cursor-pointer rounded-md bg-white font-semibold text-primary focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2 hover:text-accent-foreground"
                                 >
                                     <span>Sube tus archivos</span>
-                                    <input id="file-upload" name="file-upload" type="file" className="sr-only" multiple onChange={handleImageChange} accept="image/*" />
+                                    <input id="file-upload" name="newImages" type="file" className="sr-only" multiple onChange={handleImageChange} accept="image/*" />
                                 </label>
                                 <p className="pl-1">o arrástralos aquí</p>
                             </div>
@@ -334,11 +365,10 @@ export function PropertyForm({ isOpen, onClose, onSave, property }: PropertyForm
                                 width={150}
                                 height={150}
                                 className="h-24 w-24 object-cover rounded-md"
-                                onUnload={() => URL.revokeObjectURL(previewUrl)} // Clean up object URLs
                               />
                               <button
                                 type="button"
-                                onClick={() => removeImage(index)}
+                                onClick={() => removeImage(index, index >= existingImageCount)}
                                 className="absolute top-0 right-0 -mt-2 -mr-2 h-6 w-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                                >
                                 <X className="h-4 w-4" />

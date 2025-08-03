@@ -22,8 +22,9 @@ export function PropertyCard({ property }: PropertyCardProps) {
             height={300}
             className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-300"
           />
+          <Badge className="absolute top-4 left-4 capitalize">{property.modality}</Badge>
           {property.featured && (
-            <Badge className="absolute top-4 left-4">Destacada</Badge>
+            <Badge className="absolute top-4 right-4">Destacada</Badge>
           )}
         </div>
         <CardContent className="p-4">
@@ -32,7 +33,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
           </h3>
           <p className="text-sm text-muted-foreground mt-1 truncate">{property.address}</p>
           <div className="mt-4 flex justify-between items-center">
-             <p className="text-xl font-bold text-primary">${property.price}</p>
+             <p className="text-xl font-bold text-primary">${Number(property.price).toLocaleString()}{property.modality === 'alquiler' && <span className="text-sm font-normal text-muted-foreground"> / mes</span>}</p>
           </div>
           <div className="mt-4 pt-4 border-t border-border flex justify-around text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
