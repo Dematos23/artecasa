@@ -214,46 +214,50 @@ export default function AdminPropertiesPage() {
         <>
           {/* Mobile View - Cards */}
           <div className="md:hidden space-y-4">
-            {properties.map((property) => (
-              <Card key={property.id}>
-                 {property.imageUrls?.[0] && (
-                    <Link href={`/admin/properties/${property.id}`}>
-                        <Image
-                            src={property.imageUrls[0]}
-                            alt={property.title}
-                            width={400}
-                            height={200}
-                            className="w-full h-48 object-cover rounded-t-lg"
-                        />
-                    </Link>
-                )}
-                <CardHeader className={property.imageUrls?.[0] ? 'pt-4' : ''}>
-                  <CardTitle className="text-base truncate">
-                    <Link href={`/admin/properties/${property.id}`} className="font-bold">
-                      {property.title}
-                    </Link>
-                  </CardTitle>
-                  <CardDescription className="capitalize">{property.modality} - {property.currency === 'USD' ? '$' : 'S/'}{Number(property.price).toLocaleString()}</CardDescription>
-                </CardHeader>
-                <CardContent className="flex justify-between items-center">
-                    <Badge variant={property.featured ? 'default' : 'secondary'}>
-                      {property.featured ? 'Destacada' : 'Estándar'}
-                    </Badge>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <span className="sr-only">Abrir menú</span>
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => openFormForEdit(property)}>Editar</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleDeleteClick(property)} className="text-destructive">Eliminar</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                </CardContent>
-              </Card>
-            ))}
+            {properties.map((property) => {
+              const price = property.modality === 'alquiler' ? property.pricePEN : property.priceUSD;
+              const currencySymbol = property.modality === 'alquiler' ? 'S/' : '$';
+              return (
+                <Card key={property.id}>
+                  {property.imageUrls?.[0] && (
+                      <Link href={`/admin/properties/${property.id}`}>
+                          <Image
+                              src={property.imageUrls[0]}
+                              alt={property.title}
+                              width={400}
+                              height={200}
+                              className="w-full h-48 object-cover rounded-t-lg"
+                          />
+                      </Link>
+                  )}
+                  <CardHeader className={property.imageUrls?.[0] ? 'pt-4' : ''}>
+                    <CardTitle className="text-base truncate">
+                      <Link href={`/admin/properties/${property.id}`} className="font-bold">
+                        {property.title}
+                      </Link>
+                    </CardTitle>
+                    <CardDescription className="capitalize">{property.modality} - {currencySymbol}{Number(price).toLocaleString()}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="flex justify-between items-center">
+                      <Badge variant={property.featured ? 'default' : 'secondary'}>
+                        {property.featured ? 'Destacada' : 'Estándar'}
+                      </Badge>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <span className="sr-only">Abrir menú</span>
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => openFormForEdit(property)}>Editar</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleDeleteClick(property)} className="text-destructive">Eliminar</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                  </CardContent>
+                </Card>
+              )
+            })}
           </div>
             
           {/* Desktop View - Table */}
@@ -270,53 +274,57 @@ export default function AdminPropertiesPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {properties.map((property) => (
-                  <TableRow key={property.id}>
-                     <TableCell>
-                        <Link href={`/admin/properties/${property.id}`}>
-                            {property.imageUrls?.[0] ? (
-                                <Image
-                                    src={property.imageUrls[0]}
-                                    alt={property.title}
-                                    width={64}
-                                    height={64}
-                                    className="w-16 h-16 object-cover rounded-md"
-                                />
-                            ) : (
-                                <div className="w-16 h-16 bg-secondary rounded-md flex items-center justify-center text-muted-foreground">
-                                    <PlusCircle className="w-6 h-6"/>
-                                </div>
-                            )}
+                {properties.map((property) => {
+                  const price = property.modality === 'alquiler' ? property.pricePEN : property.priceUSD;
+                  const currencySymbol = property.modality === 'alquiler' ? 'S/' : '$';
+                  return (
+                    <TableRow key={property.id}>
+                      <TableCell>
+                          <Link href={`/admin/properties/${property.id}`}>
+                              {property.imageUrls?.[0] ? (
+                                  <Image
+                                      src={property.imageUrls[0]}
+                                      alt={property.title}
+                                      width={64}
+                                      height={64}
+                                      className="w-16 h-16 object-cover rounded-md"
+                                  />
+                              ) : (
+                                  <div className="w-16 h-16 bg-secondary rounded-md flex items-center justify-center text-muted-foreground">
+                                      <PlusCircle className="w-6 h-6"/>
+                                  </div>
+                              )}
+                          </Link>
+                      </TableCell>
+                      <TableCell>
+                        <Link href={`/admin/properties/${property.id}`} className="font-bold">
+                          {property.title}
                         </Link>
-                    </TableCell>
-                    <TableCell>
-                      <Link href={`/admin/properties/${property.id}`} className="font-bold">
-                        {property.title}
-                      </Link>
-                    </TableCell>
-                    <TableCell>{property.currency === 'USD' ? '$' : 'S/'}{Number(property.price).toLocaleString()}</TableCell>
-                    <TableCell className="capitalize">{property.modality}</TableCell>
-                    <TableCell>
-                      <Badge variant={property.featured ? 'default' : 'secondary'}>
-                        {property.featured ? 'Destacada' : 'Estándar'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Abrir menú</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => openFormForEdit(property)}>Editar</DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleDeleteClick(property)} className="text-destructive">Eliminar</DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                      </TableCell>
+                      <TableCell>{currencySymbol}{Number(price).toLocaleString()}</TableCell>
+                      <TableCell className="capitalize">{property.modality}</TableCell>
+                      <TableCell>
+                        <Badge variant={property.featured ? 'default' : 'secondary'}>
+                          {property.featured ? 'Destacada' : 'Estándar'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <span className="sr-only">Abrir menú</span>
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => openFormForEdit(property)}>Editar</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleDeleteClick(property)} className="text-destructive">Eliminar</DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
               </TableBody>
             </Table>
           </div>
@@ -325,7 +333,3 @@ export default function AdminPropertiesPage() {
     </>
   );
 }
-
-    
-
-    

@@ -58,7 +58,6 @@ export function PropertyDetailsClientView({ propertyId, initialProperty }: { pro
     );
   }
 
-  const currencySymbol = property.currency === 'USD' ? '$' : 'S/';
   const antiquityText = property.antiquity === 0 ? 'A estrenar' : property.antiquity ? `${property.antiquity} años` : 'N/A';
   const fullAddress = [property.address, property.district, property.province, property.region].filter(Boolean).join(', ');
 
@@ -115,9 +114,12 @@ export function PropertyDetailsClientView({ propertyId, initialProperty }: { pro
                                 </CardHeader>
                                 <CardContent>
                                     <div className="flex items-baseline gap-2">
-                                        <span className="text-3xl font-bold text-primary">{currencySymbol}{Number(property.price).toLocaleString()}</span>
+                                        <span className="text-3xl font-bold text-primary">${Number(property.priceUSD).toLocaleString()}</span>
                                     </div>
-                                    <div className="text-sm text-muted-foreground capitalize mt-1">{property.modality === 'alquiler' ? '/ mes' : `en ${property.modality}`}</div>
+                                    <div className="flex items-baseline gap-2 mt-2">
+                                        <span className="text-2xl font-bold">S/{Number(property.pricePEN).toLocaleString()}</span>
+                                    </div>
+                                    <div className="text-sm text-muted-foreground capitalize mt-1">{property.modality === 'alquiler' ? 'por mes' : `en ${property.modality}`}</div>
                                 </CardContent>
                             </Card>
                          </div>
@@ -137,4 +139,3 @@ export function PropertyDetailsClientView({ propertyId, initialProperty }: { pro
     </div>
   );
 }
-

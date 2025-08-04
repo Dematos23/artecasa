@@ -4,9 +4,8 @@ import { Timestamp } from "firebase/firestore";
 export interface Property {
   id: string;
   title: string;
-  price: string;
-  currency: 'USD' | 'PEN';
-  exchangeRate: number;
+  priceUSD: number;
+  pricePEN: number;
   modality: 'venta' | 'alquiler';
   region?: string;
   province?: string;

@@ -42,11 +42,8 @@ import { peruLocations } from '@/lib/peru-locations';
 
 const propertySchema = z.object({
   title: z.string().min(1, { message: 'El título es obligatorio.' }),
-  price: z.coerce.number().min(0, { message: 'El precio debe ser un número positivo.' }),
-  currency: z.enum(['USD', 'PEN'], {
-    required_error: 'Debes seleccionar una moneda.',
-  }),
-  exchangeRate: z.coerce.number().min(0, { message: 'El tipo de cambio debe ser un número positivo.' }),
+  priceUSD: z.coerce.number().min(0, { message: 'El precio debe ser un número positivo.' }),
+  pricePEN: z.coerce.number().min(0, { message: 'El precio debe ser un número positivo.' }),
   modality: z.enum(['venta', 'alquiler'], {
     required_error: 'Debes seleccionar una modalidad.',
   }),
@@ -169,8 +166,8 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
   useEffect(() => {
     const defaultVals = property ? {
         ...property,
-        price: Number(property.price?.toString().replace(/,/g, '')),
-        exchangeRate: property.exchangeRate ?? 3.75,
+        priceUSD: Number(property.priceUSD?.toString().replace(/,/g, '')),
+        pricePEN: Number(property.pricePEN?.toString().replace(/,/g, '')),
         bedrooms: property.bedrooms ?? '',
         bathrooms: property.bathrooms ?? '',
         garage: property.garage ?? '',
@@ -178,9 +175,8 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
         antiquity: property.antiquity ?? '',
     } : {
         title: '',
-        price: '',
-        currency: 'USD' as const,
-        exchangeRate: 3.75,
+        priceUSD: '',
+        pricePEN: '',
         modality: 'venta' as const,
         region: '',
         province: '',
@@ -263,7 +259,6 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
     
     const finalProperty: Omit<Property, 'id'> = {
         ...propertyData,
-        price: propertyData.price?.toString() ?? '0',
         imageUrls: values.imageUrls || [],
     }
     onSave(finalProperty, newImageFiles);
@@ -295,15 +290,15 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
                         </FormItem>
                     )}
                 />
-                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <FormField
                         control={form.control}
-                        name="price"
+                        name="priceUSD"
                         render={({ field }) => (
                             <FormItem>
-                            <FormLabel>Precio <span className="text-primary">*</span></FormLabel>
+                            <FormLabel>Precio (USD) <span className="text-primary">*</span></FormLabel>
                             <FormControl>
-                                <Input type="number" placeholder="Ej. 2500000" {...field} />
+                                <Input type="number" placeholder="Ej. 250000" {...field} />
                             </FormControl>
                             <FormMessage />
                             </FormItem>
@@ -311,35 +306,14 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
                     />
                      <FormField
                         control={form.control}
-                        name="currency"
+                        name="pricePEN"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Moneda <span className="text-primary">*</span></FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Selecciona una moneda" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                    <SelectItem value="USD">Dólares (USD)</SelectItem>
-                                    <SelectItem value="PEN">Soles (PEN)</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="exchangeRate"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Tipo de Cambio (a USD) <span className="text-primary">*</span></FormLabel>
-                                <FormControl>
-                                    <Input type="number" step="0.01" placeholder="Ej. 3.75" {...field} />
-                                </FormControl>
-                                <FormMessage />
+                            <FormLabel>Precio (PEN) <span className="text-primary">*</span></FormLabel>
+                            <FormControl>
+                                <Input type="number" placeholder="Ej. 937500" {...field} />
+                            </FormControl>
+                            <FormMessage />
                             </FormItem>
                         )}
                     />
@@ -544,7 +518,3 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
     </Dialog>
   );
 }
-
-    
-
-    

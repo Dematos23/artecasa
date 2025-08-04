@@ -11,7 +11,8 @@ interface PropertyCardProps {
 }
 
 export function PropertyCard({ property }: PropertyCardProps) {
-  const currencySymbol = property.currency === 'USD' ? '$' : 'S/';
+  const price = property.modality === 'alquiler' ? property.pricePEN : property.priceUSD;
+  const currencySymbol = property.modality === 'alquiler' ? 'S/' : '$';
 
   return (
     <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 group">
@@ -36,7 +37,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
           </h3>
           {property.address && <p className="text-sm text-muted-foreground mt-1 truncate">{property.address}</p>}
           <div className="mt-4 flex justify-between items-center">
-             <p className="text-xl font-bold text-primary">{currencySymbol}{Number(property.price).toLocaleString()}{property.modality === 'alquiler' && <span className="text-sm font-normal text-muted-foreground"> / mes</span>}</p>
+             <p className="text-xl font-bold text-primary">{currencySymbol}{Number(price).toLocaleString()}{property.modality === 'alquiler' && <span className="text-sm font-normal text-muted-foreground"> / mes</span>}</p>
           </div>
           <div className="mt-4 pt-4 border-t border-border flex justify-around text-sm text-muted-foreground">
             {property.bedrooms !== undefined && (

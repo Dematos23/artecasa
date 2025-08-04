@@ -58,7 +58,6 @@ export function PropertyDetailsClientView({ property: initialProperty }: { prope
     );
   }
   
-  const currencySymbol = property.currency === 'USD' ? '$' : 'S/';
   const fullAddress = [property.address, property.district, property.province, property.region].filter(Boolean).join(', ');
 
 
@@ -117,7 +116,19 @@ export function PropertyDetailsClientView({ property: initialProperty }: { prope
                 <CardTitle className="font-headline">Detalles de la Propiedad</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-3xl md:text-4xl font-bold text-primary mb-6">{currencySymbol}{Number(property.price).toLocaleString()} <span className="text-lg font-normal text-muted-foreground capitalize">{property.modality === 'alquiler' ? '/ mes' : `en ${property.modality}`}</span></p>
+                <div className="mb-4">
+                  <p className="text-3xl md:text-4xl font-bold text-primary">
+                      {property.modality === 'alquiler'
+                          ? `S/${Number(property.pricePEN).toLocaleString()}`
+                          : `$${Number(property.priceUSD).toLocaleString()}`}
+                  </p>
+                  <p className="text-lg font-normal text-muted-foreground capitalize">
+                      {property.modality === 'alquiler'
+                          ? `/ mes (o $${Number(property.priceUSD).toLocaleString()})`
+                          : `en ${property.modality} (o S/${Number(property.pricePEN).toLocaleString()})`}
+                  </p>
+                </div>
+
                 <div className="space-y-4 text-foreground">
                   {property.bedrooms !== undefined && <div className="flex justify-between items-center"><span className="text-muted-foreground">Dormitorios</span> <span className="font-semibold flex items-center gap-2">{property.bedrooms} <BedDouble size={18}/></span></div>}
                   {property.bathrooms !== undefined && <div className="flex justify-between items-center"><span className="text-muted-foreground">Baños</span> <span className="font-semibold flex items-center gap-2">{property.bathrooms} <Bath size={18}/></span></div>}

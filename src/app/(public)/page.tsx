@@ -100,7 +100,12 @@ export default function Home() {
                 <p className="text-muted-foreground flex items-center gap-2 mb-4">
                   <MapPin size={16} /> {featuredProperty.address}
                 </p>
-                <p className="text-2xl md:text-3xl font-bold mb-6">${Number(featuredProperty.price).toLocaleString()}{featuredProperty.modality === 'alquiler' && ' / mes'}</p>
+                <p className="text-2xl md:text-3xl font-bold mb-6">
+                  {featuredProperty.modality === 'alquiler'
+                    ? `S/${Number(featuredProperty.pricePEN).toLocaleString()}`
+                    : `$${Number(featuredProperty.priceUSD).toLocaleString()}`}
+                  {featuredProperty.modality === 'alquiler' && ' / mes'}
+                </p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6 text-foreground">
                   <div className="flex items-center gap-2"><BedDouble className="text-primary" /> <span>{featuredProperty.bedrooms} Dorms</span></div>
                   <div className="flex items-center gap-2"><Bath className="text-primary" /> <span>{featuredProperty.bathrooms} Baños</span></div>
