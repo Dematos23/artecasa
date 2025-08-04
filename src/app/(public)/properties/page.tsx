@@ -1,20 +1,21 @@
 
 "use client";
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { PropertyCard } from '@/components/PropertyCard';
 import type { Property } from '@/types';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Check, ChevronsUpDown } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { getProperties } from '@/services/properties';
 import { Skeleton } from '@/components/ui/skeleton';
 import { peruLocations } from '@/lib/peru-locations';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { cn } from '@/lib/utils';
+import { useClickAway } from 'react-use';
+
 
 // Generate a flat list of location strings for the combobox
 const locationStrings = peruLocations.flatMap(region =>
@@ -26,53 +27,87 @@ const locationStrings = peruLocations.flatMap(region =>
   )
 );
 
-function LocationCombobox({ value, onChange }: { value: string, onChange: (value: string) => void }) {
-  const [open, setOpen] = useState(false);
+function LocationCombobox({ value, onChange, className }: { value: string, onChange: (value: string) => void, className?: string }) {
+  const [inputValue, setInputValue] = useState(value);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const comboboxRef = useRef(null);
+
+  useEffect(() => {
+    // Sync outside value with inside input
+    const selectedLabel = locationStrings.find(l => l.value === value)?.label || '';
+    setInputValue(selectedLabel);
+  }, [value]);
+
+  useClickAway(comboboxRef, () => {
+    setShowSuggestions(false);
+  });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setInputValue(newValue);
+    if (newValue) {
+      setShowSuggestions(true);
+    } else {
+      setShowSuggestions(false);
+      onChange(''); // Clear filter if input is empty
+    }
+  };
+
+  const handleSuggestionSelect = (currentValue: string) => {
+    const selectedLabel = locationStrings.find(l => l.value === currentValue)?.label || '';
+    setInputValue(selectedLabel);
+    onChange(currentValue);
+    setShowSuggestions(false);
+  };
+
+  const filteredLocations = useMemo(() => {
+    if (!inputValue) return [];
+    const lowercasedInput = inputValue.toLowerCase();
+    return locationStrings.filter(location =>
+      location.label.toLowerCase().includes(lowercasedInput)
+    ).slice(0, 10); // Limit suggestions for performance
+  }, [inputValue]);
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="w-full justify-between text-muted-foreground"
-        >
-          {value
-            ? locationStrings.find((location) => location.value === value)?.label
-            : "Selecciona una ubicación..."}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[300px] p-0">
-        <Command>
-          <CommandInput placeholder="Buscar ubicación..." />
-          <CommandList>
-            <CommandEmpty>No se encontró la ubicación.</CommandEmpty>
-            <CommandGroup>
-              {locationStrings.map((location) => (
-                <CommandItem
-                  key={location.value}
-                  value={location.value}
-                  onSelect={(currentValue) => {
-                    onChange(currentValue === value ? "" : currentValue);
-                    setOpen(false);
-                  }}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      value === location.value ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  {location.label}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+    <div ref={comboboxRef} className={cn("relative w-full", className)}>
+      <Command shouldFilter={false} className="overflow-visible">
+         <Input
+            placeholder="Buscar por Región, Provincia o Distrito..."
+            value={inputValue}
+            onChange={handleInputChange}
+            onFocus={() => setShowSuggestions(true)}
+            className="w-full text-sm"
+          />
+        {showSuggestions && inputValue && (
+          <div className="absolute top-full z-10 mt-1 w-full rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in fade-in-0 zoom-in-95">
+            <CommandList>
+              {filteredLocations.length > 0 ? (
+                <CommandGroup>
+                  {filteredLocations.map((location) => (
+                    <CommandItem
+                      key={location.value}
+                      value={location.value}
+                      onSelect={handleSuggestionSelect}
+                      className="cursor-pointer"
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          value === location.value ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      {location.label}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              ) : (
+                <CommandEmpty>No se encontró la ubicación.</CommandEmpty>
+              )}
+            </CommandList>
+          </div>
+        )}
+      </Command>
+    </div>
   );
 }
 
