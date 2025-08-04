@@ -7,7 +7,8 @@ import type { Property } from '@/types';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Check } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Check, ChevronsUpDown } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { getProperties } from '@/services/properties';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -175,6 +176,13 @@ export default function PropertiesPage() {
     setMaxPrice(max === Infinity ? '' : max.toString());
   }
 
+  const priceButtonText = useMemo(() => {
+    if (minPrice && maxPrice) return `$${Number(minPrice).toLocaleString()} - $${Number(maxPrice).toLocaleString()}`;
+    if (minPrice) return `Desde $${Number(minPrice).toLocaleString()}`;
+    if (maxPrice) return `Hasta $${Number(maxPrice).toLocaleString()}`;
+    return 'Rango de Precio';
+  }, [minPrice, maxPrice]);
+
   return (
     <div className="container mx-auto py-8 md:py-12 px-4 md:px-6">
       <div className="text-center mb-8 md:mb-12">
@@ -185,13 +193,13 @@ export default function PropertiesPage() {
       </div>
 
       <Card className="p-4 md:p-6 mb-8 bg-secondary">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-          <div className="md:col-span-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+          <div className="lg:col-span-2">
             <Label>Ubicación</Label>
             <LocationCombobox value={locationQuery} onChange={setLocationQuery} />
           </div>
 
-          <div className="md:col-span-4">
+          <div>
             <Label>Tipo de Operación</Label>
             <Select value={modalityFilter} onValueChange={setModalityFilter}>
               <SelectTrigger>
@@ -205,7 +213,7 @@ export default function PropertiesPage() {
             </Select>
           </div>
           
-          <div className="md:col-span-4">
+          <div>
              <Label>Dormitorios</Label>
              <Select value={bedroomsFilter} onValueChange={setBedroomsFilter}>
               <SelectTrigger>
@@ -222,29 +230,42 @@ export default function PropertiesPage() {
             </Select>
           </div>
 
-          <div className="md:col-span-4 grid grid-cols-2 gap-4">
-            <div>
-              <Label>Precio Mín.</Label>
-              <Input placeholder="Mínimo" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} type="number" />
-            </div>
-             <div>
-              <Label>Precio Máx.</Label>
-              <Input placeholder="Máximo" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} type="number" />
-            </div>
-          </div>
-           
-          <div className="md:col-span-12 flex flex-wrap gap-2 items-center">
-            <span className="text-sm font-medium mr-2">Rangos de precio sugeridos:</span>
-            {priceRanges.map(range => (
-                <Button key={range.label} variant="outline" size="sm" onClick={() => handlePriceRangeClick(range.min, range.max)}>
-                    {range.label}
+          <div>
+            <Label>Rango de Precio</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-full justify-between font-normal">
+                  <span className='truncate'>{priceButtonText}</span>
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
-            ))}
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-4" align="start">
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="min-price">Precio Mín.</Label>
+                      <Input id="min-price" placeholder="Mínimo" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} type="number" />
+                    </div>
+                    <div>
+                      <Label htmlFor="max-price">Precio Máx.</Label>
+                      <Input id="max-price" placeholder="Máximo" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} type="number" />
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2 items-center">
+                    <span className="text-sm font-medium w-full">Sugerencias:</span>
+                    {priceRanges.map(range => (
+                        <Button key={range.label} variant="outline" size="sm" onClick={() => handlePriceRangeClick(range.min, range.max)} className="flex-grow">
+                            {range.label}
+                        </Button>
+                    ))}
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
-
-          <div className="md:col-span-12">
-            <Button className="w-full" onClick={handleClearFilters} variant="secondary">Limpiar Búsqueda</Button>
-          </div>
+        </div>
+        <div className="mt-6 flex justify-end">
+            <Button onClick={handleClearFilters} variant="secondary" size="sm">Limpiar Búsqueda</Button>
         </div>
       </Card>
 
