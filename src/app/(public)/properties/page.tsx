@@ -15,6 +15,7 @@ import { peruLocations } from '@/lib/peru-locations';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { cn } from '@/lib/utils';
 import { useClickAway } from 'react-use';
+import { Label } from '@/components/ui/label';
 
 
 // Generate a flat list of location strings for the combobox
@@ -26,6 +27,14 @@ const locationStrings = peruLocations.flatMap(region =>
     }))
   )
 );
+
+const priceRanges = [
+    { label: '$0 - $200k', min: 0, max: 200000 },
+    { label: '$200k - $500k', min: 200000, max: 500000 },
+    { label: '$500k - $1M', min: 500000, max: 1000000 },
+    { label: '$1M+', min: 1000000, max: Infinity },
+];
+
 
 function LocationCombobox({ value, onChange, className }: { value: string, onChange: (value: string) => void, className?: string }) {
   const [inputValue, setInputValue] = useState(value);
@@ -119,6 +128,9 @@ export default function PropertiesPage() {
   // Filter states
   const [locationQuery, setLocationQuery] = useState('');
   const [modalityFilter, setModalityFilter] = useState('all');
+  const [bedroomsFilter, setBedroomsFilter] = useState('all');
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
   
   useEffect(() => {
     const fetchProperties = async () => {
@@ -141,14 +153,26 @@ export default function PropertiesPage() {
       
       const locationMatch = !locationQuery || propertyLocation.includes(locationQuery);
       const modalityMatch = !modalityFilter || modalityFilter === 'all' || property.modality === modalityFilter;
+      const bedroomsMatch = bedroomsFilter === 'all' || (property.bedrooms && property.bedrooms >= parseInt(bedroomsFilter));
+      const minPriceMatch = !minPrice || Number(property.price) >= Number(minPrice);
+      const maxPriceMatch = !maxPrice || Number(property.price) <= Number(maxPrice);
 
-      return locationMatch && modalityMatch;
+
+      return locationMatch && modalityMatch && bedroomsMatch && minPriceMatch && maxPriceMatch;
     });
-  }, [properties, locationQuery, modalityFilter]);
+  }, [properties, locationQuery, modalityFilter, bedroomsFilter, minPrice, maxPrice]);
   
   const handleClearFilters = () => {
     setLocationQuery('');
     setModalityFilter('all');
+    setBedroomsFilter('all');
+    setMinPrice('');
+    setMaxPrice('');
+  }
+
+  const handlePriceRangeClick = (min: number, max: number) => {
+    setMinPrice(min.toString());
+    setMaxPrice(max === Infinity ? '' : max.toString());
   }
 
   return (
@@ -161,21 +185,66 @@ export default function PropertiesPage() {
       </div>
 
       <Card className="p-4 md:p-6 mb-8 bg-secondary">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
-          <div className="sm:col-span-2 lg:col-span-2">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+          <div className="md:col-span-12">
+            <Label>Ubicación</Label>
             <LocationCombobox value={locationQuery} onChange={setLocationQuery} />
           </div>
-          <Select value={modalityFilter} onValueChange={setModalityFilter}>
-            <SelectTrigger>
-              <SelectValue placeholder="Tipo de Operación" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos</SelectItem>
-              <SelectItem value="venta">Venta</SelectItem>
-              <SelectItem value="alquiler">Alquiler</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button className="w-full" onClick={handleClearFilters}>Limpiar Búsqueda</Button>
+
+          <div className="md:col-span-4">
+            <Label>Tipo de Operación</Label>
+            <Select value={modalityFilter} onValueChange={setModalityFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Tipo de Operación" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                <SelectItem value="venta">Venta</SelectItem>
+                <SelectItem value="alquiler">Alquiler</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="md:col-span-4">
+             <Label>Dormitorios</Label>
+             <Select value={bedroomsFilter} onValueChange={setBedroomsFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Dormitorios" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                <SelectItem value="1">1+</SelectItem>
+                <SelectItem value="2">2+</SelectItem>
+                <SelectItem value="3">3+</SelectItem>
+                <SelectItem value="4">4+</SelectItem>
+                <SelectItem value="5">5+</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="md:col-span-4 grid grid-cols-2 gap-4">
+            <div>
+              <Label>Precio Mín.</Label>
+              <Input placeholder="Mínimo" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} type="number" />
+            </div>
+             <div>
+              <Label>Precio Máx.</Label>
+              <Input placeholder="Máximo" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} type="number" />
+            </div>
+          </div>
+           
+          <div className="md:col-span-12 flex flex-wrap gap-2 items-center">
+            <span className="text-sm font-medium mr-2">Rangos de precio sugeridos:</span>
+            {priceRanges.map(range => (
+                <Button key={range.label} variant="outline" size="sm" onClick={() => handlePriceRangeClick(range.min, range.max)}>
+                    {range.label}
+                </Button>
+            ))}
+          </div>
+
+          <div className="md:col-span-12">
+            <Button className="w-full" onClick={handleClearFilters} variant="secondary">Limpiar Búsqueda</Button>
+          </div>
         </div>
       </Card>
 
@@ -202,4 +271,5 @@ export default function PropertiesPage() {
       )}
     </div>
   );
-}
+
+    
