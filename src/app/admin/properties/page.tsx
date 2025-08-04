@@ -11,7 +11,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { PlusCircle, MoreHorizontal } from 'lucide-react';
+import { PlusCircle, MoreHorizontal, Star } from 'lucide-react';
 import type { Property, NewPropertyData, UpdatePropertyData } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -217,13 +217,15 @@ export default function AdminPropertiesPage() {
             {properties.map((property) => (
               <Card key={property.id}>
                  {property.imageUrls?.[0] && (
-                    <Image
-                        src={property.imageUrls[0]}
-                        alt={property.title}
-                        width={400}
-                        height={200}
-                        className="w-full h-48 object-cover rounded-t-lg"
-                    />
+                    <Link href={`/admin/properties/${property.id}`}>
+                        <Image
+                            src={property.imageUrls[0]}
+                            alt={property.title}
+                            width={400}
+                            height={200}
+                            className="w-full h-48 object-cover rounded-t-lg"
+                        />
+                    </Link>
                 )}
                 <CardHeader className={property.imageUrls?.[0] ? 'pt-4' : ''}>
                   <CardTitle className="text-base truncate">
@@ -271,19 +273,21 @@ export default function AdminPropertiesPage() {
                 {properties.map((property) => (
                   <TableRow key={property.id}>
                      <TableCell>
-                        {property.imageUrls?.[0] ? (
-                            <Image
-                                src={property.imageUrls[0]}
-                                alt={property.title}
-                                width={64}
-                                height={64}
-                                className="w-16 h-16 object-cover rounded-md"
-                            />
-                        ) : (
-                            <div className="w-16 h-16 bg-secondary rounded-md flex items-center justify-center text-muted-foreground">
-                                <PlusCircle className="w-6 h-6"/>
-                            </div>
-                        )}
+                        <Link href={`/admin/properties/${property.id}`}>
+                            {property.imageUrls?.[0] ? (
+                                <Image
+                                    src={property.imageUrls[0]}
+                                    alt={property.title}
+                                    width={64}
+                                    height={64}
+                                    className="w-16 h-16 object-cover rounded-md"
+                                />
+                            ) : (
+                                <div className="w-16 h-16 bg-secondary rounded-md flex items-center justify-center text-muted-foreground">
+                                    <PlusCircle className="w-6 h-6"/>
+                                </div>
+                            )}
+                        </Link>
                     </TableCell>
                     <TableCell>
                       <Link href={`/admin/properties/${property.id}`} className="font-bold">
@@ -321,5 +325,7 @@ export default function AdminPropertiesPage() {
     </>
   );
 }
+
+    
 
     
