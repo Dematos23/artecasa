@@ -153,7 +153,7 @@ export function ContactDetailsClientView({ contactId, onClose, onEdit }: Contact
   );
 
   return (
-    <div className='space-y-8'>
+    <div>
         <div className="flex justify-between items-center mb-6">
             <BackButton />
             <div className="flex gap-2">
@@ -193,14 +193,14 @@ export function ContactDetailsClientView({ contactId, onClose, onEdit }: Contact
         </Card>
         
         {ownedProperties.length > 0 && (
-            <div>
+            <div className="mt-8">
                 <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><Home size={24}/> Propiedades en Posesión</h2>
                 <PropertyListView properties={ownedProperties} />
             </div>
         )}
 
         {interestedProperties.length > 0 && (
-            <div>
+            <div className="mt-8">
                  <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><Home size={24}/> Propiedades de Interés</h2>
                 <PropertyListView properties={interestedProperties} />
             </div>

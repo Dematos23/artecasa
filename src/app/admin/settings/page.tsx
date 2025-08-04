@@ -75,7 +75,7 @@ export default function SettingsPage() {
   return (
     <div>
       <h1 className="text-3xl font-bold font-headline mb-6">Configuración General</h1>
-      <Card className="max-w-2xl">
+      <Card>
         <CardHeader>
           <CardTitle>Configuración de WhatsApp</CardTitle>
           <CardDescription>
