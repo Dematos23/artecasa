@@ -170,6 +170,7 @@ export default function PropertiesPage() {
               <SelectValue placeholder="Tipo de Operación" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="">Todos</SelectItem>
               <SelectItem value="venta">Venta</SelectItem>
               <SelectItem value="alquiler">Alquiler</SelectItem>
             </SelectContent>
