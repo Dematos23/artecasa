@@ -31,6 +31,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { ContactDetailsClientView } from './ContactDetailsClientView';
+import { useRouter } from 'next/navigation';
 
 
 const getFullName = (contact: Pick<Contact, 'firstname' | 'secondname' | 'firstlastname' | 'secondlastname'>) => {
@@ -47,6 +48,8 @@ export default function AdminContactsPage() {
   const { toast } = useToast();
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [contactToDelete, setContactToDelete] = useState<string | null>(null);
+  const router = useRouter();
+
 
   const fetchContacts = useCallback(async () => {
     try {
@@ -104,6 +107,7 @@ export default function AdminContactsPage() {
 
   const openFormForEdit = (contact: Contact) => {
     setSelectedContact(contact);
+    setViewingContactId(null);
     setIsFormOpen(true);
   };
 
@@ -148,6 +152,15 @@ export default function AdminContactsPage() {
     setViewingContactId(null);
   }
 
+  const handleNavigateToProperty = (propertyId: string) => {
+    router.push(`/admin/properties?edit=${propertyId}`);
+  }
+
+
+  if (viewingContactId) {
+    return <ContactDetailsClientView contactId={viewingContactId} onClose={handleCloseDetails} onEdit={openFormForEdit} onNavigateToProperty={handleNavigateToProperty} />;
+  }
+
 
   return (
     <>
@@ -173,9 +186,6 @@ export default function AdminContactsPage() {
         contact={selectedContact}
       />
 
-      {viewingContactId ? (
-         <ContactDetailsClientView contactId={viewingContactId} onClose={handleCloseDetails} onEdit={openFormForEdit} />
-      ) : (
         <>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
             <div>
@@ -275,7 +285,6 @@ export default function AdminContactsPage() {
             </>
           )}
         </>
-      )}
     </>
   );
 }

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import type { Contact, Property } from '@/types';
 import Link from 'next/link';
-import { ArrowLeft, Mail, Phone, User, Tag, FileText, Home, Edit, X, Bed, Building } from 'lucide-react';
+import { ArrowLeft, Mail, Phone, User, Tag, FileText, Home, Edit, X, Bed, Building, Eye } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { getContactById } from '@/services/contacts';
@@ -19,7 +19,7 @@ const getFullName = (contact: Pick<Contact, 'firstname' | 'secondname' | 'firstl
 }
 
 
-function PropertyListView({ properties, onDisassociate }: { properties: Property[], onDisassociate: (propertyId: string) => void }) {
+function PropertyListView({ properties, onDisassociate, onNavigateToProperty }: { properties: Property[], onDisassociate: (propertyId: string) => void, onNavigateToProperty: (propertyId: string) => void }) {
     if (properties.length === 0) {
         return <p className="text-muted-foreground text-sm">No hay propiedades para mostrar.</p>;
     }
@@ -32,20 +32,20 @@ function PropertyListView({ properties, onDisassociate }: { properties: Property
                     <Card key={property.id}>
                         <CardHeader>
                             <CardTitle className="text-base">
-                                <Link href={`/admin/properties?edit=${property.id}`} className="font-bold hover:underline">
+                                <span className="font-bold hover:underline cursor-pointer" onClick={() => onNavigateToProperty(property.id)}>
                                     {property.title}
-                                </Link>
+                                </span>
                             </CardTitle>
                             <CardDescription className="capitalize">
                                 {property.modality} - ${Number(property.priceUSD).toLocaleString()}
                             </CardDescription>
                         </CardHeader>
-                        <CardContent className="flex justify-between">
+                        <CardContent className="flex justify-end gap-2">
                             <Button variant="destructive" size="sm" onClick={() => onDisassociate(property.id)}>
                                 <X className="mr-2 h-4 w-4" /> Desasociar
                             </Button>
-                            <Button asChild variant="outline" size="sm">
-                                <Link href={`/admin/properties?edit=${property.id}`}>Ver Detalles</Link>
+                            <Button variant="outline" size="sm" onClick={() => onNavigateToProperty(property.id)}>
+                                Ver Detalles
                             </Button>
                         </CardContent>
                     </Card>
@@ -60,26 +60,28 @@ function PropertyListView({ properties, onDisassociate }: { properties: Property
                             <TableHead>Título</TableHead>
                             <TableHead>Modalidad</TableHead>
                             <TableHead>Precio (USD)</TableHead>
-                            <TableHead>Acciones</TableHead>
+                            <TableHead className='text-right'>Acciones</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {properties.map((property) => (
                             <TableRow key={property.id}>
                                 <TableCell>
-                                    <Link href={`/admin/properties?edit=${property.id}`} className="font-bold hover:underline">
+                                    <span className="font-bold hover:underline cursor-pointer" onClick={() => onNavigateToProperty(property.id)}>
                                         {property.title}
-                                    </Link>
+                                    </span>
                                     <p className="text-xs text-muted-foreground">{property.address}</p>
                                 </TableCell>
                                 <TableCell className="capitalize">{property.modality}</TableCell>
                                 <TableCell>${Number(property.priceUSD).toLocaleString()}</TableCell>
-                                <TableCell className="space-x-2">
-                                    <Button variant="destructive" size="sm" onClick={() => onDisassociate(property.id)}>
-                                        <X className="mr-2 h-4 w-4" />
+                                <TableCell className="text-right space-x-2">
+                                     <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => onNavigateToProperty(property.id)}>
+                                        <Eye className="h-4 w-4" />
+                                        <span className="sr-only">Ver</span>
                                     </Button>
-                                    <Button asChild variant="outline" size="sm">
-                                        <Link href={`/admin/properties?edit=${property.id}`}>Ver</Link>
+                                    <Button variant="destructive" size="icon" className="h-8 w-8" onClick={() => onDisassociate(property.id)}>
+                                        <X className="h-4 w-4" />
+                                         <span className="sr-only">Desasociar</span>
                                     </Button>
                                 </TableCell>
                             </TableRow>
@@ -95,9 +97,10 @@ interface ContactDetailsClientViewProps {
   contactId: string;
   onClose?: () => void;
   onEdit?: (contact: Contact) => void;
+  onNavigateToProperty: (propertyId: string) => void;
 }
 
-export function ContactDetailsClientView({ contactId, onClose, onEdit }: ContactDetailsClientViewProps) {
+export function ContactDetailsClientView({ contactId, onClose, onEdit, onNavigateToProperty }: ContactDetailsClientViewProps) {
   const [contact, setContact] = useState<Contact | undefined>(undefined);
   const [ownedProperties, setOwnedProperties] = useState<Property[]>([]);
   const [interestedProperties, setInterestedProperties] = useState<Property[]>([]);
@@ -214,9 +217,9 @@ export function ContactDetailsClientView({ contactId, onClose, onEdit }: Contact
                                 <Bed className="text-muted-foreground" size={20} />
                                 <div>
                                     <span className="text-sm text-muted-foreground">Inquilino de:</span>
-                                    <Link href={`/admin/properties?edit=${tenantOfProperty.id}`} className="font-semibold text-primary hover:underline ml-2">
+                                    <span className="font-semibold text-primary hover:underline ml-2 cursor-pointer" onClick={() => onNavigateToProperty(tenantOfProperty.id)}>
                                         {tenantOfProperty.title}
-                                    </Link>
+                                    </span>
                                 </div>
                             </div>
                         )}
@@ -230,12 +233,12 @@ export function ContactDetailsClientView({ contactId, onClose, onEdit }: Contact
             
             <div className="mt-8">
                 <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><Home size={24}/> Propiedades en Posesión</h2>
-                <PropertyListView properties={ownedProperties} onDisassociate={handleDisassociate} />
+                <PropertyListView properties={ownedProperties} onDisassociate={handleDisassociate} onNavigateToProperty={onNavigateToProperty} />
             </div>
 
             <div className="mt-8">
                  <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><Building size={24}/> Propiedades de Interés</h2>
-                <PropertyListView properties={interestedProperties} onDisassociate={handleDisassociate} />
+                <PropertyListView properties={interestedProperties} onDisassociate={handleDisassociate} onNavigateToProperty={onNavigateToProperty} />
             </div>
         </div>
     </>
