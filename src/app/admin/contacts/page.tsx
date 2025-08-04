@@ -10,12 +10,12 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { MoreHorizontal, PlusCircle } from 'lucide-react';
+import { MoreHorizontal, PlusCircle, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import type { Contact } from '@/types';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ContactForm } from './ContactForm';
 import { getContacts, addContact, deleteContact, updateContact, UpdateContactData } from '@/services/contacts';
 import { useToast } from '@/hooks/use-toast';
@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { ContactDetailsClientView } from './ContactDetailsClientView';
 import { useRouter } from 'next/navigation';
+import { Input } from '@/components/ui/input';
 
 
 const getFullName = (contact: Pick<Contact, 'firstname' | 'secondname' | 'firstlastname' | 'secondlastname'>) => {
@@ -49,6 +50,7 @@ export default function AdminContactsPage() {
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [contactToDelete, setContactToDelete] = useState<string | null>(null);
   const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState('');
 
 
   const fetchContacts = useCallback(async () => {
@@ -76,6 +78,19 @@ export default function AdminContactsPage() {
       console.log("User not authenticated. Cannot fetch contacts.");
     }
   }, [authLoading, user, fetchContacts]);
+  
+  const filteredContacts = useMemo(() => {
+    if (!searchQuery) {
+      return contacts;
+    }
+    const lowercasedQuery = searchQuery.toLowerCase();
+    return contacts.filter(contact => {
+      const fullName = getFullName(contact).toLowerCase();
+      const email = contact.email?.toLowerCase() || '';
+      const phone = contact.phone?.toLowerCase() || '';
+      return fullName.includes(lowercasedQuery) || email.includes(lowercasedQuery) || phone.includes(lowercasedQuery);
+    });
+  }, [contacts, searchQuery]);
 
   const handleSave = async (contactData: UpdateContactData) => {
     try {
@@ -187,7 +202,7 @@ export default function AdminContactsPage() {
       />
 
         <>
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
             <div>
                 <h1 className="text-2xl font-bold font-headline">Formularios de Contacto</h1>
                 <p className="text-muted-foreground">Ver y gestionar las consultas de clientes potenciales.</p>
@@ -197,13 +212,23 @@ export default function AdminContactsPage() {
             </Button>
           </div>
 
+          <div className="mb-6 relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Input
+                placeholder="Buscar por nombre, correo o teléfono..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 w-full sm:max-w-sm"
+              />
+          </div>
+
           {loading ? (
             <p>Cargando contactos...</p>
           ) : (
             <>
               {/* Mobile View - Cards */}
               <div className="md:hidden space-y-4">
-                  {contacts.map((contact) => (
+                  {filteredContacts.map((contact) => (
                   <Card key={contact.id}>
                     <CardHeader>
                       <CardTitle className="text-base truncate">
@@ -248,7 +273,7 @@ export default function AdminContactsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {contacts.map((contact) => (
+                    {filteredContacts.map((contact) => (
                       <TableRow key={contact.id}>
                         <TableCell className="font-medium">
                            <span className="font-bold cursor-pointer" onClick={() => handleViewDetails(contact.id)}>{getFullName(contact)}</span>
@@ -282,6 +307,13 @@ export default function AdminContactsPage() {
                   </TableBody>
                 </Table>
               </div>
+               {filteredContacts.length === 0 && !loading && (
+                    <div className="text-center py-16">
+                        <p className="text-muted-foreground">
+                            {searchQuery ? "No se encontraron contactos que coincidan con tu búsqueda." : "Aún no hay contactos para mostrar."}
+                        </p>
+                    </div>
+                )}
             </>
           )}
         </>
