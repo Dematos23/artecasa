@@ -11,16 +11,17 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { PlusCircle, MoreHorizontal } from 'lucide-react';
-import type { Property } from '@/types';
+import { PlusCircle, MoreHorizontal, Search, ChevronsUpDown } from 'lucide-react';
+import type { Property, Contact } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { PropertyForm } from './PropertyForm';
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { app } from '@/lib/firebase';
 import Image from 'next/image';
 import { getProperties, addProperty, updateProperty, deleteProperty } from '@/services/properties';
+import { getContacts } from '@/services/contacts';
 import { useToast } from '@/hooks/use-toast';
 import {
   AlertDialog,
@@ -33,12 +34,24 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { PropertyDetailsClientView } from './PropertyDetailsClientView';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+
 
 const storage = getStorage(app);
+
+const getOwnerName = (ownerId: string | undefined, contacts: Contact[]) => {
+  if (!ownerId) return 'N/A';
+  const owner = contacts.find(c => c.id === ownerId);
+  return owner ? `${owner.firstname} ${owner.firstlastname}` : 'Desconocido';
+}
 
 
 export default function AdminPropertiesPage() {
   const [properties, setProperties] = useState<Property[]>([]);
+  const [contacts, setContacts] = useState<Contact[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<Property | undefined>(undefined);
   const [isSaving, setIsSaving] = useState(false);
@@ -47,20 +60,32 @@ export default function AdminPropertiesPage() {
   const [propertyToDelete, setPropertyToDelete] = useState<Property | null>(null);
   const [viewingPropertyId, setViewingPropertyId] = useState<string | null>(null);
 
+  // Filter states
+  const [searchQuery, setSearchQuery] = useState('');
+  const [modalityFilter, setModalityFilter] = useState('all');
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [priceCurrency, setPriceCurrency] = useState('USD');
+
+
   const { toast } = useToast();
   const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
-  const fetchProperties = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const propertiesData = await getProperties();
+      const [propertiesData, contactsData] = await Promise.all([
+        getProperties(),
+        getContacts(),
+      ]);
       setProperties(propertiesData);
+      setContacts(contactsData);
     } catch (error) {
       console.error(error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "No se pudieron cargar las propiedades.",
+        description: "No se pudieron cargar los datos.",
       });
     } finally {
       setLoading(false);
@@ -68,8 +93,29 @@ export default function AdminPropertiesPage() {
   }, [toast]);
 
   useEffect(() => {
-    fetchProperties();
-  }, [fetchProperties]);
+    fetchData();
+  }, [fetchData]);
+  
+  const filteredProperties = useMemo(() => {
+    return properties.filter(property => {
+       const lowercasedQuery = searchQuery.toLowerCase();
+       const ownerName = getOwnerName(property.ownerId, contacts).toLowerCase();
+       
+       const searchMatch = !searchQuery || 
+         property.title.toLowerCase().includes(lowercasedQuery) ||
+         ownerName.includes(lowercasedQuery);
+
+       const modalityMatch = modalityFilter === 'all' || property.modality === modalityFilter;
+
+       const minPriceNumber = minPrice ? Number(minPrice) : 0;
+       const maxPriceNumber = maxPrice ? Number(maxPrice) : Infinity;
+       const priceToCompare = priceCurrency === 'PEN' ? property.pricePEN : property.priceUSD;
+       const priceMatch = priceToCompare >= minPriceNumber && priceToCompare <= maxPriceNumber;
+
+       return searchMatch && modalityMatch && priceMatch;
+    });
+  }, [properties, contacts, searchQuery, modalityFilter, minPrice, maxPrice, priceCurrency]);
+
 
   const handleSave = async (propertyData: Omit<Property, 'id'>, newImages: File[]) => {
     setIsSaving(true);
@@ -101,7 +147,7 @@ export default function AdminPropertiesPage() {
             });
         }
 
-        await fetchProperties();
+        await fetchData();
         setIsFormOpen(false);
         setSelectedProperty(undefined);
     } catch (error) {
@@ -129,7 +175,7 @@ export default function AdminPropertiesPage() {
                 title: "Éxito",
                 description: "La propiedad se ha eliminado correctamente.",
             });
-            await fetchProperties();
+            await fetchData();
         } catch (error) {
             console.error("Error eliminando propiedad: ", error);
             toast({
@@ -167,6 +213,14 @@ export default function AdminPropertiesPage() {
     setViewingPropertyId(null);
     openFormForEdit(property);
   };
+  
+  const handleClearFilters = () => {
+    setSearchQuery('');
+    setModalityFilter('all');
+    setMinPrice('');
+    setMaxPrice('');
+    setPriceCurrency('USD');
+  }
 
   if (viewingPropertyId) {
     return <PropertyDetailsClientView 
@@ -175,6 +229,15 @@ export default function AdminPropertiesPage() {
         onEdit={handleEditFromDetails}
     />;
   }
+  
+  const priceButtonText = useMemo(() => {
+    const symbol = priceCurrency === 'PEN' ? 'S/' : '$';
+    if (minPrice && maxPrice) return `${symbol}${Number(minPrice).toLocaleString()} - ${symbol}${Number(maxPrice).toLocaleString()}`;
+    if (minPrice) return `Desde ${symbol}${Number(minPrice).toLocaleString()}`;
+    if (maxPrice) return `Hasta ${symbol}${Number(maxPrice).toLocaleString()}`;
+    return 'Rango de Precio';
+  }, [minPrice, maxPrice, priceCurrency]);
+
 
   return (
     <>
@@ -209,6 +272,79 @@ export default function AdminPropertiesPage() {
           <PlusCircle className="mr-2 h-4 w-4" /> Agregar Propiedad
         </Button>
       </div>
+
+       <Card className="p-4 md:p-6 mb-8">
+         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+          <div className="lg:col-span-2">
+              <Label>Buscar Propiedad</Label>
+               <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                    placeholder="Buscar por título o propietario..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 w-full"
+                />
+              </div>
+          </div>
+
+          <div>
+            <Label>Modalidad</Label>
+            <Select value={modalityFilter} onValueChange={setModalityFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Tipo de Operación" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas</SelectItem>
+                <SelectItem value="venta">Venta</SelectItem>
+                <SelectItem value="alquiler">Alquiler</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+           <div>
+            <Label>Rango de Precio</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-full justify-between font-normal">
+                  <span className='truncate'>{priceButtonText}</span>
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-4" align="start">
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="min-price">Precio Mín.</Label>
+                      <Input id="min-price" placeholder="Mínimo" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} type="number" />
+                    </div>
+                    <div>
+                      <Label htmlFor="max-price">Precio Máx.</Label>
+                      <Input id="max-price" placeholder="Máximo" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} type="number" />
+                    </div>
+                  </div>
+                   <div className="space-y-2">
+                        <Label>Moneda</Label>
+                        <Select value={priceCurrency} onValueChange={setPriceCurrency}>
+                            <SelectTrigger>
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="USD">Dólares (USD)</SelectItem>
+                                <SelectItem value="PEN">Soles (PEN)</SelectItem>
+                            </SelectContent>
+                        </Select>
+                   </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+
+         </div>
+         <div className="mt-4 flex justify-end">
+            <Button onClick={handleClearFilters} variant="secondary" size="sm">Limpiar Filtros</Button>
+        </div>
+      </Card>
       
       {loading ? (
         <p>Cargando propiedades...</p>
@@ -216,7 +352,7 @@ export default function AdminPropertiesPage() {
         <>
           {/* Mobile View - Cards */}
           <div className="md:hidden space-y-4">
-            {properties.map((property) => {
+            {filteredProperties.map((property) => {
               const price = property.modality === 'alquiler' ? property.pricePEN : property.priceUSD;
               const currencySymbol = property.modality === 'alquiler' ? 'S/' : '$';
               return (
@@ -270,6 +406,7 @@ export default function AdminPropertiesPage() {
                 <TableRow>
                   <TableHead className="w-16">Imagen</TableHead>
                   <TableHead>Título</TableHead>
+                  <TableHead>Propietario</TableHead>
                   <TableHead>Precio</TableHead>
                   <TableHead>Modalidad</TableHead>
                   <TableHead>Estado</TableHead>
@@ -277,7 +414,7 @@ export default function AdminPropertiesPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {properties.map((property) => {
+                {filteredProperties.map((property) => {
                   const getPreferredPrice = () => {
                     switch (property.preferredCurrency) {
                         case 'USD':
@@ -315,6 +452,7 @@ export default function AdminPropertiesPage() {
                           {property.title}
                         </span>
                       </TableCell>
+                      <TableCell>{getOwnerName(property.ownerId, contacts)}</TableCell>
                       <TableCell>{currencySymbol}{Number(price).toLocaleString()}</TableCell>
                       <TableCell className="capitalize">{property.modality}</TableCell>
                       <TableCell>
@@ -343,8 +481,18 @@ export default function AdminPropertiesPage() {
               </TableBody>
             </Table>
           </div>
+           {filteredProperties.length === 0 && !loading && (
+              <div className="text-center py-16">
+                  <p className="text-muted-foreground">
+                      No se encontraron propiedades que coincidan con tus filtros.
+                  </p>
+              </div>
+            )}
         </>
       )}
     </>
   );
 }
+
+
+    
