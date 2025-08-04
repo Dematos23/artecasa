@@ -48,31 +48,31 @@ export default function ContactPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <MapPin className="text-primary" /> Dirección de la Oficina
+                <MapPin className="text-primary" /> {settings?.contactAddressTitle || 'Dirección de la Oficina'}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">123 Luxury Avenue, Suite 100, Beverly Hills, CA 90210</p>
+              <p className="text-muted-foreground">{settings?.contactAddressContent || '123 Luxury Avenue, Suite 100, Beverly Hills, CA 90210'}</p>
             </CardContent>
           </Card>
            <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Mail className="text-primary" /> Envíanos un Correo
+                <Mail className="text-primary" /> {settings?.contactEmailTitle || 'Envíanos un Correo'}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <a href="mailto:contact@artecasa.com" className="text-muted-foreground hover:text-primary">contact@artecasa.com</a>
+              <a href={`mailto:${settings?.contactEmailContent || 'contact@artecasa.com'}`} className="text-muted-foreground hover:text-primary">{settings?.contactEmailContent || 'contact@artecasa.com'}</a>
             </CardContent>
           </Card>
            <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Phone className="text-primary" /> Llámanos
+                <Phone className="text-primary" /> {settings?.contactPhoneTitle || 'Llámanos'}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <a href="tel:+1234567890" className="text-muted-foreground hover:text-primary">+1 (234) 567-890</a>
+              <a href={`tel:${settings?.contactPhoneContent || '+1234567890'}`} className="text-muted-foreground hover:text-primary">{settings?.contactPhoneContent || '+1 (234) 567-890'}</a>
             </CardContent>
           </Card>
         </div>
@@ -80,8 +80,8 @@ export default function ContactPage() {
         <div>
           <Card>
             <CardHeader>
-              <CardTitle className="font-headline">Envíanos un Mensaje</CardTitle>
-              <CardDescription>Completa el formulario a continuación y nos pondremos en contacto contigo en breve.</CardDescription>
+              <CardTitle className="font-headline">{settings?.contactFormTitle || 'Envíanos un Mensaje'}</CardTitle>
+              <CardDescription>{settings?.contactFormSubtitle || 'Completa el formulario a continuación y nos pondremos en contacto contigo en breve.'}</CardDescription>
             </CardHeader>
             <CardContent>
               <form action={handleContactSubmit} className="space-y-4">
@@ -102,9 +102,9 @@ export default function ContactPage() {
                   <Textarea id="message" name="message" placeholder="Tu Mensaje" required rows={5} value={message} onChange={(e) => setMessage(e.target.value)} />
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <Button type="submit" className="flex-1">Enviar Mensaje</Button>
+                  <Button type="submit" className="flex-1">{settings?.contactFormSubmitButtonText || 'Enviar Mensaje'}</Button>
                   <Button type="button" onClick={handleWhatsAppClick} variant="outline" className="flex-1 border-green-500 text-green-600 hover:bg-green-500 hover:text-white" disabled={!settings?.whatsappNumber}>
-                      <MessageCircle className="mr-2" /> WhatsApp
+                      <MessageCircle className="mr-2" /> {settings?.contactFormWhatsappButtonText || 'WhatsApp'}
                   </Button>
                 </div>
               </form>

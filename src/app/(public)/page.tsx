@@ -81,7 +81,7 @@ export default function Home() {
           <p className="text-lg sm:text-xl md:text-2xl max-w-3xl">{settings?.homepageSubtitle || 'Donde la Casa de Tus Sueños se Hace Realidad'}</p>
           <Button asChild size="lg" className="mt-8">
             <Link href="/properties">
-              Explorar Propiedades <ArrowRight className="ml-2" />
+              {settings?.homepageHeroButtonText || 'Explorar Propiedades'} <ArrowRight className="ml-2" />
             </Link>
           </Button>
         </div>
@@ -101,7 +101,7 @@ export default function Home() {
                   className="w-full h-auto" />
               </div>
               <div className="md:w-1/2">
-                <h2 className="text-2xl md:text-4xl font-bold font-headline mb-4">Propiedad Destacada</h2>
+                <h2 className="text-2xl md:text-4xl font-bold font-headline mb-4">{settings?.featuredPropertyTitle || 'Propiedad Destacada'}</h2>
                 <h3 className="text-xl md:text-2xl font-semibold text-primary mb-2">{featuredProperty.title}</h3>
                 <p className="text-muted-foreground flex items-center gap-2 mb-4">
                   <MapPin size={16} /> {featuredProperty.address}
@@ -119,7 +119,7 @@ export default function Home() {
                 </div>
                 <Button asChild>
                   <Link href={`/properties/${featuredProperty.id}`}>
-                    Ver Detalles
+                    {settings?.featuredPropertyButtonText || 'Ver Detalles'}
                   </Link>
                 </Button>
               </div>
@@ -131,9 +131,9 @@ export default function Home() {
       <section className="py-12 md:py-24">
         <div className="container mx-auto px-4 md:px-6">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold font-headline mb-4">Descubre Nuestras Propiedades</h2>
+            <h2 className="text-3xl md:text-4xl font-bold font-headline mb-4">{settings?.discoverPropertiesTitle || 'Descubre Nuestras Propiedades'}</h2>
             <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
-              Una cuidada selección de las mejores casas de lujo, adaptadas a tu estilo de vida.
+              {settings?.discoverPropertiesSubtitle || 'Una cuidada selección de las mejores casas de lujo, adaptadas a tu estilo de vida.'}
             </p>
           </div>
           {loading ? (
@@ -160,7 +160,7 @@ export default function Home() {
           <div className="text-center mt-12">
             <Button asChild size="lg">
               <Link href="/properties">
-                Ver Todas las Propiedades
+                {settings?.discoverPropertiesButtonText || 'Ver Todas las Propiedades'}
               </Link>
             </Button>
           </div>

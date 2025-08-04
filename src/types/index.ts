@@ -79,6 +79,25 @@ export interface Settings {
   whatsappNumber: string;
   homepageTitle?: string;
   homepageSubtitle?: string;
+  homepageHeroButtonText?: string;
+  featuredPropertyTitle?: string;
+  featuredPropertyButtonText?: string;
+  discoverPropertiesTitle?: string;
+  discoverPropertiesSubtitle?: string;
+  discoverPropertiesButtonText?: string;
   contactTitle?: string;
   contactSubtitle?: string;
+  contactAddressTitle?: string;
+  contactAddressContent?: string;
+  contactEmailTitle?: string;
+  contactEmailContent?: string;
+  contactPhoneTitle?: string;
+  contactPhoneContent?: string;
+  contactFormTitle?: string;
+  contactFormSubtitle?: string;
+  contactFormSubmitButtonText?: string;
+  contactFormWhatsappButtonText?: string;
+  thankYouTitle?: string;
+  thankYouSubtitle?: string;
+  thankYouButtonText?: string;
 }
