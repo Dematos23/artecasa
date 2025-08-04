@@ -33,7 +33,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { PropertyDetailsClientView } from './[id]/PropertyDetailsClientView';
+import { PropertyDetailsClientView } from './PropertyDetailsClientView';
 
 const storage = getStorage(app);
 
