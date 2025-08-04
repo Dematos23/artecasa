@@ -65,7 +65,7 @@ function LocationCombobox({ value, onChange, className }: { value: string, onCha
       setShowSuggestions(true);
     } else {
       setShowSuggestions(false);
-      onChange(''); 
+      onChange('');
     }
   };
 
@@ -138,7 +138,8 @@ export default function PropertiesPage() {
   const [bedroomsFilter, setBedroomsFilter] = useState('all');
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
-  
+  const [priceCurrency, setPriceCurrency] = useState('PEN');
+
   useEffect(() => {
     const fetchProperties = async () => {
       try {
@@ -159,25 +160,31 @@ export default function PropertiesPage() {
     // Reset prices when modality changes
     setMinPrice('');
     setMaxPrice('');
+    if (value === 'alquiler') {
+        setPriceCurrency('PEN');
+    } else {
+        setPriceCurrency('USD');
+    }
   }
 
   const priceRanges = useMemo(() => {
-    return modalityFilter === 'alquiler' ? rentPriceRanges : salePriceRanges;
-  }, [modalityFilter]);
+    if (priceCurrency === 'PEN') return rentPriceRanges;
+    return salePriceRanges;
+  }, [priceCurrency]);
 
 
   const filteredProperties = useMemo(() => {
     return properties.filter(property => {
       const propertyLocation = `${property.district || ''}, ${property.province || ''}, ${property.region || ''}`.toLowerCase();
-      
+
       const locationMatch = !locationQuery || propertyLocation.includes(locationQuery);
       const modalityMatch = !modalityFilter || modalityFilter === 'all' || property.modality === modalityFilter;
       const bedroomsMatch = bedroomsFilter === 'all' || (property.bedrooms && property.bedrooms >= parseInt(bedroomsFilter));
-      
+
       const minPriceNumber = minPrice ? Number(minPrice) : 0;
       const maxPriceNumber = maxPrice ? Number(maxPrice) : Infinity;
-      
-      const priceToCompare = modalityFilter === 'alquiler' ? property.pricePEN : property.priceUSD;
+
+      const priceToCompare = priceCurrency === 'PEN' ? property.pricePEN : property.priceUSD;
 
       const minPriceMatch = priceToCompare >= minPriceNumber;
       const maxPriceMatch = priceToCompare <= maxPriceNumber;
@@ -185,14 +192,15 @@ export default function PropertiesPage() {
 
       return locationMatch && modalityMatch && bedroomsMatch && minPriceMatch && maxPriceMatch;
     });
-  }, [properties, locationQuery, modalityFilter, bedroomsFilter, minPrice, maxPrice]);
-  
+  }, [properties, locationQuery, modalityFilter, bedroomsFilter, minPrice, maxPrice, priceCurrency]);
+
   const handleClearFilters = () => {
     setLocationQuery('');
     setModalityFilter('all');
     setBedroomsFilter('all');
     setMinPrice('');
     setMaxPrice('');
+    setPriceCurrency('PEN');
   }
 
   const handlePriceRangeClick = (min: number, max: number) => {
@@ -201,12 +209,12 @@ export default function PropertiesPage() {
   }
 
   const priceButtonText = useMemo(() => {
-    const symbol = modalityFilter === 'alquiler' ? 'S/' : '$';
+    const symbol = priceCurrency === 'PEN' ? 'S/' : '$';
     if (minPrice && maxPrice) return `${symbol}${Number(minPrice).toLocaleString()} - ${symbol}${Number(maxPrice).toLocaleString()}`;
     if (minPrice) return `Desde ${symbol}${Number(minPrice).toLocaleString()}`;
     if (maxPrice) return `Hasta ${symbol}${Number(maxPrice).toLocaleString()}`;
     return 'Rango de Precio';
-  }, [minPrice, maxPrice, modalityFilter]);
+  }, [minPrice, maxPrice, priceCurrency]);
 
   return (
     <div className="container mx-auto py-8 md:py-12 px-4 md:px-6">
@@ -237,7 +245,7 @@ export default function PropertiesPage() {
               </SelectContent>
             </Select>
           </div>
-          
+
           <div>
              <Label>Dormitorios</Label>
              <Select value={bedroomsFilter} onValueChange={setBedroomsFilter}>
@@ -276,6 +284,18 @@ export default function PropertiesPage() {
                       <Input id="max-price" placeholder="Máximo" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} type="number" />
                     </div>
                   </div>
+                   <div className="space-y-2">
+                        <Label>Moneda</Label>
+                        <Select value={priceCurrency} onValueChange={setPriceCurrency}>
+                            <SelectTrigger>
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="PEN">Soles (PEN)</SelectItem>
+                                <SelectItem value="USD">Dólares (USD)</SelectItem>
+                            </SelectContent>
+                        </Select>
+                   </div>
                   <div className="flex flex-wrap gap-2 items-center">
                     <span className="text-sm font-medium w-full">Sugerencias:</span>
                     {priceRanges.map(range => (
