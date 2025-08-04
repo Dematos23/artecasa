@@ -222,13 +222,6 @@ export default function PropertiesPage() {
 
   return (
     <div className="container mx-auto py-8 md:py-12 px-4 md:px-6">
-      <div className="text-center mb-8 md:mb-12">
-        <h1 className="text-3xl md:text-5xl font-bold font-headline mb-4">Nuestras Propiedades</h1>
-        <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
-          Explora nuestra colección de propiedades exclusivas y encuentra tu próximo hogar.
-        </p>
-      </div>
-
       <Card className="p-4 md:p-6 mb-8 bg-secondary">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
           <div className="lg:col-span-2">
