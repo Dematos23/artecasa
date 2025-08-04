@@ -1,19 +1,24 @@
 
-import { getPropertyById } from '@/services/properties';
+"use client";
+
 import { PropertyDetailsClientView } from './PropertyDetailsClientView';
-import { auth } from '@/lib/firebase';
+import { useAuth } from '@/context/AuthContext';
 import { redirect } from 'next/navigation';
 
+export default function PropertyDetailsPage({ params }: { params: { id: string } }) {
+  const { user, loading } = useAuth();
 
-export default async function PropertyDetailsPage({ params }: { params: { id: string } }) {
-
-  const user = auth.currentUser;
+  if (loading) {
+     return (
+      <div className="container mx-auto py-24 text-center">
+        <p>Cargando...</p>
+      </div>
+    );
+  }
 
   if (!user) {
     redirect('/login');
   }
 
-  const property = await getPropertyById(params.id);
-  
-  return <PropertyDetailsClientView property={property} />;
+  return <PropertyDetailsClientView propertyId={params.id} />;
 }

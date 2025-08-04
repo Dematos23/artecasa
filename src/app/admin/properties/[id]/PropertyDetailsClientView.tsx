@@ -13,25 +13,21 @@ import { useEffect, useState } from 'react';
 import { getPropertyById } from '@/services/properties';
 
 
-export function PropertyDetailsClientView({ propertyId, initialProperty }: { propertyId: string, initialProperty: Property | undefined }) {
+export function PropertyDetailsClientView({ propertyId }: { propertyId: string }) {
   const router = useRouter();
 
-  const [property, setProperty] = useState<Property | null>(initialProperty || null);
-  const [loading, setLoading] = useState(!initialProperty);
+  const [property, setProperty] = useState<Property | undefined>(undefined);
+  const [loading, setLoading] = useState(true);
 
    useEffect(() => {
-    if (!initialProperty) {
       const fetchDetails = async () => {
         setLoading(true);
         const prop = await getPropertyById(propertyId);
-        if (prop) {
-          setProperty(prop);
-        }
+        setProperty(prop);
         setLoading(false);
       };
       fetchDetails();
-    }
-  }, [propertyId, initialProperty]);
+  }, [propertyId]);
 
   const handleEdit = () => {
     router.push(`/admin/properties?edit=${property?.id}`);

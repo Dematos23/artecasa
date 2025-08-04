@@ -9,6 +9,8 @@ import Link from 'next/link';
 import { ArrowLeft, Mail, Phone, Calendar, User, Tag, FileText, Home } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { getContactById } from '@/services/contacts';
+import { getPropertiesByIds, getPropertiesByOwnerId } from '@/services/properties';
 
 const getFullName = (contact: Pick<Contact, 'firstname' | 'secondname' | 'firstlastname' | 'secondlastname'>) => {
     return [contact.firstname, contact.secondname, contact.firstlastname, contact.secondlastname].filter(Boolean).join(' ');
@@ -16,6 +18,10 @@ const getFullName = (contact: Pick<Contact, 'firstname' | 'secondname' | 'firstl
 
 
 function PropertyListView({ properties }: { properties: Property[] }) {
+    if (properties.length === 0) {
+        return <p className="text-muted-foreground text-sm">No hay propiedades para mostrar.</p>;
+    }
+
     return (
         <>
             {/* Mobile View */}
@@ -29,7 +35,7 @@ function PropertyListView({ properties }: { properties: Property[] }) {
                                 </Link>
                             </CardTitle>
                             <CardDescription className="capitalize">
-                                {property.modality} - ${Number(property.price).toLocaleString()}
+                                {property.modality} - ${Number(property.priceUSD).toLocaleString()}
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="flex justify-end">
@@ -48,7 +54,7 @@ function PropertyListView({ properties }: { properties: Property[] }) {
                         <TableRow>
                             <TableHead>Título</TableHead>
                             <TableHead>Modalidad</TableHead>
-                            <TableHead>Precio</TableHead>
+                            <TableHead>Precio (USD)</TableHead>
                             <TableHead>Acciones</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -62,7 +68,7 @@ function PropertyListView({ properties }: { properties: Property[] }) {
                                     <p className="text-xs text-muted-foreground">{property.address}</p>
                                 </TableCell>
                                 <TableCell className="capitalize">{property.modality}</TableCell>
-                                <TableCell>${Number(property.price).toLocaleString()}</TableCell>
+                                <TableCell>${Number(property.priceUSD).toLocaleString()}</TableCell>
                                 <TableCell>
                                     <Button asChild variant="outline" size="sm">
                                         <Link href={`/admin/properties/${property.id}`}>Ver Detalles</Link>
@@ -78,25 +84,39 @@ function PropertyListView({ properties }: { properties: Property[] }) {
 }
 
 interface ContactDetailsClientViewProps {
-  contact?: Contact;
-  ownedProperties: Property[];
-  interestedProperties: Property[];
+  contactId: string;
 }
 
-export function ContactDetailsClientView({ contact: initialContact, ownedProperties: initialOwnedProperties, interestedProperties: initialInterestedProperties }: ContactDetailsClientViewProps) {
-  const [contact, setContact] = useState(initialContact);
-  const [ownedProperties, setOwnedProperties] = useState(initialOwnedProperties);
-  const [interestedProperties, setInterestedProperties] = useState(initialInterestedProperties);
-  const [loading, setLoading] = useState(!initialContact);
+export function ContactDetailsClientView({ contactId }: ContactDetailsClientViewProps) {
+  const [contact, setContact] = useState<Contact | undefined>(undefined);
+  const [ownedProperties, setOwnedProperties] = useState<Property[]>([]);
+  const [interestedProperties, setInterestedProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
   
   useEffect(() => {
-    if (initialContact) {
-      setContact(initialContact);
-      setOwnedProperties(initialOwnedProperties);
-      setInterestedProperties(initialInterestedProperties);
+    const fetchContactData = async () => {
+      setLoading(true);
+      const contactData = await getContactById(contactId);
+      if (contactData) {
+        setContact(contactData);
+        let ownedProps: Property[] = [];
+        let interestedProps: Property[] = [];
+        
+        if (contactData.types.includes('vendedor') || contactData.types.includes('arrendador')) {
+          // ownedProps = await getPropertiesByOwnerId(contactData.id);
+        }
+        if ((contactData.types.includes('comprador') || contactData.types.includes('arrendatario')) && contactData.interestedPropertyIds && contactData.interestedPropertyIds.length > 0) {
+          interestedProps = await getPropertiesByIds(contactData.interestedPropertyIds);
+        }
+        
+        setOwnedProperties(ownedProps);
+        setInterestedProperties(interestedProps);
+      }
       setLoading(false);
-    }
-  }, [initialContact, initialOwnedProperties, initialInterestedProperties]);
+    };
+
+    fetchContactData();
+  }, [contactId]);
   
 
   if (loading) {
@@ -173,4 +193,3 @@ export function ContactDetailsClientView({ contact: initialContact, ownedPropert
     </div>
   );
 }
-

@@ -9,6 +9,7 @@ import type { Property } from '@/types';
 import { BedDouble, Bath, Car, Maximize, MapPin, Phone, CalendarClock } from 'lucide-react';
 import Link from 'next/link';
 import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
+import { getPropertyById } from '@/services/properties';
 
 const containerStyle = {
   width: '100%',
@@ -21,9 +22,9 @@ const defaultCenter = {
   lng: -77.042793
 };
 
-export function PropertyDetailsClientView({ property: initialProperty }: { property: Property | undefined }) {
-  const [property, setProperty] = useState(initialProperty);
-  const [loading, setLoading] = useState(!initialProperty);
+export function PropertyDetailsClientView({ propertyId }: { propertyId: string }) {
+  const [property, setProperty] = useState<Property | undefined>(undefined);
+  const [loading, setLoading] = useState(true);
   const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
   const { isLoaded } = useJsApiLoader({
@@ -33,11 +34,14 @@ export function PropertyDetailsClientView({ property: initialProperty }: { prope
   });
 
   useEffect(() => {
-    if (initialProperty) {
-      setProperty(initialProperty);
+    const fetchProperty = async () => {
+      setLoading(true);
+      const prop = await getPropertyById(propertyId);
+      setProperty(prop);
       setLoading(false);
     }
-  }, [initialProperty]);
+    fetchProperty();
+  }, [propertyId]);
 
   if (loading) {
      return (

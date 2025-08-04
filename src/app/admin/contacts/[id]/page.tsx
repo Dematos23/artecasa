@@ -1,30 +1,24 @@
 
-import { getContactById } from '@/services/contacts';
-import { getPropertiesByOwnerId, getPropertiesByIds } from '@/services/properties';
-import { ContactDetailsClientView } from './ContactDetailsClientView';
-import { redirect } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
+"use client";
 
-export default async function ContactDetailsPage({ params }: { params: { id: string } }) {
-  // Note: This component is an RSC, useAuth will not work here directly.
-  // Authentication check should be done on the client-side component or a server-side guard.
+import { ContactDetailsClientView } from './ContactDetailsClientView';
+import { useAuth } from '@/context/AuthContext';
+import { redirect } from 'next/navigation';
+
+export default function ContactDetailsPage({ params }: { params: { id: string } }) {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+     return (
+      <div className="container mx-auto py-24 text-center">
+        <p>Cargando...</p>
+      </div>
+    );
+  }
+
   if (!user) {
     redirect('/login');
   }
 
-  const contactId = params.id;
-  const contactData = await getContactById(contactId);  
-  let ownedProperties = [];
-  let interestedProperties = [];
-
-  if (contactData) {
-    if (contactData.types.includes('vendedor') || contactData.types.includes('arrendador')) {
-      ownedProperties = await getPropertiesByOwnerId(contactData.id);
-    }
-    if ((contactData.types.includes('comprador') || contactData.types.includes('arrendatario')) && contactData.interestedPropertyIds && contactData.interestedPropertyIds.length > 0) {
-      interestedProperties = await getPropertiesByIds(contactData.interestedPropertyIds);
-    }
-  }
-  
-  return <ContactDetailsClientView contact={contactData} ownedProperties={ownedProperties} interestedProperties={interestedProperties} />;
+  return <ContactDetailsClientView contactId={params.id} />;
 }
