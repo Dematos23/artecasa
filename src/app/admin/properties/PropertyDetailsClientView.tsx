@@ -101,7 +101,7 @@ export function PropertyDetailsClientView({ propertyId, onClose }: { propertyId:
                  <CardContent>
                     {property.imageUrls && property.imageUrls.length > 0 ? (
                         <div className="relative w-full h-96 rounded-lg overflow-hidden mb-6">
-                            <Image src={property.imageUrls[0]} alt={property.title} fill style={{objectFit: 'cover'}} />
+                            <Image src={property.imageUrls[0]} alt={property.title} fill style={{objectFit: 'cover'}} sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" />
                         </div>
                     ) : (
                         <div className="relative w-full h-96 rounded-lg overflow-hidden mb-6 bg-secondary flex items-center justify-center text-muted-foreground">

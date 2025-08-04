@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/table';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { PlusCircle, MoreHorizontal } from 'lucide-react';
-import type { Property, NewPropertyData, UpdatePropertyData } from '@/types';
+import type { Property } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import React, { useState, useEffect, useCallback } from 'react';
@@ -106,13 +106,13 @@ export default function AdminPropertiesPage() {
         };
 
         if (selectedProperty) {
-            await updateProperty(selectedProperty.id, finalPropertyData as UpdatePropertyData);
+            await updateProperty(selectedProperty.id, finalPropertyData);
             toast({
                 title: "Éxito",
                 description: "La propiedad se ha actualizado correctamente.",
             });
         } else {
-            await addProperty(finalPropertyData as NewPropertyData);
+            await addProperty(finalPropertyData);
              toast({
                 title: "Éxito",
                 description: "La propiedad se ha creado correctamente.",
@@ -193,7 +193,7 @@ export default function AdminPropertiesPage() {
       <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Estás absolutamente seguro?</AlertDialogTitle>
+            <AlertDialogTitle>¿Estás absolutely seguro?</AlertDialogTitle>
             <AlertDialogDescription>
               Esta acción no se puede deshacer. Esto eliminará permanentemente
               la propiedad y todas sus imágenes de la base de datos.
@@ -349,3 +349,5 @@ export default function AdminPropertiesPage() {
     </>
   );
 }
+
+    

@@ -262,17 +262,11 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
   };
 
 
-  const onSubmit = async (values: z.infer<typeof propertySchema>) => {
+  const onSubmit = (values: z.infer<typeof propertySchema>) => {
     const { newImages, ...propertyData } = values;
-    
-    const finalProperty: Omit<Property, 'id'> = {
-        ...propertyData,
-        imageUrls: values.imageUrls || [],
-    }
-    onSave(finalProperty, newImageFiles);
+    onSave(propertyData, newImageFiles);
   };
 
-  const existingImageCount = form.getValues('imageUrls')?.length ?? 0;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -571,3 +565,5 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
     </Dialog>
   );
 }
+
+    

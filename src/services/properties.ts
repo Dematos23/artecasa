@@ -52,18 +52,14 @@ export async function getPropertiesByIds(ids: string[]): Promise<Property[]> {
 
 // Function to add a new property to Firestore
 export async function addProperty(propertyData: NewPropertyData): Promise<string> {
-  const docRef = await addDoc(propertiesCollection, {
-    ...propertyData,
-  });
+  const docRef = await addDoc(propertiesCollection, propertyData);
   return docRef.id;
 }
 
 // Function to update an existing property in Firestore
 export async function updateProperty(id: string, propertyData: UpdatePropertyData): Promise<void> {
   const propertyDoc = doc(db, 'properties', id);
-  await updateDoc(propertyDoc, {
-    ...propertyData,
-  });
+  await updateDoc(propertyDoc, propertyData);
 }
 
 // Function to delete a property from Firestore and its images from Storage
@@ -90,3 +86,5 @@ export async function deleteProperty(id: string, imageUrls: string[]): Promise<v
   const propertyDoc = doc(db, 'properties', id);
   await deleteDoc(propertyDoc);
 }
+
+    
