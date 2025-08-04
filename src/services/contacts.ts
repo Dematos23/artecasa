@@ -1,8 +1,10 @@
 
 import { db } from '@/lib/firebase';
-import { collection, getDocs, addDoc, serverTimestamp, query, orderBy, doc, deleteDoc, updateDoc, getDoc, arrayUnion } from 'firebase/firestore';
-import type { Contact } from '@/types';
-import { updateProperty } from './properties';
+import { collection, getDocs, addDoc, serverTimestamp, query, orderBy, doc, deleteDoc, updateDoc, getDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
+import type { Contact, Property } from '@/types';
+import { getPropertiesByIds, updateProperty } from './properties';
+import { getProperties } from './properties';
+
 
 const contactsCollection = collection(db, 'contacts');
 
@@ -42,6 +44,31 @@ export async function getContactById(id: string): Promise<Contact | undefined> {
         return undefined;
     }
 }
+
+// Function to get the properties (owned and interested) for a contact
+export async function getContactProperties(contact: Contact): Promise<{ owned: Property[], interested: Property[] }> {
+    let owned: Property[] = [];
+    let interested: Property[] = [];
+
+    if (contact.ownerOfPropertyIds && contact.ownerOfPropertyIds.length > 0) {
+        owned = await getPropertiesByIds(contact.ownerOfPropertyIds);
+    }
+    if (contact.interestedInPropertyIds && contact.interestedInPropertyIds.length > 0) {
+        interested = await getPropertiesByIds(contact.interestedInPropertyIds);
+    }
+
+    return { owned, interested };
+}
+
+// Function to get all properties that are not currently associated with any contact as an owner
+export async function getUnassociatedProperties(): Promise<Property[]> {
+    const allProperties = await getProperties();
+    const allContacts = await getContacts();
+    const associatedPropertyIds = new Set(allContacts.flatMap(c => c.ownerOfPropertyIds || []));
+
+    return allProperties.filter(p => !associatedPropertyIds.has(p.id));
+}
+
 
 
 // Function to add a new contact to Firestore
@@ -86,4 +113,19 @@ export async function updateContactAssociations(
         // Also update the property to set the ownerId
         await updateProperty(propertyId, { ownerId: contactId });
     }
+}
+
+// Function to disassociate a property from a contact
+export async function disassociatePropertyFromContact(contactId: string, propertyId: string): Promise<void> {
+    const contactDoc = doc(db, 'contacts', contactId);
+    
+    // Remove from both arrays, as we don't know the type here.
+    // Firestore's arrayRemove is idempotent.
+    await updateDoc(contactDoc, {
+        interestedInPropertyIds: arrayRemove(propertyId),
+        ownerOfPropertyIds: arrayRemove(propertyId)
+    });
+
+    // Unset the ownerId from the property as well
+    await updateProperty(propertyId, { ownerId: '' }); // or delete the field
 }

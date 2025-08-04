@@ -6,18 +6,20 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import type { Contact, Property } from '@/types';
 import Link from 'next/link';
-import { ArrowLeft, Mail, Phone, User, Tag, FileText, Home, Edit } from 'lucide-react';
+import { ArrowLeft, Mail, Phone, User, Tag, FileText, Home, Edit, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { getContactById } from '@/services/contacts';
-import { getPropertiesByIds } from '@/services/properties';
+import { getContactProperties, disassociatePropertyFromContact } from '@/services/contacts';
+import { AssociatePropertyForm } from './AssociatePropertyForm';
+import { useToast } from '@/hooks/use-toast';
 
 const getFullName = (contact: Pick<Contact, 'firstname' | 'secondname' | 'firstlastname' | 'secondlastname'>) => {
     return [contact.firstname, contact.secondname, contact.firstlastname, contact.secondlastname].filter(Boolean).join(' ');
 }
 
 
-function PropertyListView({ properties }: { properties: Property[] }) {
+function PropertyListView({ properties, onDisassociate }: { properties: Property[], onDisassociate: (propertyId: string) => void }) {
     if (properties.length === 0) {
         return <p className="text-muted-foreground text-sm">No hay propiedades para mostrar.</p>;
     }
@@ -38,8 +40,11 @@ function PropertyListView({ properties }: { properties: Property[] }) {
                                 {property.modality} - ${Number(property.priceUSD).toLocaleString()}
                             </CardDescription>
                         </CardHeader>
-                        <CardContent className="flex justify-end">
-                             <Button asChild variant="outline" size="sm">
+                        <CardContent className="flex justify-between">
+                            <Button variant="destructive" size="sm" onClick={() => onDisassociate(property.id)}>
+                                <X className="mr-2 h-4 w-4" /> Desasociar
+                            </Button>
+                            <Button asChild variant="outline" size="sm">
                                 <Link href={`/admin/properties?edit=${property.id}`}>Ver Detalles</Link>
                             </Button>
                         </CardContent>
@@ -69,9 +74,12 @@ function PropertyListView({ properties }: { properties: Property[] }) {
                                 </TableCell>
                                 <TableCell className="capitalize">{property.modality}</TableCell>
                                 <TableCell>${Number(property.priceUSD).toLocaleString()}</TableCell>
-                                <TableCell>
+                                <TableCell className="space-x-2">
+                                    <Button variant="destructive" size="sm" onClick={() => onDisassociate(property.id)}>
+                                        <X className="mr-2 h-4 w-4" />
+                                    </Button>
                                     <Button asChild variant="outline" size="sm">
-                                        <Link href={`/admin/properties?edit=${property.id}`}>Ver Detalles</Link>
+                                        <Link href={`/admin/properties?edit=${property.id}`}>Ver</Link>
                                     </Button>
                                 </TableCell>
                             </TableRow>
@@ -94,32 +102,40 @@ export function ContactDetailsClientView({ contactId, onClose, onEdit }: Contact
   const [ownedProperties, setOwnedProperties] = useState<Property[]>([]);
   const [interestedProperties, setInterestedProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isAssociateFormOpen, setIsAssociateFormOpen] = useState(false);
+  const { toast } = useToast();
   
-  useEffect(() => {
-    const fetchContactData = async () => {
-      setLoading(true);
-      const contactData = await getContactById(contactId);
-      if (contactData) {
+  const fetchContactData = async () => {
+    setLoading(true);
+    const contactData = await getContactById(contactId);
+    if (contactData) {
         setContact(contactData);
-        let ownedProps: Property[] = [];
-        let interestedProps: Property[] = [];
-        
-        if (contactData.ownerOfPropertyIds && contactData.ownerOfPropertyIds.length > 0) {
-          ownedProps = await getPropertiesByIds(contactData.ownerOfPropertyIds);
-        }
-        if (contactData.interestedInPropertyIds && contactData.interestedInPropertyIds.length > 0) {
-          interestedProps = await getPropertiesByIds(contactData.interestedInPropertyIds);
-        }
-        
-        setOwnedProperties(ownedProps);
-        setInterestedProperties(interestedProps);
-      }
-      setLoading(false);
-    };
+        const { owned, interested } = await getContactProperties(contactData);
+        setOwnedProperties(owned);
+        setInterestedProperties(interested);
+    }
+    setLoading(false);
+  };
 
+  useEffect(() => {
     fetchContactData();
   }, [contactId]);
+
+  const handleAssociationSaved = () => {
+      fetchContactData(); // Refetch all data
+  };
   
+  const handleDisassociate = async (propertyId: string) => {
+    if (!contact) return;
+    try {
+      await disassociatePropertyFromContact(contact.id, propertyId);
+      toast({ title: "Éxito", description: "Propiedad desasociada correctamente." });
+      fetchContactData(); // Refetch
+    } catch (error) {
+      console.error(error);
+      toast({ variant: "destructive", title: "Error", description: "No se pudo desasociar la propiedad." });
+    }
+  };
 
   if (loading) {
     return (
@@ -153,11 +169,17 @@ export function ContactDetailsClientView({ contactId, onClose, onEdit }: Contact
   );
 
   return (
-    <div>
+    <>
+        <AssociatePropertyForm 
+            isOpen={isAssociateFormOpen}
+            onClose={() => setIsAssociateFormOpen(false)}
+            onAssociationSaved={handleAssociationSaved}
+            contact={contact}
+        />
         <div className="flex justify-between items-center mb-6">
             <BackButton />
             <div className="flex gap-2">
-                 <Button size="sm" variant="outline" onClick={() => alert("Función no implementada")}>
+                 <Button size="sm" variant="outline" onClick={() => setIsAssociateFormOpen(true)}>
                     <Home className="mr-2 h-4 w-4" /> Asociar a Propiedad
                 </Button>
                 {onEdit && (
@@ -168,7 +190,7 @@ export function ContactDetailsClientView({ contactId, onClose, onEdit }: Contact
             </div>
         </div>
 
-        <div className="space-y-8">
+        <div>
             <Card>
                 <CardHeader>
                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
@@ -193,20 +215,16 @@ export function ContactDetailsClientView({ contactId, onClose, onEdit }: Contact
                 </CardContent>
             </Card>
             
-            {ownedProperties.length > 0 && (
-                <div className="mt-8">
-                    <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><Home size={24}/> Propiedades en Posesión</h2>
-                    <PropertyListView properties={ownedProperties} />
-                </div>
-            )}
+            <div className="mt-8">
+                <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><Home size={24}/> Propiedades en Posesión</h2>
+                <PropertyListView properties={ownedProperties} onDisassociate={handleDisassociate} />
+            </div>
 
-            {interestedProperties.length > 0 && (
-                <div className="mt-8">
-                     <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><Home size={24}/> Propiedades de Interés</h2>
-                    <PropertyListView properties={interestedProperties} />
-                </div>
-            )}
+            <div className="mt-8">
+                 <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><Home size={24}/> Propiedades de Interés</h2>
+                <PropertyListView properties={interestedProperties} onDisassociate={handleDisassociate} />
+            </div>
         </div>
-    </div>
+    </>
   );
 }
