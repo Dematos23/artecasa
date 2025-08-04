@@ -11,15 +11,14 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { PlusCircle, MoreHorizontal, Star } from 'lucide-react';
+import { PlusCircle, MoreHorizontal } from 'lucide-react';
 import type { Property, NewPropertyData, UpdatePropertyData } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import React, { useState, useEffect, useCallback } from 'react';
 import { PropertyForm } from './PropertyForm';
-import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { app } from '@/lib/firebase';
-import Link from 'next/link';
 import Image from 'next/image';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { getProperties, addProperty, updateProperty, deleteProperty } from '@/services/properties';
@@ -34,6 +33,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { PropertyDetailsClientView } from './[id]/PropertyDetailsClientView';
 
 const storage = getStorage(app);
 
@@ -46,6 +46,7 @@ export default function AdminPropertiesPage() {
   const [loading, setLoading] = useState(true);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [propertyToDelete, setPropertyToDelete] = useState<Property | null>(null);
+  const [viewingPropertyId, setViewingPropertyId] = useState<string | null>(null);
 
   const { toast } = useToast();
   const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
@@ -172,6 +173,19 @@ export default function AdminPropertiesPage() {
     setSelectedProperty(undefined);
     setIsFormOpen(true);
   };
+  
+  const handleViewDetails = (id: string) => {
+    setViewingPropertyId(id);
+  }
+
+  const handleCloseDetails = () => {
+    setViewingPropertyId(null);
+  }
+
+
+  if (viewingPropertyId) {
+    return <PropertyDetailsClientView propertyId={viewingPropertyId} onClose={handleCloseDetails} />;
+  }
 
 
   return (
@@ -220,7 +234,7 @@ export default function AdminPropertiesPage() {
               return (
                 <Card key={property.id}>
                   {property.imageUrls?.[0] && (
-                      <Link href={`/admin/properties/${property.id}`}>
+                      <div className='cursor-pointer' onClick={() => handleViewDetails(property.id)}>
                           <Image
                               src={property.imageUrls[0]}
                               alt={property.title}
@@ -228,13 +242,13 @@ export default function AdminPropertiesPage() {
                               height={200}
                               className="w-full h-48 object-cover rounded-t-lg"
                           />
-                      </Link>
+                      </div>
                   )}
                   <CardHeader className={property.imageUrls?.[0] ? 'pt-4' : ''}>
                     <CardTitle className="text-base truncate">
-                      <Link href={`/admin/properties/${property.id}`} className="font-bold">
+                      <span className="font-bold cursor-pointer" onClick={() => handleViewDetails(property.id)}>
                         {property.title}
-                      </Link>
+                      </span>
                     </CardTitle>
                     <CardDescription className="capitalize">{property.modality} - {currencySymbol}{Number(price).toLocaleString()}</CardDescription>
                   </CardHeader>
@@ -280,7 +294,7 @@ export default function AdminPropertiesPage() {
                   return (
                     <TableRow key={property.id}>
                       <TableCell>
-                          <Link href={`/admin/properties/${property.id}`}>
+                          <div className='cursor-pointer' onClick={() => handleViewDetails(property.id)}>
                               {property.imageUrls?.[0] ? (
                                   <Image
                                       src={property.imageUrls[0]}
@@ -294,12 +308,12 @@ export default function AdminPropertiesPage() {
                                       <PlusCircle className="w-6 h-6"/>
                                   </div>
                               )}
-                          </Link>
+                          </div>
                       </TableCell>
                       <TableCell>
-                        <Link href={`/admin/properties/${property.id}`} className="font-bold">
+                        <span className="font-bold cursor-pointer" onClick={() => handleViewDetails(property.id)}>
                           {property.title}
-                        </Link>
+                        </span>
                       </TableCell>
                       <TableCell>{currencySymbol}{Number(price).toLocaleString()}</TableCell>
                       <TableCell className="capitalize">{property.modality}</TableCell>

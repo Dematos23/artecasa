@@ -13,7 +13,7 @@ import { useEffect, useState } from 'react';
 import { getPropertyById } from '@/services/properties';
 
 
-export function PropertyDetailsClientView({ propertyId }: { propertyId: string }) {
+export function PropertyDetailsClientView({ propertyId, onClose }: { propertyId: string, onClose?: () => void }) {
   const router = useRouter();
 
   const [property, setProperty] = useState<Property | undefined>(undefined);
@@ -30,7 +30,14 @@ export function PropertyDetailsClientView({ propertyId }: { propertyId: string }
   }, [propertyId]);
 
   const handleEdit = () => {
+    // This will navigate to the properties page with a query param
+    // The properties page will detect this and open the form for editing
     router.push(`/admin/properties?edit=${property?.id}`);
+    // If we have an onClose handler, it means we are in the modal-like view
+    // so we should call it to close the details view.
+    if(onClose) {
+      onClose();
+    }
   }
 
   if (loading) {
@@ -53,6 +60,16 @@ export function PropertyDetailsClientView({ propertyId }: { propertyId: string }
       </div>
     );
   }
+  
+  const BackButton = () => (
+    <Button asChild variant="outline" size="sm" onClick={onClose}>
+        {onClose ? (
+            <span className='flex items-center cursor-pointer'><ArrowLeft className="mr-2" /> Volver a Propiedades</span>
+        ) : (
+            <Link href="/admin/properties"><ArrowLeft className="mr-2" /> Volver a Propiedades</Link>
+        )}
+    </Button>
+  );
 
   const antiquityText = property.antiquity === 0 ? 'A estrenar' : property.antiquity ? `${property.antiquity} años` : 'N/A';
   const fullAddress = [property.address, property.district, property.province, property.region].filter(Boolean).join(', ');
@@ -60,9 +77,7 @@ export function PropertyDetailsClientView({ propertyId }: { propertyId: string }
   return (
     <div>
         <div className="flex justify-between items-center mb-6">
-            <Button asChild variant="outline" size="sm">
-                <Link href="/admin/properties"><ArrowLeft className="mr-2" /> Volver a Propiedades</Link>
-            </Button>
+            <BackButton />
             <Button size="sm" onClick={handleEdit}>
                 <Edit className="mr-2 h-4 w-4" /> Editar Propiedad
             </Button>
