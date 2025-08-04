@@ -85,9 +85,10 @@ function PropertyListView({ properties }: { properties: Property[] }) {
 
 interface ContactDetailsClientViewProps {
   contactId: string;
+  onClose?: () => void;
 }
 
-export function ContactDetailsClientView({ contactId }: ContactDetailsClientViewProps) {
+export function ContactDetailsClientView({ contactId, onClose }: ContactDetailsClientViewProps) {
   const [contact, setContact] = useState<Contact | undefined>(undefined);
   const [ownedProperties, setOwnedProperties] = useState<Property[]>([]);
   const [interestedProperties, setInterestedProperties] = useState<Property[]>([]);
@@ -140,12 +141,20 @@ export function ContactDetailsClientView({ contactId }: ContactDetailsClientView
     );
   }
 
+  const BackButton = () => (
+    <Button asChild variant="outline" size="sm" onClick={onClose}>
+        {onClose ? (
+            <span className='flex items-center cursor-pointer'><ArrowLeft className="mr-2" /> Volver a Contactos</span>
+        ) : (
+            <Link href="/admin/contacts"><ArrowLeft className="mr-2" /> Volver a Contactos</Link>
+        )}
+    </Button>
+  );
+
   return (
     <div className='space-y-8'>
         <div className="mb-6">
-            <Button asChild variant="outline" size="sm">
-                <Link href="/admin/contacts"><ArrowLeft className="mr-2" /> Volver a Contactos</Link>
-            </Button>
+            <BackButton />
         </div>
 
         <Card>
