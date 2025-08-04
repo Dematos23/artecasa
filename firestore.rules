@@ -1,34 +1,28 @@
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper functions
-    function isSignedIn() {
-      return request.auth != null;
-    }
-
-    // PROTECTED: Only authenticated users can read or write
+    // Properties: Public can read, only admin can write
     match /properties/{propertyId} {
-      allow read: if true; // Public can read
-      allow write: if isSignedIn();
-    }
-    
-    // PROTECTED: Only authenticated users can read or write
-    match /contacts/{contactId} {
-      allow read, write: if isSignedIn();
+      allow read: if true;
+      allow write: if request.auth != null;
     }
 
-    // PROTECTED: Only authenticated users can read or write
-    match /settings/{settingId} {
-      allow read: if true; // Public can read settings for WhatsApp number etc.
-      allow write: if isSignedIn();
+    // Contacts: Only admin can read/write
+    match /contacts/{contactId} {
+      allow read, write: if request.auth != null;
     }
-    
-    // PUBLIC: Anyone can submit a lead
+
+    // Leads: Public can write, only admin can read/delete
     match /leads/{leadId} {
-      allow read, write: if true;
+      allow create: if true;
+      allow read, delete: if request.auth != null;
+    }
+
+    // Settings: Only admin can read/write
+     match /settings/{settingId} {
+      allow read, write: if request.auth != null;
     }
   }
 }
