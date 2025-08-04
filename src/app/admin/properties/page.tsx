@@ -20,6 +20,7 @@ import { PropertyForm } from './PropertyForm';
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { app } from '@/lib/firebase';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { getProperties, addProperty, updateProperty, deleteProperty } from '@/services/properties';
 import { useToast } from '@/hooks/use-toast';
@@ -215,7 +216,16 @@ export default function AdminPropertiesPage() {
           <div className="md:hidden space-y-4">
             {properties.map((property) => (
               <Card key={property.id}>
-                <CardHeader>
+                 {property.imageUrls?.[0] && (
+                    <Image
+                        src={property.imageUrls[0]}
+                        alt={property.title}
+                        width={400}
+                        height={200}
+                        className="w-full h-48 object-cover rounded-t-lg"
+                    />
+                )}
+                <CardHeader className={property.imageUrls?.[0] ? 'pt-4' : ''}>
                   <CardTitle className="text-base truncate">
                     <Link href={`/admin/properties/${property.id}`} className="font-bold">
                       {property.title}
@@ -249,6 +259,7 @@ export default function AdminPropertiesPage() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-16">Imagen</TableHead>
                   <TableHead>Título</TableHead>
                   <TableHead>Precio</TableHead>
                   <TableHead>Modalidad</TableHead>
@@ -259,6 +270,21 @@ export default function AdminPropertiesPage() {
               <TableBody>
                 {properties.map((property) => (
                   <TableRow key={property.id}>
+                     <TableCell>
+                        {property.imageUrls?.[0] ? (
+                            <Image
+                                src={property.imageUrls[0]}
+                                alt={property.title}
+                                width={64}
+                                height={64}
+                                className="w-16 h-16 object-cover rounded-md"
+                            />
+                        ) : (
+                            <div className="w-16 h-16 bg-secondary rounded-md flex items-center justify-center text-muted-foreground">
+                                <PlusCircle className="w-6 h-6"/>
+                            </div>
+                        )}
+                    </TableCell>
                     <TableCell>
                       <Link href={`/admin/properties/${property.id}`} className="font-bold">
                         {property.title}
@@ -295,3 +321,5 @@ export default function AdminPropertiesPage() {
     </>
   );
 }
+
+    

@@ -34,7 +34,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
-import { UploadCloud, X } from 'lucide-react';
+import { UploadCloud, X, Star } from 'lucide-react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { peruLocations } from '@/lib/peru-locations';
@@ -135,6 +135,7 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
   });
   
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
   
   const watchedAddress = useWatch({ control: form.control, name: 'address' });
   const watchedRegion = useWatch({ control: form.control, name: 'region' });
@@ -194,37 +195,63 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
     };
     form.reset(defaultVals as any);
     setImagePreviews(property?.imageUrls || []);
+    setNewImageFiles([]);
   }, [property, form, isOpen]);
 
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length > 0) {
-        const currentFiles = form.getValues('newImages') || [];
-        form.setValue('newImages', [...currentFiles, ...files]);
+        setNewImageFiles(prev => [...prev, ...files]);
 
         const newPreviews = files.map(file => URL.createObjectURL(file));
         setImagePreviews(prev => [...prev, ...newPreviews]);
     }
   };
 
-  const removeImage = (index: number, isNew: boolean) => {
-    const currentPreviews = [...imagePreviews];
-    if (isNew) {
-        const newImageIndex = index - (property?.imageUrls?.length ?? 0);
-        const newImages = [...(form.getValues('newImages') || [])];
-        const removedPreview = imagePreviews[index];
-        URL.revokeObjectURL(removedPreview);
-        newImages.splice(newImageIndex, 1);
-        form.setValue('newImages', newImages);
+  const removeImage = (indexToRemove: number) => {
+    const existingUrls = form.getValues('imageUrls') || [];
+    const newPreviews = [...imagePreviews];
+    newPreviews.splice(indexToRemove, 1);
+    setImagePreviews(newPreviews);
+
+    if (indexToRemove < existingUrls.length) {
+        // It's an existing image, update form value
+        const newUrls = existingUrls.filter((_, i) => i !== indexToRemove);
+        form.setValue('imageUrls', newUrls);
     } else {
-        const imageUrls = [...(form.getValues('imageUrls') || [])];
-        imageUrls.splice(index, 1);
-        form.setValue('imageUrls', imageUrls);
+        // It's a new image, update file list
+        const newImageIndex = indexToRemove - existingUrls.length;
+        const newFiles = [...newImageFiles];
+        const removedPreview = imagePreviews[indexToRemove];
+        URL.revokeObjectURL(removedPreview);
+        newFiles.splice(newImageIndex, 1);
+        setNewImageFiles(newFiles);
     }
-    
-    currentPreviews.splice(index, 1);
-    setImagePreviews(currentPreviews);
+  };
+
+  const setAsPrimary = (indexToMove: number) => {
+      if (indexToMove === 0) return; // Already primary
+
+      const existingUrls = form.getValues('imageUrls') || [];
+      const newAllPreviews = [...imagePreviews];
+      
+      const itemToMove = newAllPreviews.splice(indexToMove, 1)[0];
+      newAllPreviews.unshift(itemToMove);
+      setImagePreviews(newAllPreviews);
+
+      if (indexToMove < existingUrls.length) {
+          const newUrls = [...existingUrls];
+          const urlToMove = newUrls.splice(indexToMove, 1)[0];
+          newUrls.unshift(urlToMove);
+          form.setValue('imageUrls', newUrls);
+      } else {
+          const newImageIndexInFiles = indexToMove - existingUrls.length;
+          const newFiles = [...newImageFiles];
+          const fileToMove = newFiles.splice(newImageIndexInFiles, 1)[0];
+          newFiles.unshift(fileToMove);
+          setNewImageFiles(newFiles);
+      }
   };
 
 
@@ -236,10 +263,10 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
         price: propertyData.price?.toString() ?? '0',
         imageUrls: values.imageUrls || [],
     }
-    onSave(finalProperty, newImages || []);
+    onSave(finalProperty, newImageFiles);
   };
 
-  const existingImageCount = property?.imageUrls?.length ?? 0;
+  const existingImageCount = form.getValues('imageUrls')?.length ?? 0;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -363,11 +390,16 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
                    {imagePreviews.length > 0 && (
                      <div className="mt-4 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
                         {imagePreviews.map((previewUrl, index) => (
-                           <div key={index} className="relative group">
+                           <div key={previewUrl + index} className="relative group">
                              <Image src={previewUrl} alt={`Vista previa de imagen ${index + 1}`} width={150} height={150} className="h-24 w-24 object-cover rounded-md" />
-                              <button type="button" onClick={() => removeImage(index, index >= existingImageCount)} className="absolute top-0 right-0 -mt-2 -mr-2 h-6 w-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" >
-                                <X className="h-4 w-4" />
-                               </button>
+                              <div className="absolute top-0 right-0 -mt-2 -mr-2 flex gap-1">
+                                <button type="button" onClick={() => setAsPrimary(index)} title="Marcar como portada" className={cn("h-6 w-6 bg-background text-primary rounded-full flex items-center justify-center border transition-colors", index === 0 ? "bg-primary text-white" : "hover:bg-primary/10")} >
+                                    <Star className="h-4 w-4" />
+                                </button>
+                                <button type="button" onClick={() => removeImage(index)} title="Eliminar imagen" className="h-6 w-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" >
+                                    <X className="h-4 w-4" />
+                                </button>
+                              </div>
                            </div>
                         ))}
                      </div>
@@ -496,5 +528,7 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
     </Dialog>
   );
 }
+
+    
 
     
