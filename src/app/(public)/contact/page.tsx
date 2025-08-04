@@ -10,36 +10,36 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { getSettings } from '@/services/settings';
 import { handleContactSubmit } from '@/actions/contact';
+import type { Settings } from '@/types';
 
 export default function ContactPage() {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
     const [message, setMessage] = useState('');
-    const [whatsAppNumber, setWhatsAppNumber] = useState('');
+    const [settings, setSettings] = useState<Settings | null>(null);
 
     useEffect(() => {
-        async function fetchSettings() {
-            const settings = await getSettings();
-            if (settings) {
-                setWhatsAppNumber(settings.whatsappNumber);
-            }
+        async function fetchSettingsData() {
+            const settingsData = await getSettings();
+            setSettings(settingsData);
         }
-        fetchSettings();
+        fetchSettingsData();
     }, []);
 
     const handleWhatsAppClick = () => {
+        if (!settings?.whatsappNumber) return;
         const text = `Hola, mi nombre es ${name}.\n\nCorreo: ${email}\nTeléfono: ${phone}\n\nMensaje: ${message}`;
         const encodedText = encodeURIComponent(text);
-        window.open(`https://wa.me/${whatsAppNumber}?text=${encodedText}`, '_blank');
+        window.open(`https://wa.me/${settings.whatsappNumber}?text=${encodedText}`, '_blank');
     };
 
   return (
     <div className="container mx-auto py-12 md:py-24 px-4 md:px-6">
       <div className="text-center mb-12">
-        <h1 className="text-3xl md:text-5xl font-bold font-headline mb-4">Contáctanos</h1>
+        <h1 className="text-3xl md:text-5xl font-bold font-headline mb-4">{settings?.contactTitle || 'Contáctanos'}</h1>
         <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
-          Estamos aquí para ayudarte a encontrar la casa de tus sueños. Contáctanos con cualquier pregunta.
+          {settings?.contactSubtitle || 'Estamos aquí para ayudarte a encontrar la casa de tus sueños. Contáctanos con cualquier pregunta.'}
         </p>
       </div>
 
@@ -103,7 +103,7 @@ export default function ContactPage() {
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4">
                   <Button type="submit" className="flex-1">Enviar Mensaje</Button>
-                  <Button type="button" onClick={handleWhatsAppClick} variant="outline" className="flex-1 border-green-500 text-green-600 hover:bg-green-500 hover:text-white" disabled={!whatsAppNumber}>
+                  <Button type="button" onClick={handleWhatsAppClick} variant="outline" className="flex-1 border-green-500 text-green-600 hover:bg-green-500 hover:text-white" disabled={!settings?.whatsappNumber}>
                       <MessageCircle className="mr-2" /> WhatsApp
                   </Button>
                 </div>

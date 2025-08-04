@@ -74,3 +74,11 @@ export interface Lead {
     message: string;
     date: Date | Timestamp;
 }
+
+export interface Settings {
+  whatsappNumber: string;
+  homepageTitle?: string;
+  homepageSubtitle?: string;
+  contactTitle?: string;
+  contactSubtitle?: string;
+}

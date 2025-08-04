@@ -2,7 +2,7 @@
 "use client"
 import { Button } from '@/components/ui/button';
 import { PropertyCard } from '@/components/PropertyCard';
-import type { Property } from '@/types';
+import type { Property, Settings } from '@/types';
 import Link from 'next/link';
 import { ArrowRight, BedDouble, Bath, Car, MapPin } from 'lucide-react';
 import Image from 'next/image';
@@ -14,6 +14,7 @@ import {
 import Autoplay from "embla-carousel-autoplay"
 import React, { useState, useEffect } from 'react';
 import { getProperties } from '@/services/properties';
+import { getSettings } from '@/services/settings';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const heroImages = ['/hero1.webp', '/hero2.webp'];
@@ -21,20 +22,25 @@ const heroImages = ['/hero1.webp', '/hero2.webp'];
 export default function Home() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
+  const [settings, setSettings] = useState<Settings | null>(null);
 
   useEffect(() => {
-    const fetchProperties = async () => {
+    const fetchPageData = async () => {
       try {
         setLoading(true);
-        const propertiesData = await getProperties();
+        const [propertiesData, settingsData] = await Promise.all([
+          getProperties(),
+          getSettings(),
+        ]);
         setProperties(propertiesData);
+        setSettings(settingsData);
       } catch (error) {
-        console.error("Error fetching properties: ", error);
+        console.error("Error fetching page data: ", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchProperties();
+    fetchPageData();
   }, []);
 
   const featuredProperty = properties.find(p => p.featured);
@@ -71,8 +77,8 @@ export default function Home() {
         </Carousel>
         <div className="absolute inset-0 bg-black/50 z-10" />
         <div className="relative z-20 flex flex-col items-center justify-center h-full text-center text-white px-4 md:px-6">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold font-headline text-primary mb-4">Artecasa</h1>
-          <p className="text-lg sm:text-xl md:text-2xl max-w-3xl">Donde la Casa de Tus Sueños se Hace Realidad</p>
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold font-headline text-primary mb-4">{settings?.homepageTitle || 'Artecasa'}</h1>
+          <p className="text-lg sm:text-xl md:text-2xl max-w-3xl">{settings?.homepageSubtitle || 'Donde la Casa de Tus Sueños se Hace Realidad'}</p>
           <Button asChild size="lg" className="mt-8">
             <Link href="/properties">
               Explorar Propiedades <ArrowRight className="ml-2" />

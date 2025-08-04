@@ -1,10 +1,8 @@
 
 import { db } from '@/lib/firebase';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import type { Settings } from '@/types';
 
-interface Settings {
-  whatsappNumber: string;
-}
 
 const settingsDocRef = doc(db, 'settings', 'global');
 
