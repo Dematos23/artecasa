@@ -29,11 +29,18 @@ const locationStrings = peruLocations.flatMap(region =>
   )
 );
 
-const priceRanges = [
+const salePriceRanges = [
     { label: '$0 - $200k', min: 0, max: 200000 },
     { label: '$200k - $500k', min: 200000, max: 500000 },
     { label: '$500k - $1M', min: 500000, max: 1000000 },
     { label: '$1M+', min: 1000000, max: Infinity },
+];
+
+const rentPriceRanges = [
+    { label: 'S/0 - S/1.5k', min: 0, max: 1500 },
+    { label: 'S/1.5k - S/3k', min: 1500, max: 3000 },
+    { label: 'S/3k - S/5k', min: 3000, max: 5000 },
+    { label: 'S/5k+', min: 5000, max: Infinity },
 ];
 
 
@@ -43,7 +50,6 @@ function LocationCombobox({ value, onChange, className }: { value: string, onCha
   const comboboxRef = useRef(null);
 
   useEffect(() => {
-    // Sync outside value with inside input
     const selectedLabel = locationStrings.find(l => l.value === value)?.label || '';
     setInputValue(selectedLabel);
   }, [value]);
@@ -59,7 +65,7 @@ function LocationCombobox({ value, onChange, className }: { value: string, onCha
       setShowSuggestions(true);
     } else {
       setShowSuggestions(false);
-      onChange(''); // Clear filter if input is empty
+      onChange(''); 
     }
   };
 
@@ -75,7 +81,7 @@ function LocationCombobox({ value, onChange, className }: { value: string, onCha
     const lowercasedInput = inputValue.toLowerCase();
     return locationStrings.filter(location =>
       location.label.toLowerCase().includes(lowercasedInput)
-    ).slice(0, 10); // Limit suggestions for performance
+    ).slice(0, 10);
   }, [inputValue]);
 
   return (
@@ -148,6 +154,18 @@ export default function PropertiesPage() {
     fetchProperties();
   }, []);
 
+  const handleModalityChange = (value: string) => {
+    setModalityFilter(value);
+    // Reset prices when modality changes
+    setMinPrice('');
+    setMaxPrice('');
+  }
+
+  const priceRanges = useMemo(() => {
+    return modalityFilter === 'alquiler' ? rentPriceRanges : salePriceRanges;
+  }, [modalityFilter]);
+
+
   const filteredProperties = useMemo(() => {
     return properties.filter(property => {
       const propertyLocation = `${property.district || ''}, ${property.province || ''}, ${property.region || ''}`.toLowerCase();
@@ -177,11 +195,12 @@ export default function PropertiesPage() {
   }
 
   const priceButtonText = useMemo(() => {
-    if (minPrice && maxPrice) return `$${Number(minPrice).toLocaleString()} - $${Number(maxPrice).toLocaleString()}`;
-    if (minPrice) return `Desde $${Number(minPrice).toLocaleString()}`;
-    if (maxPrice) return `Hasta $${Number(maxPrice).toLocaleString()}`;
+    const symbol = modalityFilter === 'alquiler' ? 'S/' : '$';
+    if (minPrice && maxPrice) return `${symbol}${Number(minPrice).toLocaleString()} - ${symbol}${Number(maxPrice).toLocaleString()}`;
+    if (minPrice) return `Desde ${symbol}${Number(minPrice).toLocaleString()}`;
+    if (maxPrice) return `Hasta ${symbol}${Number(maxPrice).toLocaleString()}`;
     return 'Rango de Precio';
-  }, [minPrice, maxPrice]);
+  }, [minPrice, maxPrice, modalityFilter]);
 
   return (
     <div className="container mx-auto py-8 md:py-12 px-4 md:px-6">
@@ -201,7 +220,7 @@ export default function PropertiesPage() {
 
           <div>
             <Label>Tipo de Operación</Label>
-            <Select value={modalityFilter} onValueChange={setModalityFilter}>
+            <Select value={modalityFilter} onValueChange={handleModalityChange}>
               <SelectTrigger>
                 <SelectValue placeholder="Tipo de Operación" />
               </SelectTrigger>
@@ -292,5 +311,4 @@ export default function PropertiesPage() {
       )}
     </div>
   );
-
-    
+}
