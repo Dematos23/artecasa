@@ -62,11 +62,11 @@ export function PropertyDetailsClientView({ propertyId, onClose }: { propertyId:
   }
   
   const BackButton = () => (
-    <Button asChild variant="outline" size="sm" onClick={onClose}>
+    <Button variant="outline" size="sm" onClick={onClose}>
         {onClose ? (
             <span className='flex items-center cursor-pointer'><ArrowLeft className="mr-2" /> Volver a Propiedades</span>
         ) : (
-            <Link href="/admin/properties"><ArrowLeft className="mr-2" /> Volver a Propiedades</Link>
+            <Link href="/admin/properties" className='flex items-center'><ArrowLeft className="mr-2" /> Volver a Propiedades</Link>
         )}
     </Button>
   );
@@ -83,7 +83,7 @@ export function PropertyDetailsClientView({ propertyId, onClose }: { propertyId:
             </Button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 gap-8">
             <div className="lg:col-span-3 space-y-8">
                 <Card>
                     <CardHeader>
@@ -105,8 +105,8 @@ export function PropertyDetailsClientView({ propertyId, onClose }: { propertyId:
                                 <Image src={property.imageUrls[0]} alt={property.title} fill style={{objectFit: 'cover'}} />
                             </div>
                         ) : (
-                            <div className="relative w-full h-96 rounded-lg overflow-hidden mb-6">
-                                <Image src="/appartment.webp" alt="Default property image" fill style={{objectFit: 'cover'}} />
+                            <div className="relative w-full h-96 rounded-lg overflow-hidden mb-6 bg-secondary flex items-center justify-center text-muted-foreground">
+                                No hay imágenes
                             </div>
                         )}
 

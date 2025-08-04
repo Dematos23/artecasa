@@ -83,7 +83,7 @@ export default function AdminContactsPage() {
             description: "El contacto se ha actualizado correctamente.",
         });
       } else {
-        await addContact(contactData as Omit<Contact, 'id' | 'date' | 'interestedPropertyIds'>);
+        await addContact(contactData as Omit<Contact, 'id' | 'date' | 'interestedInPropertyIds' | 'ownerOfPropertyIds'>);
         toast({
             title: "Éxito",
             description: "El contacto se ha creado correctamente.",
@@ -174,7 +174,7 @@ export default function AdminContactsPage() {
       />
 
       {viewingContactId ? (
-         <ContactDetailsClientView contactId={viewingContactId} onClose={handleCloseDetails} />
+         <ContactDetailsClientView contactId={viewingContactId} onClose={handleCloseDetails} onEdit={openFormForEdit} />
       ) : (
         <>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
@@ -215,6 +215,7 @@ export default function AdminContactsPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleViewDetails(contact.id)}>Ver Detalles</DropdownMenuItem>
                           <DropdownMenuItem onClick={() => openFormForEdit(contact)}>Editar</DropdownMenuItem>
                           <DropdownMenuItem onClick={() => handleDeleteClick(contact.id)} className="text-destructive">Eliminar</DropdownMenuItem>
                         </DropdownMenuContent>
@@ -242,7 +243,7 @@ export default function AdminContactsPage() {
                         <TableCell className="font-medium">
                            <span className="font-bold cursor-pointer" onClick={() => handleViewDetails(contact.id)}>{getFullName(contact)}</span>
                         </TableCell>
-                        <TableCell>{contact.email}</TableCell>
+                        <TableCell>{contact.email || '-'}</TableCell>
                         <TableCell>{contact.phone || '-'}</TableCell>
                         <TableCell>
                           <div className="flex gap-1 flex-wrap">

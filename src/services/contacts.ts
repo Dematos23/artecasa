@@ -1,12 +1,13 @@
 
 import { db } from '@/lib/firebase';
-import { collection, getDocs, addDoc, serverTimestamp, query, orderBy, doc, deleteDoc, updateDoc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, serverTimestamp, query, orderBy, doc, deleteDoc, updateDoc, getDoc, arrayUnion } from 'firebase/firestore';
 import type { Contact } from '@/types';
+import { updateProperty } from './properties';
 
 const contactsCollection = collection(db, 'contacts');
 
 // Type for new contact data, omitting id and date which will be generated
-export type NewContactData = Omit<Contact, 'id' | 'date' | 'interestedPropertyIds'>;
+export type NewContactData = Omit<Contact, 'id' | 'date' | 'interestedInPropertyIds' | 'ownerOfPropertyIds'>;
 export type UpdateContactData = Partial<Omit<Contact, 'id' | 'date'>>;
 
 
@@ -47,7 +48,8 @@ export async function getContactById(id: string): Promise<Contact | undefined> {
 export async function addContact(contactData: NewContactData): Promise<string> {
   const docRef = await addDoc(contactsCollection, {
     ...contactData,
-    interestedPropertyIds: [], // Always initialize with an empty array
+    interestedInPropertyIds: [],
+    ownerOfPropertyIds: [],
     date: serverTimestamp(),
   });
   return docRef.id;
@@ -63,4 +65,25 @@ export async function updateContact(id: string, contactData: UpdateContactData):
 export async function deleteContact(id: string): Promise<void> {
     const contactDoc = doc(db, 'contacts', id);
     await deleteDoc(contactDoc);
+}
+
+// Function to associate a contact with a property
+export async function updateContactAssociations(
+  contactId: string, 
+  propertyId: string, 
+  associationType: 'interested' | 'owner'
+): Promise<void> {
+    const contactDoc = doc(db, 'contacts', contactId);
+
+    if (associationType === 'interested') {
+        await updateDoc(contactDoc, {
+            interestedInPropertyIds: arrayUnion(propertyId)
+        });
+    } else if (associationType === 'owner') {
+        await updateDoc(contactDoc, {
+            ownerOfPropertyIds: arrayUnion(propertyId)
+        });
+        // Also update the property to set the ownerId
+        await updateProperty(propertyId, { ownerId: contactId });
+    }
 }

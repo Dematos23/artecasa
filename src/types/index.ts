@@ -23,6 +23,7 @@ export interface Property {
     lat: number;
     lng: number;
   };
+  ownerId?: string;
 }
 
 // Type for new property data, omitting id which will be generated
@@ -43,6 +44,7 @@ export interface Contact {
   phone: string;
   notes?: string;
   types: ContactType[];
-  interestedPropertyIds?: string[];
+  interestedInPropertyIds?: string[];
+  ownerOfPropertyIds?: string[];
   date?: Date | Timestamp | null | undefined;
 }

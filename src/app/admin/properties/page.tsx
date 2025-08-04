@@ -77,13 +77,13 @@ export default function AdminPropertiesPage() {
   }, [fetchProperties]);
 
   useEffect(() => {
-    if (editPropertyId) {
+    if (editPropertyId && properties.length > 0) {
       const propertyToEdit = properties.find(p => p.id === editPropertyId);
       if (propertyToEdit) {
         setSelectedProperty(propertyToEdit);
         setIsFormOpen(true);
         // Clean the URL
-        router.replace('/admin/properties');
+        router.replace('/admin/properties', { scroll: false });
       }
     }
   }, [editPropertyId, properties, router]);
@@ -264,6 +264,7 @@ export default function AdminPropertiesPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                           <DropdownMenuItem onClick={() => handleViewDetails(property.id)}>Ver Detalles</DropdownMenuItem>
                           <DropdownMenuItem onClick={() => openFormForEdit(property)}>Editar</DropdownMenuItem>
                           <DropdownMenuItem onClick={() => handleDeleteClick(property)} className="text-destructive">Eliminar</DropdownMenuItem>
                         </DropdownMenuContent>
@@ -331,6 +332,7 @@ export default function AdminPropertiesPage() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleViewDetails(property.id)}>Ver Detalles</DropdownMenuItem>
                             <DropdownMenuItem onClick={() => openFormForEdit(property)}>Editar</DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleDeleteClick(property)} className="text-destructive">Eliminar</DropdownMenuItem>
                           </DropdownMenuContent>

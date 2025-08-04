@@ -6,11 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import type { Contact, Property } from '@/types';
 import Link from 'next/link';
-import { ArrowLeft, Mail, Phone, Calendar, User, Tag, FileText, Home } from 'lucide-react';
+import { ArrowLeft, Mail, Phone, User, Tag, FileText, Home, Edit } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { getContactById } from '@/services/contacts';
-import { getPropertiesByIds, getPropertiesByOwnerId } from '@/services/properties';
+import { getPropertiesByIds } from '@/services/properties';
 
 const getFullName = (contact: Pick<Contact, 'firstname' | 'secondname' | 'firstlastname' | 'secondlastname'>) => {
     return [contact.firstname, contact.secondname, contact.firstlastname, contact.secondlastname].filter(Boolean).join(' ');
@@ -30,7 +30,7 @@ function PropertyListView({ properties }: { properties: Property[] }) {
                     <Card key={property.id}>
                         <CardHeader>
                             <CardTitle className="text-base">
-                                <Link href={`/admin/properties/${property.id}`} className="font-bold hover:underline">
+                                <Link href={`/admin/properties?edit=${property.id}`} className="font-bold hover:underline">
                                     {property.title}
                                 </Link>
                             </CardTitle>
@@ -86,9 +86,10 @@ function PropertyListView({ properties }: { properties: Property[] }) {
 interface ContactDetailsClientViewProps {
   contactId: string;
   onClose?: () => void;
+  onEdit?: (contact: Contact) => void;
 }
 
-export function ContactDetailsClientView({ contactId, onClose }: ContactDetailsClientViewProps) {
+export function ContactDetailsClientView({ contactId, onClose, onEdit }: ContactDetailsClientViewProps) {
   const [contact, setContact] = useState<Contact | undefined>(undefined);
   const [ownedProperties, setOwnedProperties] = useState<Property[]>([]);
   const [interestedProperties, setInterestedProperties] = useState<Property[]>([]);
@@ -103,11 +104,11 @@ export function ContactDetailsClientView({ contactId, onClose }: ContactDetailsC
         let ownedProps: Property[] = [];
         let interestedProps: Property[] = [];
         
-        if (contactData.types.includes('vendedor') || contactData.types.includes('arrendador')) {
-          // ownedProps = await getPropertiesByOwnerId(contactData.id);
+        if (contactData.ownerOfPropertyIds && contactData.ownerOfPropertyIds.length > 0) {
+          ownedProps = await getPropertiesByIds(contactData.ownerOfPropertyIds);
         }
-        if ((contactData.types.includes('comprador') || contactData.types.includes('arrendatario')) && contactData.interestedPropertyIds && contactData.interestedPropertyIds.length > 0) {
-          interestedProps = await getPropertiesByIds(contactData.interestedPropertyIds);
+        if (contactData.interestedInPropertyIds && contactData.interestedInPropertyIds.length > 0) {
+          interestedProps = await getPropertiesByIds(contactData.interestedInPropertyIds);
         }
         
         setOwnedProperties(ownedProps);
@@ -153,8 +154,18 @@ export function ContactDetailsClientView({ contactId, onClose }: ContactDetailsC
 
   return (
     <div className='space-y-8'>
-        <div className="mb-6">
+        <div className="flex justify-between items-center mb-6">
             <BackButton />
+            <div className="flex gap-2">
+                 <Button size="sm" variant="outline" onClick={() => alert("Función no implementada")}>
+                    <Home className="mr-2 h-4 w-4" /> Asociar a Propiedad
+                </Button>
+                {onEdit && (
+                    <Button size="sm" onClick={() => onEdit(contact)}>
+                        <Edit className="mr-2 h-4 w-4" /> Editar Contacto
+                    </Button>
+                )}
+            </div>
         </div>
 
         <Card>
@@ -166,15 +177,12 @@ export function ContactDetailsClientView({ contactId, onClose }: ContactDetailsC
                         </CardTitle>
                         <CardDescription>Detalles del contacto y actividad.</CardDescription>
                     </div>
-                    <div className="text-sm text-muted-foreground flex items-center gap-2 pt-1">
-                       <Calendar size={16} /><span>Contactado el: {contact.date ? new Date(contact.date as any).toLocaleDateString() : 'N/A'}</span>
-                    </div>
                 </div>
             </CardHeader>
             <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 gap-6">
                     <div className="space-y-4">
-                        <div className="flex items-center gap-3"><Mail className="text-muted-foreground" size={20} /><a href={`mailto:${contact.email}`} className="text-primary hover:underline">{contact.email}</a></div>
+                        <div className="flex items-center gap-3"><Mail className="text-muted-foreground" size={20} /><a href={`mailto:${contact.email}`} className="text-primary hover:underline">{contact.email || 'No disponible'}</a></div>
                         {contact.phone && (<div className="flex items-center gap-3"><Phone className="text-muted-foreground" size={20} /><span>{contact.phone}</span></div>)}
                          <div className="flex items-start gap-3"><Tag className="text-muted-foreground mt-1" size={20} /><div className="flex flex-wrap gap-2">{contact.types.map(type => (<Badge key={type} variant="secondary" className="capitalize text-sm">{type}</Badge>))}</div></div>
                     </div>
