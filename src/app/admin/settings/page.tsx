@@ -202,17 +202,17 @@ export default function SettingsPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <FormField
+                   <FormField
                     control={form.control}
                     name="whatsappNumber"
                     render={({ field }) => (
-                      <FormItem>
+                        <FormItem>
                         <Label htmlFor="whatsappNumber">Número de WhatsApp</Label>
                         <FormControl>
-                          <Input id="whatsappNumber" placeholder="Ej: 51987654321" {...field} />
+                            <Input id="whatsappNumber" placeholder="Ej: 51987654321" {...field} />
                         </FormControl>
                         <FormMessage />
-                      </FormItem>
+                        </FormItem>
                     )}
                   />
                 </CardContent>
