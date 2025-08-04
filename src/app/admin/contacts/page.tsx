@@ -260,6 +260,7 @@ export default function AdminContactsPage() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => handleViewDetails(contact.id)}>Ver Detalles</DropdownMenuItem>
                               <DropdownMenuItem onClick={() => openFormForEdit(contact)}>Editar</DropdownMenuItem>
                               <DropdownMenuItem onClick={() => handleDeleteClick(contact.id)} className="text-destructive">Eliminar</DropdownMenuItem>
                             </DropdownMenuContent>

@@ -40,7 +40,7 @@ function PropertyListView({ properties }: { properties: Property[] }) {
                         </CardHeader>
                         <CardContent className="flex justify-end">
                              <Button asChild variant="outline" size="sm">
-                                <Link href={`/admin/properties/${property.id}`}>Ver Detalles</Link>
+                                <Link href={`/admin/properties?edit=${property.id}`}>Ver Detalles</Link>
                             </Button>
                         </CardContent>
                     </Card>
@@ -62,7 +62,7 @@ function PropertyListView({ properties }: { properties: Property[] }) {
                         {properties.map((property) => (
                             <TableRow key={property.id}>
                                 <TableCell>
-                                    <Link href={`/admin/properties/${property.id}`} className="font-bold hover:underline">
+                                    <Link href={`/admin/properties?edit=${property.id}`} className="font-bold hover:underline">
                                         {property.title}
                                     </Link>
                                     <p className="text-xs text-muted-foreground">{property.address}</p>
@@ -71,7 +71,7 @@ function PropertyListView({ properties }: { properties: Property[] }) {
                                 <TableCell>${Number(property.priceUSD).toLocaleString()}</TableCell>
                                 <TableCell>
                                     <Button asChild variant="outline" size="sm">
-                                        <Link href={`/admin/properties/${property.id}`}>Ver Detalles</Link>
+                                        <Link href={`/admin/properties?edit=${property.id}`}>Ver Detalles</Link>
                                     </Button>
                                 </TableCell>
                             </TableRow>
@@ -172,7 +172,7 @@ export function ContactDetailsClientView({ contactId, onClose }: ContactDetailsC
                 </div>
             </CardHeader>
             <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-6">
                     <div className="space-y-4">
                         <div className="flex items-center gap-3"><Mail className="text-muted-foreground" size={20} /><a href={`mailto:${contact.email}`} className="text-primary hover:underline">{contact.email}</a></div>
                         {contact.phone && (<div className="flex items-center gap-3"><Phone className="text-muted-foreground" size={20} /><span>{contact.phone}</span></div>)}
