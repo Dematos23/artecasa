@@ -6,6 +6,7 @@ export interface Property {
   title: string;
   price: string;
   currency: 'USD' | 'PEN';
+  exchangeRate: number;
   modality: 'venta' | 'alquiler';
   region?: string;
   province?: string;

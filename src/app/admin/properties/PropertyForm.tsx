@@ -46,6 +46,7 @@ const propertySchema = z.object({
   currency: z.enum(['USD', 'PEN'], {
     required_error: 'Debes seleccionar una moneda.',
   }),
+  exchangeRate: z.coerce.number().min(0, { message: 'El tipo de cambio debe ser un número positivo.' }),
   modality: z.enum(['venta', 'alquiler'], {
     required_error: 'Debes seleccionar una modalidad.',
   }),
@@ -169,6 +170,7 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
     const defaultVals = property ? {
         ...property,
         price: Number(property.price?.toString().replace(/,/g, '')),
+        exchangeRate: property.exchangeRate ?? 3.75,
         bedrooms: property.bedrooms ?? '',
         bathrooms: property.bathrooms ?? '',
         garage: property.garage ?? '',
@@ -178,6 +180,7 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
         title: '',
         price: '',
         currency: 'USD' as const,
+        exchangeRate: 3.75,
         modality: 'venta' as const,
         region: '',
         province: '',
@@ -292,12 +295,12 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
                         </FormItem>
                     )}
                 />
-                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <FormField
                         control={form.control}
                         name="price"
                         render={({ field }) => (
-                            <FormItem className="sm:col-span-1">
+                            <FormItem>
                             <FormLabel>Precio <span className="text-primary">*</span></FormLabel>
                             <FormControl>
                                 <Input type="number" placeholder="Ej. 2500000" {...field} />
@@ -323,6 +326,19 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
                                     <SelectItem value="PEN">Soles (PEN)</SelectItem>
                                     </SelectContent>
                                 </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="exchangeRate"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Tipo de Cambio (a USD) <span className="text-primary">*</span></FormLabel>
+                                <FormControl>
+                                    <Input type="number" step="0.01" placeholder="Ej. 3.75" {...field} />
+                                </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}

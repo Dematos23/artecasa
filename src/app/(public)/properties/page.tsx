@@ -173,8 +173,25 @@ export default function PropertiesPage() {
       const locationMatch = !locationQuery || propertyLocation.includes(locationQuery);
       const modalityMatch = !modalityFilter || modalityFilter === 'all' || property.modality === modalityFilter;
       const bedroomsMatch = bedroomsFilter === 'all' || (property.bedrooms && property.bedrooms >= parseInt(bedroomsFilter));
-      const minPriceMatch = !minPrice || Number(property.price) >= Number(minPrice);
-      const maxPriceMatch = !maxPrice || Number(property.price) <= Number(maxPrice);
+      
+      // Price filtering with currency conversion
+      const priceInUSD = property.currency === 'USD' 
+        ? Number(property.price) 
+        : Number(property.price) / property.exchangeRate;
+
+      const filterCurrency = modalityFilter === 'alquiler' ? 'PEN' : 'USD';
+
+      const minPriceNumber = minPrice ? Number(minPrice) : 0;
+      const maxPriceNumber = maxPrice ? Number(maxPrice) : Infinity;
+
+      let priceToCompare = priceInUSD;
+      if (filterCurrency === 'PEN') {
+        // This is an approximation for filtering UI. The exchange rate on the property is the source of truth.
+        priceToCompare = priceInUSD * 3.75; 
+      }
+
+      const minPriceMatch = priceToCompare >= minPriceNumber;
+      const maxPriceMatch = priceToCompare <= maxPriceNumber;
 
 
       return locationMatch && modalityMatch && bedroomsMatch && minPriceMatch && maxPriceMatch;
