@@ -264,7 +264,7 @@ export default function AdminPropertiesPage() {
           </div>
             
           {/* Desktop View - Table */}
-          <div className="hidden overflow-x-auto">
+          <div className="hidden md:block overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>

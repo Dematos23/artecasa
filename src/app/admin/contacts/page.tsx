@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import type { Contact } from '@/types';
+import { contactTypes } from '@/types';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ContactForm } from './ContactForm';
 import { getContacts, addContact, deleteContact, updateContact, UpdateContactData } from '@/services/contacts';
@@ -33,6 +34,8 @@ import {
 import { ContactDetailsClientView } from './ContactDetailsClientView';
 import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 
 
 const getFullName = (contact: Pick<Contact, 'firstname' | 'secondname' | 'firstlastname' | 'secondlastname'>) => {
@@ -51,6 +54,7 @@ export default function AdminContactsPage() {
   const [contactToDelete, setContactToDelete] = useState<string | null>(null);
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
+  const [typeFilter, setTypeFilter] = useState('all');
 
 
   const fetchContacts = useCallback(async () => {
@@ -80,17 +84,21 @@ export default function AdminContactsPage() {
   }, [authLoading, user, fetchContacts]);
   
   const filteredContacts = useMemo(() => {
-    if (!searchQuery) {
-      return contacts;
-    }
-    const lowercasedQuery = searchQuery.toLowerCase();
     return contacts.filter(contact => {
-      const fullName = getFullName(contact).toLowerCase();
-      const email = contact.email?.toLowerCase() || '';
-      const phone = contact.phone?.toLowerCase() || '';
-      return fullName.includes(lowercasedQuery) || email.includes(lowercasedQuery) || phone.includes(lowercasedQuery);
+      const searchMatch = (() => {
+        if (!searchQuery) return true;
+        const lowercasedQuery = searchQuery.toLowerCase();
+        const fullName = getFullName(contact).toLowerCase();
+        const email = contact.email?.toLowerCase() || '';
+        const phone = contact.phone?.toLowerCase() || '';
+        return fullName.includes(lowercasedQuery) || email.includes(lowercasedQuery) || phone.includes(lowercasedQuery);
+      })();
+
+      const typeMatch = typeFilter === 'all' || (contact.types && contact.types.includes(typeFilter as any));
+
+      return searchMatch && typeMatch;
     });
-  }, [contacts, searchQuery]);
+  }, [contacts, searchQuery, typeFilter]);
 
   const handleSave = async (contactData: UpdateContactData) => {
     try {
@@ -212,14 +220,29 @@ export default function AdminContactsPage() {
             </Button>
           </div>
 
-          <div className="mb-6 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input
-                placeholder="Buscar por nombre, correo o teléfono..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 w-full sm:max-w-sm"
-              />
+          <div className="mb-6 flex flex-col sm:flex-row gap-4">
+              <div className="relative flex-grow">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                    placeholder="Buscar por nombre, correo o teléfono..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 w-full"
+                />
+              </div>
+               <div className='w-full sm:w-48'>
+                <Select value={typeFilter} onValueChange={setTypeFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Filtrar por tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos los Tipos</SelectItem>
+                    {contactTypes.map(type => (
+                      <SelectItem key={type} value={type} className="capitalize">{type}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
           </div>
 
           {loading ? (
@@ -310,7 +333,7 @@ export default function AdminContactsPage() {
                {filteredContacts.length === 0 && !loading && (
                     <div className="text-center py-16">
                         <p className="text-muted-foreground">
-                            {searchQuery ? "No se encontraron contactos que coincidan con tu búsqueda." : "Aún no hay contactos para mostrar."}
+                            {searchQuery || typeFilter !== 'all' ? "No se encontraron contactos que coincidan con tu búsqueda." : "Aún no hay contactos para mostrar."}
                         </p>
                     </div>
                 )}
