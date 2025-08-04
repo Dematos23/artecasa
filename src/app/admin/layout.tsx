@@ -138,7 +138,7 @@ export default function AdminLayout({
                 <SidebarTrigger />
                 <h1 className='text-xl font-bold font-headline ml-4'>Panel de Administrador</h1>
             </header>
-            <div className="p-4 sm:p-6 lg:p-8">{children}</div>
+            <div className="p-4 sm:p-6 lg:p-8 flex flex-col flex-1">{children}</div>
         </main>
         </div>
     </SidebarProvider>
