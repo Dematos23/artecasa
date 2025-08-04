@@ -83,6 +83,7 @@ export default function PropertiesPage() {
 
   // Filter states
   const [locationQuery, setLocationQuery] = useState('');
+  const [modalityFilter, setModalityFilter] = useState('');
   
   useEffect(() => {
     const fetchProperties = async () => {
@@ -104,10 +105,16 @@ export default function PropertiesPage() {
       const propertyLocation = `${property.district || ''}, ${property.province || ''}, ${property.region || ''}`.toLowerCase();
       
       const locationMatch = !locationQuery || propertyLocation.includes(locationQuery);
+      const modalityMatch = !modalityFilter || property.modality === modalityFilter;
 
-      return locationMatch;
+      return locationMatch && modalityMatch;
     });
-  }, [properties, locationQuery]);
+  }, [properties, locationQuery, modalityFilter]);
+  
+  const handleClearFilters = () => {
+    setLocationQuery('');
+    setModalityFilter('');
+  }
 
   return (
     <div className="container mx-auto py-8 md:py-12 px-4 md:px-6">
@@ -123,16 +130,16 @@ export default function PropertiesPage() {
           <div className="sm:col-span-2 lg:col-span-2">
             <LocationCombobox value={locationQuery} onChange={setLocationQuery} />
           </div>
-          <Select>
+          <Select value={modalityFilter} onValueChange={setModalityFilter}>
             <SelectTrigger>
-              <SelectValue placeholder="Tipo de Propiedad" />
+              <SelectValue placeholder="Tipo de Operación" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="venta">Venta</SelectItem>
               <SelectItem value="alquiler">Alquiler</SelectItem>
             </SelectContent>
           </Select>
-          <Button className="w-full" onClick={() => setLocationQuery('')}>Limpiar Búsqueda</Button>
+          <Button className="w-full" onClick={handleClearFilters}>Limpiar Búsqueda</Button>
         </div>
       </Card>
 
