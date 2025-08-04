@@ -17,6 +17,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { cn } from '@/lib/utils';
 import { useClickAway } from 'react-use';
 import { Label } from '@/components/ui/label';
+import { propertyTypes } from '@/types';
 
 
 // Generate a flat list of location strings for the combobox
@@ -135,6 +136,7 @@ export default function PropertiesPage() {
   // Filter states
   const [locationQuery, setLocationQuery] = useState('');
   const [modalityFilter, setModalityFilter] = useState('all');
+  const [propertyTypeFilter, setPropertyTypeFilter] = useState('all');
   const [bedroomsFilter, setBedroomsFilter] = useState('all');
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
@@ -179,6 +181,7 @@ export default function PropertiesPage() {
 
       const locationMatch = !locationQuery || propertyLocation.includes(locationQuery);
       const modalityMatch = !modalityFilter || modalityFilter === 'all' || property.modality === modalityFilter;
+      const propertyTypeMatch = !propertyTypeFilter || propertyTypeFilter === 'all' || property.propertyType === propertyTypeFilter;
       const bedroomsMatch = bedroomsFilter === 'all' || (property.bedrooms && property.bedrooms >= parseInt(bedroomsFilter));
 
       const minPriceNumber = minPrice ? Number(minPrice) : 0;
@@ -190,13 +193,14 @@ export default function PropertiesPage() {
       const maxPriceMatch = priceToCompare <= maxPriceNumber;
 
 
-      return locationMatch && modalityMatch && bedroomsMatch && minPriceMatch && maxPriceMatch;
+      return locationMatch && modalityMatch && propertyTypeMatch && bedroomsMatch && minPriceMatch && maxPriceMatch;
     });
-  }, [properties, locationQuery, modalityFilter, bedroomsFilter, minPrice, maxPrice, priceCurrency]);
+  }, [properties, locationQuery, modalityFilter, propertyTypeFilter, bedroomsFilter, minPrice, maxPrice, priceCurrency]);
 
   const handleClearFilters = () => {
     setLocationQuery('');
     setModalityFilter('all');
+    setPropertyTypeFilter('all');
     setBedroomsFilter('all');
     setMinPrice('');
     setMaxPrice('');
@@ -226,7 +230,7 @@ export default function PropertiesPage() {
       </div>
 
       <Card className="p-4 md:p-6 mb-8 bg-secondary">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
           <div className="lg:col-span-2">
             <Label>Ubicación</Label>
             <LocationCombobox value={locationQuery} onChange={setLocationQuery} />
@@ -242,6 +246,21 @@ export default function PropertiesPage() {
                 <SelectItem value="all">Todos</SelectItem>
                 <SelectItem value="venta">Venta</SelectItem>
                 <SelectItem value="alquiler">Alquiler</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+           <div>
+            <Label>Tipo de Propiedad</Label>
+            <Select value={propertyTypeFilter} onValueChange={setPropertyTypeFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Tipo de Propiedad" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                {propertyTypes.map(type => (
+                  <SelectItem key={type} value={type}>{type}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

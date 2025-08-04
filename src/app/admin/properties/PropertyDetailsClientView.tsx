@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import type { Property } from '@/types';
 import Link from 'next/link';
-import { ArrowLeft, Home, DollarSign, FileText, BedDouble, Bath, Car, Maximize, CalendarClock, MapPin, Edit } from 'lucide-react';
+import { ArrowLeft, Home, DollarSign, FileText, BedDouble, Bath, Car, Maximize, CalendarClock, MapPin, Edit, Building } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -83,7 +83,7 @@ export function PropertyDetailsClientView({ propertyId, onClose }: { propertyId:
             </Button>
         </div>
 
-        <div className="space-y-8">
+        <div>
             <Card>
                 <CardHeader>
                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
@@ -109,7 +109,8 @@ export function PropertyDetailsClientView({ propertyId, onClose }: { propertyId:
                         </div>
                     )}
 
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 text-center mb-6 py-4 border-y">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 text-center mb-6 py-4 border-y">
+                        {property.propertyType && <div className="flex flex-col items-center gap-1"><Building size={20} className="text-primary"/> <span className="font-semibold">{property.propertyType}</span> <span className="text-xs text-muted-foreground">Tipo</span></div>}
                         {property.bedrooms !== undefined && <div className="flex flex-col items-center gap-1"><BedDouble size={20} className="text-primary"/> <span className="font-semibold">{property.bedrooms}</span> <span className="text-xs text-muted-foreground">Dorms</span></div>}
                         {property.bathrooms !== undefined && <div className="flex flex-col items-center gap-1"><Bath size={20} className="text-primary"/> <span className="font-semibold">{property.bathrooms}</span> <span className="text-xs text-muted-foreground">Baños</span></div>}
                         {property.garage !== undefined && <div className="flex flex-col items-center gap-1"><Car size={20} className="text-primary"/> <span className="font-semibold">{property.garage}</span> <span className="text-xs text-muted-foreground">Cochera</span></div>}

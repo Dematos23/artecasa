@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Property } from '@/types';
-import { BedDouble, Bath, Car, Maximize, MapPin, Phone, CalendarClock } from 'lucide-react';
+import { BedDouble, Bath, Car, Maximize, MapPin, Phone, CalendarClock, Building } from 'lucide-react';
 import Link from 'next/link';
 import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
 import { getPropertyById } from '@/services/properties';
@@ -134,6 +134,7 @@ export function PropertyDetailsClientView({ propertyId }: { propertyId: string }
                 </div>
 
                 <div className="space-y-4 text-foreground">
+                  {property.propertyType && <div className="flex justify-between items-center"><span className="text-muted-foreground">Tipo</span> <span className="font-semibold flex items-center gap-2">{property.propertyType} <Building size={18}/></span></div>}
                   {property.bedrooms !== undefined && <div className="flex justify-between items-center"><span className="text-muted-foreground">Dormitorios</span> <span className="font-semibold flex items-center gap-2">{property.bedrooms} <BedDouble size={18}/></span></div>}
                   {property.bathrooms !== undefined && <div className="flex justify-between items-center"><span className="text-muted-foreground">Baños</span> <span className="font-semibold flex items-center gap-2">{property.bathrooms} <Bath size={18}/></span></div>}
                   {property.garage !== undefined && <div className="flex justify-between items-center"><span className="text-muted-foreground">Cochera</span> <span className="font-semibold flex items-center gap-2">{property.garage} <Car size={18}/></span></div>}

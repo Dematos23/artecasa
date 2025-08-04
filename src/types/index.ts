@@ -1,12 +1,24 @@
 
 import { Timestamp } from "firebase/firestore";
 
+export const propertyTypes = [
+  'Departamento',
+  'Casa',
+  'Terreno / Lote',
+  'Local comercial',
+  'Oficina comercial',
+  'Casa de campo',
+  'Casa de playa'
+] as const;
+export type PropertyType = (typeof propertyTypes)[number];
+
 export interface Property {
   id: string;
   title: string;
   priceUSD: number;
   pricePEN: number;
   modality: 'venta' | 'alquiler';
+  propertyType?: PropertyType;
   region?: string;
   province?: string;
   district?: string;

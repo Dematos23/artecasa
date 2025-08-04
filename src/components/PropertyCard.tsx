@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { Property } from '@/types';
-import { BedDouble, Bath, Car } from 'lucide-react';
+import { BedDouble, Bath, Car, Building } from 'lucide-react';
 
 interface PropertyCardProps {
   property: Property;
@@ -40,6 +40,12 @@ export function PropertyCard({ property }: PropertyCardProps) {
              <p className="text-xl font-bold text-primary">{currencySymbol}{Number(price).toLocaleString()}{property.modality === 'alquiler' && <span className="text-sm font-normal text-muted-foreground"> / mes</span>}</p>
           </div>
           <div className="mt-4 pt-4 border-t border-border flex justify-around text-sm text-muted-foreground">
+             {property.propertyType && (
+              <div className="flex items-center gap-2">
+                <Building className="w-4 h-4 text-primary" />
+                <span>{property.propertyType.split(' ')[0]}</span>
+              </div>
+            )}
             {property.bedrooms !== undefined && (
               <div className="flex items-center gap-2">
                 <BedDouble className="w-4 h-4 text-primary" />

@@ -4,7 +4,8 @@
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import type { Property } from '@/types';
+import type { Property, PropertyType } from '@/types';
+import { propertyTypes } from '@/types';
 import {
   Dialog,
   DialogContent,
@@ -46,6 +47,9 @@ const propertySchema = z.object({
   pricePEN: z.coerce.number().min(0, { message: 'El precio debe ser un número positivo.' }),
   modality: z.enum(['venta', 'alquiler'], {
     required_error: 'Debes seleccionar una modalidad.',
+  }),
+  propertyType: z.enum(propertyTypes, {
+    required_error: 'Debes seleccionar un tipo de propiedad.',
   }),
   region: z.string().optional(),
   province: z.string().optional(),
@@ -178,6 +182,7 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
         priceUSD: '',
         pricePEN: '',
         modality: 'venta' as const,
+        propertyType: undefined,
         region: '',
         province: '',
         district: '',
@@ -290,7 +295,52 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
                         </FormItem>
                     )}
                 />
-                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
+                     <FormField
+                        control={form.control}
+                        name="modality"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Modalidad <span className="text-primary">*</span></FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Selecciona una modalidad" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                    <SelectItem value="venta">Venta</SelectItem>
+                                    <SelectItem value="alquiler">Alquiler</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                     <FormField
+                        control={form.control}
+                        name="propertyType"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Tipo de Propiedad <span className="text-primary">*</span></FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Selecciona un tipo" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                    {propertyTypes.map(type => (
+                                        <SelectItem key={type} value={type}>{type}</SelectItem>
+                                    ))}
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                </div>
+                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <FormField
                         control={form.control}
                         name="priceUSD"
@@ -317,27 +367,6 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
                             </FormItem>
                         )}
                     />
-                     <FormField
-                        control={form.control}
-                        name="modality"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Modalidad <span className="text-primary">*</span></FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Selecciona una modalidad" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                    <SelectItem value="venta">Venta</SelectItem>
-                                    <SelectItem value="alquiler">Alquiler</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                        />
                 </div>
                 <FormField
                     control={form.control}
