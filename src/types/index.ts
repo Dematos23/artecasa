@@ -44,7 +44,7 @@ export type NewPropertyData = Omit<Property, 'id'>;
 export type UpdatePropertyData = Partial<NewPropertyData>;
 
 
-export const contactTypes = ['comprador', 'arrendatario', 'arrendador', 'vendedor'] as const;
+export const contactTypes = ['comprador', 'arrendatario', 'propietario'] as const;
 export type ContactType = (typeof contactTypes)[number];
 
 export const associationTypes = ['owner', 'interested', 'inquilino'] as const;
