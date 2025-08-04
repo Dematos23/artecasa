@@ -118,7 +118,7 @@ export default function PropertiesPage() {
 
   // Filter states
   const [locationQuery, setLocationQuery] = useState('');
-  const [modalityFilter, setModalityFilter] = useState('');
+  const [modalityFilter, setModalityFilter] = useState('all');
   
   useEffect(() => {
     const fetchProperties = async () => {
@@ -140,7 +140,7 @@ export default function PropertiesPage() {
       const propertyLocation = `${property.district || ''}, ${property.province || ''}, ${property.region || ''}`.toLowerCase();
       
       const locationMatch = !locationQuery || propertyLocation.includes(locationQuery);
-      const modalityMatch = !modalityFilter || property.modality === modalityFilter;
+      const modalityMatch = !modalityFilter || modalityFilter === 'all' || property.modality === modalityFilter;
 
       return locationMatch && modalityMatch;
     });
@@ -148,7 +148,7 @@ export default function PropertiesPage() {
   
   const handleClearFilters = () => {
     setLocationQuery('');
-    setModalityFilter('');
+    setModalityFilter('all');
   }
 
   return (
@@ -170,7 +170,7 @@ export default function PropertiesPage() {
               <SelectValue placeholder="Tipo de Operación" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos</SelectItem>
+              <SelectItem value="all">Todos</SelectItem>
               <SelectItem value="venta">Venta</SelectItem>
               <SelectItem value="alquiler">Alquiler</SelectItem>
             </SelectContent>
