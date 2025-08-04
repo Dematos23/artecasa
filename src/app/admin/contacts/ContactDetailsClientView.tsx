@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import type { Contact, Property } from '@/types';
 import Link from 'next/link';
-import { ArrowLeft, Mail, Phone, User, Tag, FileText, Home, Edit, X } from 'lucide-react';
+import { ArrowLeft, Mail, Phone, User, Tag, FileText, Home, Edit, X, Bed, Building } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { getContactById } from '@/services/contacts';
@@ -101,6 +101,7 @@ export function ContactDetailsClientView({ contactId, onClose, onEdit }: Contact
   const [contact, setContact] = useState<Contact | undefined>(undefined);
   const [ownedProperties, setOwnedProperties] = useState<Property[]>([]);
   const [interestedProperties, setInterestedProperties] = useState<Property[]>([]);
+  const [tenantOfProperty, setTenantOfProperty] = useState<Property | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   const [isAssociateFormOpen, setIsAssociateFormOpen] = useState(false);
   const { toast } = useToast();
@@ -110,9 +111,10 @@ export function ContactDetailsClientView({ contactId, onClose, onEdit }: Contact
     const contactData = await getContactById(contactId);
     if (contactData) {
         setContact(contactData);
-        const { owned, interested } = await getContactProperties(contactData);
+        const { owned, interested, tenantOf } = await getContactProperties(contactData);
         setOwnedProperties(owned);
         setInterestedProperties(interested);
+        setTenantOfProperty(tenantOf);
     }
     setLoading(false);
   };
@@ -203,10 +205,21 @@ export function ContactDetailsClientView({ contactId, onClose, onEdit }: Contact
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                         <div className="flex items-center gap-3"><Mail className="text-muted-foreground" size={20} /><a href={`mailto:${contact.email}`} className="text-primary hover:underline">{contact.email || 'No disponible'}</a></div>
                         {contact.phone && (<div className="flex items-center gap-3"><Phone className="text-muted-foreground" size={20} /><span>{contact.phone}</span></div>)}
-                        <div className="flex items-start gap-3"><Tag className="text-muted-foreground mt-1" size={20} /><div className="flex flex-wrap gap-2">{contact.types.map(type => (<Badge key={type} variant="secondary" className="capitalize text-sm">{type}</Badge>))}</div></div>
+                        <div className="flex items-start gap-3 md:col-span-2"><Tag className="text-muted-foreground mt-1" size={20} /><div className="flex flex-wrap gap-2">{contact.types.map(type => (<Badge key={type} variant="secondary" className="capitalize text-sm">{type}</Badge>))}</div></div>
+                        {tenantOfProperty && (
+                            <div className="flex items-center gap-3 md:col-span-2 bg-secondary p-3 rounded-md">
+                                <Bed className="text-muted-foreground" size={20} />
+                                <div>
+                                    <span className="text-sm text-muted-foreground">Inquilino de:</span>
+                                    <Link href={`/admin/properties?edit=${tenantOfProperty.id}`} className="font-semibold text-primary hover:underline ml-2">
+                                        {tenantOfProperty.title}
+                                    </Link>
+                                </div>
+                            </div>
+                        )}
                     </div>
                     <div className="space-y-2 pt-6 border-t mt-6">
                         <h4 className="font-semibold flex items-center gap-2 text-lg"><FileText size={20}/> Notas</h4>
@@ -221,7 +234,7 @@ export function ContactDetailsClientView({ contactId, onClose, onEdit }: Contact
             </div>
 
             <div className="mt-8">
-                 <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><Home size={24}/> Propiedades de Interés</h2>
+                 <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><Building size={24}/> Propiedades de Interés</h2>
                 <PropertyListView properties={interestedProperties} onDisassociate={handleDisassociate} />
             </div>
         </div>

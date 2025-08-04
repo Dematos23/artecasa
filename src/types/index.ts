@@ -59,6 +59,7 @@ export interface Contact {
   types: ContactType[];
   interestedInPropertyIds?: string[];
   ownerOfPropertyIds?: string[];
+  tenantOfPropertyId?: string;
   date?: Date | Timestamp | null | undefined;
 }
 
