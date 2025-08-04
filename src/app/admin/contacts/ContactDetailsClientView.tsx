@@ -168,43 +168,45 @@ export function ContactDetailsClientView({ contactId, onClose, onEdit }: Contact
             </div>
         </div>
 
-        <Card>
-            <CardHeader>
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                    <div>
-                        <CardTitle className="font-headline text-2xl flex items-center gap-3">
-                           <User /> {getFullName(contact)}
-                        </CardTitle>
-                        <CardDescription>Detalles del contacto y actividad.</CardDescription>
+        <div className="space-y-8">
+            <Card>
+                <CardHeader>
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                        <div>
+                            <CardTitle className="font-headline text-2xl flex items-center gap-3">
+                               <User /> {getFullName(contact)}
+                            </CardTitle>
+                            <CardDescription>Detalles del contacto y actividad.</CardDescription>
+                        </div>
                     </div>
+                </CardHeader>
+                <CardContent>
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-3"><Mail className="text-muted-foreground" size={20} /><a href={`mailto:${contact.email}`} className="text-primary hover:underline">{contact.email || 'No disponible'}</a></div>
+                        {contact.phone && (<div className="flex items-center gap-3"><Phone className="text-muted-foreground" size={20} /><span>{contact.phone}</span></div>)}
+                        <div className="flex items-start gap-3"><Tag className="text-muted-foreground mt-1" size={20} /><div className="flex flex-wrap gap-2">{contact.types.map(type => (<Badge key={type} variant="secondary" className="capitalize text-sm">{type}</Badge>))}</div></div>
+                    </div>
+                    <div className="space-y-2 pt-6 border-t mt-6">
+                        <h4 className="font-semibold flex items-center gap-2 text-lg"><FileText size={20}/> Notas</h4>
+                        <p className="text-muted-foreground whitespace-pre-wrap bg-secondary p-4 rounded-md">{contact.notes || 'No hay notas para este contacto.'}</p>
+                    </div>
+                </CardContent>
+            </Card>
+            
+            {ownedProperties.length > 0 && (
+                <div className="mt-8">
+                    <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><Home size={24}/> Propiedades en Posesión</h2>
+                    <PropertyListView properties={ownedProperties} />
                 </div>
-            </CardHeader>
-            <CardContent className="space-y-6">
-                <div className="space-y-4">
-                    <div className="flex items-center gap-3"><Mail className="text-muted-foreground" size={20} /><a href={`mailto:${contact.email}`} className="text-primary hover:underline">{contact.email || 'No disponible'}</a></div>
-                    {contact.phone && (<div className="flex items-center gap-3"><Phone className="text-muted-foreground" size={20} /><span>{contact.phone}</span></div>)}
-                    <div className="flex items-start gap-3"><Tag className="text-muted-foreground mt-1" size={20} /><div className="flex flex-wrap gap-2">{contact.types.map(type => (<Badge key={type} variant="secondary" className="capitalize text-sm">{type}</Badge>))}</div></div>
-                </div>
-                <div className="space-y-2 pt-6 border-t">
-                    <h4 className="font-semibold flex items-center gap-2 text-lg"><FileText size={20}/> Notas</h4>
-                    <p className="text-muted-foreground whitespace-pre-wrap bg-secondary p-4 rounded-md">{contact.notes || 'No hay notas para este contacto.'}</p>
-                </div>
-            </CardContent>
-        </Card>
-        
-        {ownedProperties.length > 0 && (
-            <div className="mt-8">
-                <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><Home size={24}/> Propiedades en Posesión</h2>
-                <PropertyListView properties={ownedProperties} />
-            </div>
-        )}
+            )}
 
-        {interestedProperties.length > 0 && (
-            <div className="mt-8">
-                 <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><Home size={24}/> Propiedades de Interés</h2>
-                <PropertyListView properties={interestedProperties} />
-            </div>
-        )}
+            {interestedProperties.length > 0 && (
+                <div className="mt-8">
+                     <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><Home size={24}/> Propiedades de Interés</h2>
+                    <PropertyListView properties={interestedProperties} />
+                </div>
+            )}
+        </div>
     </div>
   );
 }
