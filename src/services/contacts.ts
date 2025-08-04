@@ -1,7 +1,7 @@
 
 import { db } from '@/lib/firebase';
-import { collection, getDocs, addDoc, serverTimestamp, query, orderBy, doc, deleteDoc, updateDoc, getDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
-import type { Contact, Property } from '@/types';
+import { collection, getDocs, addDoc, serverTimestamp, query, orderBy, doc, deleteDoc, updateDoc, getDoc, arrayUnion, arrayRemove, writeBatch } from 'firebase/firestore';
+import type { Contact, Property, AssociationType } from '@/types';
 import { getPropertiesByIds, updateProperty, getPropertyById } from './properties';
 import { getProperties } from './properties';
 
@@ -131,7 +131,7 @@ export async function disassociatePropertyFromContact(contactId: string, propert
     const contactSnap = await getDoc(contactDocRef);
     const contact = contactSnap.data() as Contact | undefined;
 
-    const updates: Partial<Contact> = {
+    const updates: any = {
         interestedInPropertyIds: arrayRemove(propertyId),
         ownerOfPropertyIds: arrayRemove(propertyId)
     };
@@ -148,4 +148,55 @@ export async function disassociatePropertyFromContact(contactId: string, propert
     if(propertySnap?.ownerId === contactId) {
       await updateProperty(propertyId, { ownerId: '' }); // or delete the field
     }
+}
+
+// Function to change the association type of a property for a contact
+export async function updateContactAssociationType(
+    contactId: string,
+    propertyId: string,
+    newType: AssociationType
+): Promise<void> {
+    const batch = writeBatch(db);
+    const contactRef = doc(db, 'contacts', contactId);
+
+    // First, remove all existing associations for this property
+    const removalUpdates: any = {
+        ownerOfPropertyIds: arrayRemove(propertyId),
+        interestedInPropertyIds: arrayRemove(propertyId),
+    };
+    batch.update(contactRef, removalUpdates);
+
+    // If the contact was a tenant of this property, clear the field
+    const contactSnap = await getDoc(contactRef);
+    if (contactSnap.exists() && contactSnap.data().tenantOfPropertyId === propertyId) {
+        batch.update(contactRef, { tenantOfPropertyId: '' });
+    }
+
+    // Now, add the new association
+    if (newType === 'owner') {
+        batch.update(contactRef, { ownerOfPropertyIds: arrayUnion(propertyId) });
+        const propertyRef = doc(db, 'properties', propertyId);
+        batch.update(propertyRef, { ownerId: contactId });
+    } else if (newType === 'interested') {
+        batch.update(contactRef, { interestedInPropertyIds: arrayUnion(propertyId) });
+        // Make sure to remove ownerId from property if they are no longer the owner
+        const propertyRef = doc(db, 'properties', propertyId);
+        const propertySnap = await getPropertyById(propertyId);
+        if(propertySnap?.ownerId === contactId) {
+            batch.update(propertyRef, { ownerId: '' });
+        }
+    } else if (newType === 'inquilino') {
+        batch.update(contactRef, {
+            tenantOfPropertyId: propertyId,
+            types: arrayUnion('arrendatario')
+        });
+        // Make sure to remove ownerId from property if they are no longer the owner
+         const propertyRef = doc(db, 'properties', propertyId);
+        const propertySnap = await getPropertyById(propertyId);
+        if(propertySnap?.ownerId === contactId) {
+            batch.update(propertyRef, { ownerId: '' });
+        }
+    }
+
+    await batch.commit();
 }

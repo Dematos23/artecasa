@@ -47,6 +47,9 @@ export type UpdatePropertyData = Partial<NewPropertyData>;
 export const contactTypes = ['comprador', 'arrendatario', 'arrendador', 'vendedor'] as const;
 export type ContactType = (typeof contactTypes)[number];
 
+export const associationTypes = ['owner', 'interested', 'inquilino'] as const;
+export type AssociationType = (typeof associationTypes)[number];
+
 export interface Contact {
   id: string;
   firstname: string;

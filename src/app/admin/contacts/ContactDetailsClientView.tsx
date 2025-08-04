@@ -4,22 +4,24 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import type { Contact, Property } from '@/types';
+import type { Contact, Property, AssociationType } from '@/types';
 import Link from 'next/link';
-import { ArrowLeft, Mail, Phone, User, Tag, FileText, Home, Edit, X, Bed, Building, Eye } from 'lucide-react';
+import { ArrowLeft, Mail, Phone, User, Tag, FileText, Home, Edit, X, Bed, Building, Eye, Pencil } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { getContactById } from '@/services/contacts';
-import { getContactProperties, disassociatePropertyFromContact } from '@/services/contacts';
+import { getContactProperties, disassociatePropertyFromContact, updateContactAssociationType } from '@/services/contacts';
 import { AssociatePropertyForm } from './AssociatePropertyForm';
 import { useToast } from '@/hooks/use-toast';
+import { EditAssociationForm } from './EditAssociationForm';
+
 
 const getFullName = (contact: Pick<Contact, 'firstname' | 'secondname' | 'firstlastname' | 'secondlastname'>) => {
     return [contact.firstname, contact.secondname, contact.firstlastname, contact.secondlastname].filter(Boolean).join(' ');
 }
 
 
-function PropertyListView({ properties, onDisassociate, onNavigateToProperty }: { properties: Property[], onDisassociate: (propertyId: string) => void, onNavigateToProperty: (propertyId: string) => void }) {
+function PropertyListView({ properties, onDisassociate, onNavigateToProperty, onEditAssociation }: { properties: Property[], onDisassociate: (propertyId: string) => void, onNavigateToProperty: (propertyId: string) => void, onEditAssociation: (property: Property) => void }) {
     if (properties.length === 0) {
         return <p className="text-muted-foreground text-sm">No hay propiedades para mostrar.</p>;
     }
@@ -41,6 +43,9 @@ function PropertyListView({ properties, onDisassociate, onNavigateToProperty }: 
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="flex justify-end gap-2">
+                             <Button variant="outline" size="sm" onClick={() => onEditAssociation(property)}>
+                                <Pencil className="mr-2 h-4 w-4" /> Editar
+                            </Button>
                             <Button variant="destructive" size="sm" onClick={() => onDisassociate(property.id)}>
                                 <X className="mr-2 h-4 w-4" /> Desasociar
                             </Button>
@@ -79,6 +84,10 @@ function PropertyListView({ properties, onDisassociate, onNavigateToProperty }: 
                                         <Eye className="h-4 w-4" />
                                         <span className="sr-only">Ver</span>
                                     </Button>
+                                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => onEditAssociation(property)}>
+                                        <Pencil className="h-4 w-4" />
+                                        <span className="sr-only">Editar Asociación</span>
+                                    </Button>
                                     <Button variant="destructive" size="icon" className="h-8 w-8" onClick={() => onDisassociate(property.id)}>
                                         <X className="h-4 w-4" />
                                          <span className="sr-only">Desasociar</span>
@@ -107,6 +116,8 @@ export function ContactDetailsClientView({ contactId, onClose, onEdit, onNavigat
   const [tenantOfProperty, setTenantOfProperty] = useState<Property | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   const [isAssociateFormOpen, setIsAssociateFormOpen] = useState(false);
+  const [isEditAssociationFormOpen, setIsEditAssociationFormOpen] = useState(false);
+  const [propertyToEdit, setPropertyToEdit] = useState<Property | null>(null);
   const { toast } = useToast();
   
   const fetchContactData = async () => {
@@ -141,6 +152,26 @@ export function ContactDetailsClientView({ contactId, onClose, onEdit, onNavigat
       toast({ variant: "destructive", title: "Error", description: "No se pudo desasociar la propiedad." });
     }
   };
+  
+  const handleOpenEditAssociation = (property: Property) => {
+    setPropertyToEdit(property);
+    setIsEditAssociationFormOpen(true);
+  };
+  
+  const handleEditAssociation = async (propertyId: string, newType: AssociationType) => {
+    if (!contact) return;
+    try {
+      await updateContactAssociationType(contact.id, propertyId, newType);
+      toast({ title: "Éxito", description: "La asociación ha sido actualizada." });
+      fetchContactData();
+      setIsEditAssociationFormOpen(false);
+      setPropertyToEdit(null);
+    } catch (error) {
+      console.error("Error updating association:", error);
+      toast({ variant: "destructive", title: "Error", description: "No se pudo actualizar la asociación." });
+    }
+  };
+
 
   if (loading) {
     return (
@@ -181,6 +212,18 @@ export function ContactDetailsClientView({ contactId, onClose, onEdit, onNavigat
             onAssociationSaved={handleAssociationSaved}
             contact={contact}
         />
+        {propertyToEdit && (
+            <EditAssociationForm
+                isOpen={isEditAssociationFormOpen}
+                onClose={() => {
+                    setIsEditAssociationFormOpen(false);
+                    setPropertyToEdit(null);
+                }}
+                contact={contact}
+                property={propertyToEdit}
+                onSave={handleEditAssociation}
+            />
+        )}
         <div className="flex justify-between items-center mb-6">
             <BackButton />
             <div className="flex gap-2">
@@ -233,12 +276,12 @@ export function ContactDetailsClientView({ contactId, onClose, onEdit, onNavigat
             
             <div className="mt-8">
                 <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><Home size={24}/> Propiedades en Posesión</h2>
-                <PropertyListView properties={ownedProperties} onDisassociate={handleDisassociate} onNavigateToProperty={onNavigateToProperty} />
+                <PropertyListView properties={ownedProperties} onDisassociate={handleDisassociate} onNavigateToProperty={onNavigateToProperty} onEditAssociation={handleOpenEditAssociation} />
             </div>
 
             <div className="mt-8">
                  <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><Building size={24}/> Propiedades de Interés</h2>
-                <PropertyListView properties={interestedProperties} onDisassociate={handleDisassociate} onNavigateToProperty={onNavigateToProperty} />
+                <PropertyListView properties={interestedProperties} onDisassociate={handleDisassociate} onNavigateToProperty={onNavigateToProperty} onEditAssociation={handleOpenEditAssociation} />
             </div>
         </div>
     </>
