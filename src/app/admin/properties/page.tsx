@@ -20,7 +20,6 @@ import { PropertyForm } from './PropertyForm';
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { app } from '@/lib/firebase';
 import Image from 'next/image';
-import { useSearchParams, useRouter } from 'next/navigation';
 import { getProperties, addProperty, updateProperty, deleteProperty } from '@/services/properties';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -51,10 +50,6 @@ export default function AdminPropertiesPage() {
   const { toast } = useToast();
   const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const editPropertyId = searchParams.get('edit');
-
   const fetchProperties = useCallback(async () => {
     try {
       setLoading(true);
@@ -75,19 +70,6 @@ export default function AdminPropertiesPage() {
   useEffect(() => {
     fetchProperties();
   }, [fetchProperties]);
-
-  useEffect(() => {
-    if (editPropertyId && properties.length > 0) {
-      const propertyToEdit = properties.find(p => p.id === editPropertyId);
-      if (propertyToEdit) {
-        setSelectedProperty(propertyToEdit);
-        setIsFormOpen(true);
-        // Clean the URL
-        router.replace('/admin/properties', { scroll: false });
-      }
-    }
-  }, [editPropertyId, properties, router]);
-
 
   const handleSave = async (propertyData: Omit<Property, 'id'>, newImages: File[]) => {
     setIsSaving(true);
@@ -134,7 +116,6 @@ export default function AdminPropertiesPage() {
     }
   };
 
-
   const handleDeleteClick = (property: Property) => {
     setPropertyToDelete(property);
     setIsAlertOpen(true);
@@ -163,7 +144,6 @@ export default function AdminPropertiesPage() {
     }
   };
 
-
   const openFormForEdit = (property: Property) => {
     setSelectedProperty(property);
     setIsFormOpen(true);
@@ -176,17 +156,24 @@ export default function AdminPropertiesPage() {
   
   const handleViewDetails = (id: string) => {
     setViewingPropertyId(id);
-  }
+  };
 
   const handleCloseDetails = () => {
     setViewingPropertyId(null);
-  }
+  };
 
+  const handleEditFromDetails = (property: Property) => {
+    setViewingPropertyId(null);
+    openFormForEdit(property);
+  };
 
   if (viewingPropertyId) {
-    return <PropertyDetailsClientView propertyId={viewingPropertyId} onClose={handleCloseDetails} />;
+    return <PropertyDetailsClientView 
+        propertyId={viewingPropertyId} 
+        onClose={handleCloseDetails} 
+        onEdit={handleEditFromDetails}
+    />;
   }
-
 
   return (
     <>
@@ -349,5 +336,3 @@ export default function AdminPropertiesPage() {
     </>
   );
 }
-
-    
