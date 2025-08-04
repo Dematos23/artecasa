@@ -60,3 +60,12 @@ export interface Contact {
   ownerOfPropertyIds?: string[];
   date?: Date | Timestamp | null | undefined;
 }
+
+export interface Lead {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    message: string;
+    date: Date | Timestamp;
+}

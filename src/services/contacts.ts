@@ -48,8 +48,8 @@ export async function getContactById(id: string): Promise<Contact | undefined> {
 export async function addContact(contactData: NewContactData): Promise<string> {
   const docRef = await addDoc(contactsCollection, {
     ...contactData,
-    interestedInPropertyIds: [],
-    ownerOfPropertyIds: [],
+    interestedInPropertyIds: contactData.interestedInPropertyIds || [],
+    ownerOfPropertyIds: contactData.ownerOfPropertyIds || [],
     date: serverTimestamp(),
   });
   return docRef.id;

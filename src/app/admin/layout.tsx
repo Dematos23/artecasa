@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { redirect, usePathname } from 'next/navigation';
-import { Home, Building2, Users, User, LogOut, ArrowLeft, Settings } from 'lucide-react';
+import { Home, Building2, Users, User, LogOut, ArrowLeft, Settings, Inbox } from 'lucide-react';
 
 import {
   Sidebar,
@@ -90,6 +90,12 @@ export default function AdminLayout({
                   <AdminSidebarButton href="/admin/properties">
                     <Building2 />
                     Propiedades
+                  </AdminSidebarButton>
+                </SidebarMenuItem>
+                 <SidebarMenuItem>
+                  <AdminSidebarButton href="/admin/leads">
+                    <Inbox />
+                    Leads
                   </AdminSidebarButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
