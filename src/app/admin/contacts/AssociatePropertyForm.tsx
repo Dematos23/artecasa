@@ -28,7 +28,7 @@ import { useToast } from '@/hooks/use-toast';
 
 const associationSchema = z.object({
   propertyId: z.string().min(1, { message: 'Debes seleccionar una propiedad.' }),
-  associationType: z.enum(['owner', 'interested'], {
+  associationType: z.enum(['owner', 'interested', 'inquilino'], {
     required_error: 'Debes seleccionar un tipo de asociación.',
   }),
 });
@@ -157,9 +157,9 @@ export function AssociatePropertyForm({ isOpen, onClose, onAssociationSaved, con
           <div>
             <Label>Tipo de Asociación</Label>
             <RadioGroup
-              onValueChange={(value) => form.setValue("associationType", value as 'owner' | 'interested')}
+              onValueChange={(value) => form.setValue("associationType", value as 'owner' | 'interested' | 'inquilino')}
               defaultValue={form.getValues("associationType")}
-              className="mt-2 space-y-2"
+              className="mt-2 grid grid-cols-1 gap-2"
             >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="owner" id="owner" />
@@ -168,6 +168,10 @@ export function AssociatePropertyForm({ isOpen, onClose, onAssociationSaved, con
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="interested" id="interested" />
                 <Label htmlFor="interested" className="font-normal">Interesado</Label>
+              </div>
+               <div className="flex items-center space-x-2">
+                <RadioGroupItem value="inquilino" id="inquilino" />
+                <Label htmlFor="inquilino" className="font-normal">Inquilino</Label>
               </div>
             </RadioGroup>
             {form.formState.errors.associationType && <p className="text-sm font-medium text-destructive">{form.formState.errors.associationType.message}</p>}

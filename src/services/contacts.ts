@@ -98,13 +98,18 @@ export async function deleteContact(id: string): Promise<void> {
 export async function updateContactAssociations(
   contactId: string, 
   propertyId: string, 
-  associationType: 'interested' | 'owner'
+  associationType: 'interested' | 'owner' | 'inquilino'
 ): Promise<void> {
     const contactDoc = doc(db, 'contacts', contactId);
 
     if (associationType === 'interested') {
         await updateDoc(contactDoc, {
             interestedInPropertyIds: arrayUnion(propertyId)
+        });
+    } else if (associationType === 'inquilino') {
+        await updateDoc(contactDoc, {
+            interestedInPropertyIds: arrayUnion(propertyId),
+            types: arrayUnion('arrendatario') // 'inquilino' se traduce a 'arrendatario'
         });
     } else if (associationType === 'owner') {
         await updateDoc(contactDoc, {
