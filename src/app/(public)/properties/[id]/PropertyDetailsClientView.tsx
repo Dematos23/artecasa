@@ -64,6 +64,17 @@ export function PropertyDetailsClientView({ propertyId }: { propertyId: string }
   
   const fullAddress = [property.address, property.district, property.province, property.region].filter(Boolean).join(', ');
 
+  const getPriceDisplay = () => {
+    const preferredIsUSD = (property.preferredCurrency === 'USD') || (!property.preferredCurrency && property.modality !== 'alquiler');
+    const mainPrice = preferredIsUSD ? property.priceUSD : property.pricePEN;
+    const mainSymbol = preferredIsUSD ? '$' : 'S/';
+    const secondaryPrice = preferredIsUSD ? property.pricePEN : property.priceUSD;
+    const secondarySymbol = preferredIsUSD ? 'S/' : '$';
+
+    return { mainPrice, mainSymbol, secondaryPrice, secondarySymbol };
+  };
+
+  const { mainPrice, mainSymbol, secondaryPrice, secondarySymbol } = getPriceDisplay();
 
   return (
     <div className="bg-secondary">
@@ -122,14 +133,13 @@ export function PropertyDetailsClientView({ propertyId }: { propertyId: string }
               <CardContent>
                 <div className="mb-4">
                   <p className="text-3xl md:text-4xl font-bold text-primary">
-                      {property.modality === 'alquiler'
-                          ? `S/${Number(property.pricePEN).toLocaleString()}`
-                          : `$${Number(property.priceUSD).toLocaleString()}`}
+                      {mainSymbol}{Number(mainPrice).toLocaleString()}
                   </p>
                   <p className="text-lg font-normal text-muted-foreground capitalize">
                       {property.modality === 'alquiler'
-                          ? `/ mes (o $${Number(property.priceUSD).toLocaleString()})`
-                          : `en ${property.modality} (o S/${Number(property.pricePEN).toLocaleString()})`}
+                          ? '/ mes'
+                          : `en ${property.modality}`}{' '}
+                      (o {secondarySymbol}{Number(secondaryPrice).toLocaleString()})
                   </p>
                 </div>
 

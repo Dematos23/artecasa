@@ -36,6 +36,7 @@ export interface Property {
     lng: number;
   };
   ownerId?: string;
+  preferredCurrency?: 'USD' | 'PEN';
 }
 
 // Type for new property data, omitting id which will be generated

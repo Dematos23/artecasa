@@ -45,6 +45,7 @@ const propertySchema = z.object({
   title: z.string().min(1, { message: 'El título es obligatorio.' }),
   priceUSD: z.coerce.number().min(0, { message: 'El precio debe ser un número positivo.' }),
   pricePEN: z.coerce.number().min(0, { message: 'El precio debe ser un número positivo.' }),
+  preferredCurrency: z.enum(['USD', 'PEN']).default('USD'),
   modality: z.enum(['venta', 'alquiler'], {
     required_error: 'Debes seleccionar una modalidad.',
   }),
@@ -177,10 +178,12 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
         garage: property.garage ?? '',
         area_m2: property.area_m2 ?? '',
         antiquity: property.antiquity ?? '',
+        preferredCurrency: property.preferredCurrency ?? 'USD',
     } : {
         title: '',
         priceUSD: '',
         pricePEN: '',
+        preferredCurrency: 'USD',
         modality: 'venta' as const,
         propertyType: undefined,
         region: '',
@@ -340,7 +343,7 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
                         )}
                         />
                 </div>
-                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <FormField
                         control={form.control}
                         name="priceUSD"
@@ -364,6 +367,27 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
                                 <Input type="number" placeholder="Ej. 937500" {...field} />
                             </FormControl>
                             <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="preferredCurrency"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Moneda Preferida</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Selecciona una moneda" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="USD">Dólares (USD)</SelectItem>
+                                        <SelectItem value="PEN">Soles (PEN)</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
                             </FormItem>
                         )}
                     />

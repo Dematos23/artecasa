@@ -11,8 +11,21 @@ interface PropertyCardProps {
 }
 
 export function PropertyCard({ property }: PropertyCardProps) {
-  const price = property.modality === 'alquiler' ? property.pricePEN : property.priceUSD;
-  const currencySymbol = property.modality === 'alquiler' ? 'S/' : '$';
+  const getPreferredPrice = () => {
+    switch (property.preferredCurrency) {
+        case 'USD':
+            return { price: property.priceUSD, currencySymbol: '$' };
+        case 'PEN':
+            return { price: property.pricePEN, currencySymbol: 'S/' };
+        default:
+            // Fallback for older properties without preferredCurrency
+            const price = property.modality === 'alquiler' ? property.pricePEN : property.priceUSD;
+            const currencySymbol = property.modality === 'alquiler' ? 'S/' : '$';
+            return { price, currencySymbol };
+    }
+  };
+
+  const { price, currencySymbol } = getPreferredPrice();
 
   return (
     <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 group">
