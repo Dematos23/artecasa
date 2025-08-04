@@ -1,20 +1,88 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { PropertyCard } from '@/components/PropertyCard';
 import type { Property } from '@/types';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search } from 'lucide-react';
+import { Search, Check, ChevronsUpDown } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { getProperties } from '@/services/properties';
 import { Skeleton } from '@/components/ui/skeleton';
+import { peruLocations } from '@/lib/peru-locations';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { cn } from '@/lib/utils';
+
+// Generate a flat list of location strings for the combobox
+const locationStrings = peruLocations.flatMap(region =>
+  region.provinces.flatMap(province =>
+    province.districts.map(district => ({
+      value: `${district}, ${province.province}, ${region.region}`.toLowerCase(),
+      label: `${district}, ${province.province}, ${region.region}`,
+    }))
+  )
+);
+
+function LocationCombobox({ value, onChange }: { value: string, onChange: (value: string) => void }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="w-full justify-between text-muted-foreground"
+        >
+          {value
+            ? locationStrings.find((location) => location.value === value)?.label
+            : "Selecciona una ubicación..."}
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[300px] p-0">
+        <Command>
+          <CommandInput placeholder="Buscar ubicación..." />
+          <CommandList>
+            <CommandEmpty>No se encontró la ubicación.</CommandEmpty>
+            <CommandGroup>
+              {locationStrings.map((location) => (
+                <CommandItem
+                  key={location.value}
+                  value={location.value}
+                  onSelect={(currentValue) => {
+                    onChange(currentValue === value ? "" : currentValue);
+                    setOpen(false);
+                  }}
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      value === location.value ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  {location.label}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 
 export default function PropertiesPage() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Filter states
+  const [locationQuery, setLocationQuery] = useState('');
   
   useEffect(() => {
     const fetchProperties = async () => {
@@ -31,6 +99,16 @@ export default function PropertiesPage() {
     fetchProperties();
   }, []);
 
+  const filteredProperties = useMemo(() => {
+    return properties.filter(property => {
+      const propertyLocation = `${property.district || ''}, ${property.province || ''}, ${property.region || ''}`.toLowerCase();
+      
+      const locationMatch = !locationQuery || propertyLocation.includes(locationQuery);
+
+      return locationMatch;
+    });
+  }, [properties, locationQuery]);
+
   return (
     <div className="container mx-auto py-8 md:py-12 px-4 md:px-6">
       <div className="text-center mb-8 md:mb-12">
@@ -42,36 +120,19 @@ export default function PropertiesPage() {
 
       <Card className="p-4 md:p-6 mb-8 bg-secondary">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
-          <div className="relative sm:col-span-2 lg:col-span-1">
-            <Input
-              type="text"
-              placeholder="Buscar por ubicación, palabra clave..."
-              className="pl-10"
-            />
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          <div className="sm:col-span-2 lg:col-span-2">
+            <LocationCombobox value={locationQuery} onChange={setLocationQuery} />
           </div>
           <Select>
             <SelectTrigger>
               <SelectValue placeholder="Tipo de Propiedad" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="villa">Villa</SelectItem>
-              <SelectItem value="penthouse">Penthouse</SelectItem>
-              <SelectItem value="cottage">Casa de campo</SelectItem>
-              <SelectItem value="ranch">Rancho</SelectItem>
+              <SelectItem value="venta">Venta</SelectItem>
+              <SelectItem value="alquiler">Alquiler</SelectItem>
             </SelectContent>
           </Select>
-          <Select>
-            <SelectTrigger>
-              <SelectValue placeholder="Rango de Precios" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="1m-2m">$1,000,000 - $2,000,000</SelectItem>
-              <SelectItem value="2m-3m">$2,000,000 - $3,000,000</SelectItem>
-              <SelectItem value="3m+">$3,000,000+</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button className="w-full">Buscar</Button>
+          <Button className="w-full" onClick={() => setLocationQuery('')}>Limpiar Búsqueda</Button>
         </div>
       </Card>
 
@@ -85,9 +146,9 @@ export default function PropertiesPage() {
             </div>
           ))}
         </div>
-      ) : properties.length > 0 ? (
+      ) : filteredProperties.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-          {properties.map((property) => (
+          {filteredProperties.map((property) => (
             <PropertyCard key={property.id} property={property} />
           ))}
         </div>
