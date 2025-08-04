@@ -145,6 +145,7 @@ export default function AdminPropertiesPage() {
   };
 
   const openFormForEdit = (property: Property) => {
+    setViewingPropertyId(null);
     setSelectedProperty(property);
     setIsFormOpen(true);
   };
@@ -277,8 +278,19 @@ export default function AdminPropertiesPage() {
               </TableHeader>
               <TableBody>
                 {properties.map((property) => {
-                  const price = property.modality === 'alquiler' ? property.pricePEN : property.priceUSD;
-                  const currencySymbol = property.modality === 'alquiler' ? 'S/' : '$';
+                  const getPreferredPrice = () => {
+                    switch (property.preferredCurrency) {
+                        case 'USD':
+                            return { price: property.priceUSD, currencySymbol: '$' };
+                        case 'PEN':
+                            return { price: property.pricePEN, currencySymbol: 'S/' };
+                        default:
+                            const price = property.modality === 'alquiler' ? property.pricePEN : property.priceUSD;
+                            const currencySymbol = property.modality === 'alquiler' ? 'S/' : '$';
+                            return { price, currencySymbol };
+                    }
+                  };
+                  const { price, currencySymbol } = getPreferredPrice();
                   return (
                     <TableRow key={property.id}>
                       <TableCell>
