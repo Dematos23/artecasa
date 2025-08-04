@@ -10,21 +10,23 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { MoreHorizontal, UserPlus, Trash2 } from 'lucide-react';
+import { MoreHorizontal, UserPlus, Trash2, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import type { Lead } from '@/types';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { getLeads, deleteLead, convertLeadToContact } from '@/services/leads';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { format } from 'date-fns';
+import { Input } from '@/components/ui/input';
 
 export default function AdminLeadsPage() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const { user, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const [searchQuery, setSearchQuery] = useState('');
 
   const fetchLeads = useCallback(async () => {
     try {
@@ -51,6 +53,18 @@ export default function AdminLeadsPage() {
       console.log("User not authenticated. Cannot fetch leads.");
     }
   }, [authLoading, user, fetchLeads]);
+
+  const filteredLeads = useMemo(() => {
+    return leads.filter(lead => {
+      const lowercasedQuery = searchQuery.toLowerCase();
+      return (
+        lead.name.toLowerCase().includes(lowercasedQuery) ||
+        lead.email.toLowerCase().includes(lowercasedQuery) ||
+        (lead.phone && lead.phone.toLowerCase().includes(lowercasedQuery)) ||
+        lead.message.toLowerCase().includes(lowercasedQuery)
+      );
+    });
+  }, [leads, searchQuery]);
 
   const handleDelete = async (id: string) => {
     try {
@@ -98,6 +112,19 @@ export default function AdminLeadsPage() {
         </div>
         </div>
 
+        <div className="mb-6">
+            <div className="relative flex-grow">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                    placeholder="Buscar por nombre, correo, teléfono o mensaje..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 w-full max-w-lg"
+                />
+            </div>
+        </div>
+
+
         {loading ? (
         <p>Cargando leads...</p>
         ) : (
@@ -115,7 +142,7 @@ export default function AdminLeadsPage() {
                     </TableRow>
                     </TableHeader>
                     <TableBody>
-                    {leads.map((lead) => (
+                    {filteredLeads.map((lead) => (
                         <TableRow key={lead.id}>
                         <TableCell className="font-medium">{lead.name}</TableCell>
                         <TableCell>{lead.email}</TableCell>
@@ -146,9 +173,9 @@ export default function AdminLeadsPage() {
                     ))}
                     </TableBody>
                 </Table>
-                 {leads.length === 0 && (
+                 {filteredLeads.length === 0 && (
                     <div className="text-center p-8 text-muted-foreground">
-                        No hay nuevos leads en este momento.
+                       {searchQuery ? "No se encontraron leads que coincidan con la búsqueda." : "No hay nuevos leads en este momento."}
                     </div>
                  )}
             </CardContent>
