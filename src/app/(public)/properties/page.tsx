@@ -9,12 +9,26 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { getProperties } from '@/services/properties';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function PropertiesPage() {
   const [properties, setProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
   
   useEffect(() => {
-    // TODO: Fetch properties from Firestore
+    const fetchProperties = async () => {
+      try {
+        setLoading(true);
+        const propertiesData = await getProperties();
+        setProperties(propertiesData);
+      } catch (error) {
+        console.error("Error fetching properties:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProperties();
   }, []);
 
   return (
@@ -61,7 +75,17 @@ export default function PropertiesPage() {
         </div>
       </Card>
 
-      {properties.length > 0 ? (
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="space-y-4">
+              <Skeleton className="h-56 w-full" />
+              <Skeleton className="h-6 w-3/4" />
+              <Skeleton className="h-4 w-1/2" />
+            </div>
+          ))}
+        </div>
+      ) : properties.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {properties.map((property) => (
             <PropertyCard key={property.id} property={property} />

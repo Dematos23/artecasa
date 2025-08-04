@@ -13,14 +13,28 @@ import {
 } from '@/components/ui/carousel';
 import Autoplay from "embla-carousel-autoplay"
 import React, { useState, useEffect } from 'react';
+import { getProperties } from '@/services/properties';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const heroImages = ['/hero1.webp', '/hero2.webp'];
 
 export default function Home() {
   const [properties, setProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // TODO: Fetch properties from Firestore
+    const fetchProperties = async () => {
+      try {
+        setLoading(true);
+        const propertiesData = await getProperties();
+        setProperties(propertiesData);
+      } catch (error) {
+        console.error("Error fetching properties: ", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProperties();
   }, []);
 
   const featuredProperty = properties.find(p => p.featured);
@@ -67,7 +81,7 @@ export default function Home() {
         </div>
       </section>
 
-      {featuredProperty && (
+      {!loading && featuredProperty && (
         <section className="py-12 md:py-24 bg-secondary">
           <div className="container mx-auto px-4 md:px-6">
             <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
@@ -111,7 +125,17 @@ export default function Home() {
               Una cuidada selección de las mejores casas de lujo, adaptadas a tu estilo de vida.
             </p>
           </div>
-          {recentProperties.length > 0 ? (
+          {loading ? (
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="space-y-4">
+                    <Skeleton className="h-56 w-full" />
+                    <Skeleton className="h-6 w-3/4" />
+                    <Skeleton className="h-4 w-1/2" />
+                </div>
+              ))}
+            </div>
+          ) : recentProperties.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
               {recentProperties.map((property) => (
                 <PropertyCard key={property.id} property={property} />
