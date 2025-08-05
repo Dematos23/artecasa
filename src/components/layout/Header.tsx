@@ -34,6 +34,7 @@ export function Header() {
   const pathname = usePathname();
   const { user } = useAuth();
   const [settings, setSettings] = useState<Settings | null>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
    useEffect(() => {
     async function fetchSettingsData() {
@@ -59,7 +60,7 @@ export function Header() {
   );
 
 
-  const NavItems = ({ className }: { className?: string }) => (
+  const NavItems = ({ className, onLinkClick }: { className?: string, onLinkClick?: () => void }) => (
     <nav className={cn('flex items-center gap-4 lg:gap-6', className)}>
       {navLinks.map(({ href, label }) => (
         <Link
@@ -69,6 +70,7 @@ export function Header() {
             'text-sm font-medium transition-colors hover:text-primary',
             pathname === href ? 'text-primary' : 'text-muted-foreground'
           )}
+           onClick={onLinkClick}
         >
           {label}
         </Link>
@@ -81,7 +83,7 @@ export function Header() {
       <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
         {/* Mobile Menu Toggle (Left) */}
         <div className="md:hidden flex-1 flex justify-start">
-          <Sheet>
+          <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon">
                 <Menu className="h-6 w-6" />
@@ -94,10 +96,10 @@ export function Header() {
                  Menú principal de navegación del sitio Artecasa.
                </SheetDescription>
               <div className="flex flex-col gap-4 p-4">
-                <Link href="/" className="mr-6 flex items-center mb-4">
+                <Link href="/" className="mr-6 flex items-center mb-4" onClick={() => setIsMobileMenuOpen(false)}>
                   <Logo />
                 </Link>
-                <NavItems className="flex-col items-start gap-4" />
+                <NavItems className="flex-col items-start gap-4" onLinkClick={() => setIsMobileMenuOpen(false)} />
               </div>
             </SheetContent>
           </Sheet>
