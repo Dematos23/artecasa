@@ -52,7 +52,7 @@ export function PropertyDetailsClientView({ propertyId }: { propertyId: string }
   const handleWhatsAppInquiry = () => {
     if (!settings?.whatsappNumber || !property) return;
     const propertyUrl = window.location.href;
-    const text = `Hola, estoy interesado/a en la propiedad: "${property.title}". Puedes verla aquí: ${propertyUrl}`;
+    const text = `Hola, me interesa la propiedad: "${property.title}".\nPuedes verla aquí: \n${propertyUrl}`;
     const encodedText = encodeURIComponent(text);
     window.open(`https://wa.me/${settings.whatsappNumber}?text=${encodedText}`, '_blank');
   };
