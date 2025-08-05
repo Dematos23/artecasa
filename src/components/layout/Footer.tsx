@@ -1,7 +1,7 @@
 
 "use client";
 
-import { Facebook, Instagram, Linkedin, MessageCircle, Send } from 'lucide-react';
+import { Facebook, Instagram, Linkedin, MessageCircle, Send, Youtube } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
@@ -76,6 +76,11 @@ export function Footer() {
               {settings?.showX && settings.xUrl && (
                 <a href={settings.xUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-accent-foreground transition-colors">
                     <XIcon className="h-6 w-6" />
+                </a>
+              )}
+              {settings?.showYoutube && settings.youtubeUrl && (
+                <a href={settings.youtubeUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-accent-foreground transition-colors">
+                    <Youtube size={24} />
                 </a>
               )}
               {settings?.showWhatsapp && settings.whatsappUrl && (

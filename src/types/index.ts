@@ -86,6 +86,7 @@ export interface Settings {
   instagramUrl?: string;
   tiktokUrl?: string;
   xUrl?: string;
+  youtubeUrl?: string;
   whatsappUrl?: string;
   linkedinUrl?: string;
   telegramUrl?: string;
@@ -94,6 +95,7 @@ export interface Settings {
   showInstagram?: boolean;
   showTiktok?: boolean;
   showX?: boolean;
+  showYoutube?: boolean;
   showWhatsapp?: boolean;
   showLinkedin?: boolean;
   showTelegram?: boolean;

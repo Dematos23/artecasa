@@ -37,6 +37,7 @@ const settingsSchema = z.object({
   instagramUrl: z.string().url({ message: "Debe ser una URL válida." }).optional().or(z.literal('')),
   tiktokUrl: z.string().url({ message: "Debe ser una URL válida." }).optional().or(z.literal('')),
   xUrl: z.string().url({ message: "Debe ser una URL válida." }).optional().or(z.literal('')),
+  youtubeUrl: z.string().url({ message: "Debe ser una URL válida." }).optional().or(z.literal('')),
   whatsappUrl: z.string().url({ message: "Debe ser una URL válida." }).optional().or(z.literal('')),
   linkedinUrl: z.string().url({ message: "Debe ser una URL válida." }).optional().or(z.literal('')),
   telegramUrl: z.string().url({ message: "Debe ser una URL válida." }).optional().or(z.literal('')),
@@ -45,6 +46,7 @@ const settingsSchema = z.object({
   showInstagram: z.boolean().optional(),
   showTiktok: z.boolean().optional(),
   showX: z.boolean().optional(),
+  showYoutube: z.boolean().optional(),
   showWhatsapp: z.boolean().optional(),
   showLinkedin: z.boolean().optional(),
   showTelegram: z.boolean().optional(),
@@ -173,6 +175,7 @@ export default function SettingsPage() {
       instagramUrl: '',
       tiktokUrl: '',
       xUrl: '',
+      youtubeUrl: '',
       whatsappUrl: '',
       linkedinUrl: '',
       telegramUrl: '',
@@ -180,6 +183,7 @@ export default function SettingsPage() {
       showInstagram: false,
       showTiktok: false,
       showX: false,
+      showYoutube: false,
       showWhatsapp: false,
       showLinkedin: false,
       showTelegram: false,
@@ -813,6 +817,16 @@ export default function SettingsPage() {
                             <div className="space-y-0.5">
                                 <FormLabel className="text-base">X (Twitter)</FormLabel>
                                 <FormControl><Input className='mt-2' placeholder="https://x.com/tu-usuario" {...form.register('xUrl')} /></FormControl>
+                            </div>
+                            <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
+                        </FormItem>
+                    )}/>
+
+                     <FormField control={form.control} name="showYoutube" render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                            <div className="space-y-0.5">
+                                <FormLabel className="text-base">YouTube</FormLabel>
+                                <FormControl><Input className='mt-2' placeholder="https://youtube.com/tu-canal" {...form.register('youtubeUrl')} /></FormControl>
                             </div>
                             <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
                         </FormItem>
