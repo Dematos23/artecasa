@@ -11,7 +11,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { PlusCircle, MoreHorizontal, Search, ChevronsUpDown, Loader2 } from 'lucide-react';
+import { PlusCircle, MoreHorizontal, Search, ChevronsUpDown, Loader2, BedDouble, Maximize, CalendarClock } from 'lucide-react';
 import type { Property, Contact } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -358,6 +358,7 @@ export default function AdminPropertiesPage() {
           {filteredProperties.map((property) => {
             const price = property.modality === 'alquiler' ? property.pricePEN : property.priceUSD;
             const currencySymbol = property.modality === 'alquiler' ? 'S/' : '$';
+            const antiquityText = property.antiquity === 0 ? 'A estrenar' : property.antiquity ? `${property.antiquity} años` : null;
             return (
               <Card key={property.id}>
                 {property.imageUrls?.[0] && (
@@ -371,7 +372,7 @@ export default function AdminPropertiesPage() {
                         />
                     </div>
                 )}
-                <CardHeader className={property.imageUrls?.[0] ? 'pt-4' : ''}>
+                <CardHeader className={property.imageUrls?.[0] ? 'pt-4 pb-2' : 'pb-2'}>
                   <CardTitle className="text-base truncate">
                     <span className="font-bold cursor-pointer" onClick={() => handleViewDetails(property.id)}>
                       {property.title}
@@ -379,23 +380,30 @@ export default function AdminPropertiesPage() {
                   </CardTitle>
                   <CardDescription className="capitalize">{property.modality} - {currencySymbol}{Number(price).toLocaleString()}</CardDescription>
                 </CardHeader>
-                <CardContent className="flex justify-between items-center">
-                    <Badge variant={property.featured ? 'default' : 'secondary'}>
-                      {property.featured ? 'Destacada' : 'Estándar'}
-                    </Badge>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <span className="sr-only">Abrir menú</span>
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                         <DropdownMenuItem onClick={() => handleViewDetails(property.id)}>Ver Detalles</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => openFormForEdit(property)}>Editar</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleDeleteClick(property)} className="text-destructive">Eliminar</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                 <CardContent className="space-y-3 pt-2">
+                   <div className="border-t pt-3 flex justify-around text-xs text-muted-foreground">
+                        {property.bedrooms !== undefined && <div className="flex items-center gap-1.5"><BedDouble size={14} className="text-primary"/> <span>{property.bedrooms} Dorms</span></div>}
+                        {property.area_m2 !== undefined && <div className="flex items-center gap-1.5"><Maximize size={14} className="text-primary"/> <span>{property.area_m2} m²</span></div>}
+                        {antiquityText && <div className="flex items-center gap-1.5"><CalendarClock size={14} className="text-primary"/> <span>{antiquityText}</span></div>}
+                   </div>
+                   <div className="flex justify-between items-center pt-2">
+                      <Badge variant={property.featured ? 'default' : 'secondary'}>
+                        {property.featured ? 'Destacada' : 'Estándar'}
+                      </Badge>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <span className="sr-only">Abrir menú</span>
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                           <DropdownMenuItem onClick={() => handleViewDetails(property.id)}>Ver Detalles</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => openFormForEdit(property)}>Editar</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleDeleteClick(property)} className="text-destructive">Eliminar</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                  </div>
                 </CardContent>
               </Card>
             )
@@ -495,5 +503,3 @@ export default function AdminPropertiesPage() {
     </>
   );
 }
-
-    
