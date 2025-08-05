@@ -5,11 +5,12 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { Property } from '@/types';
+import type { Property, Settings } from '@/types';
 import { BedDouble, Bath, Car, Maximize, MapPin, Phone, CalendarClock, Building } from 'lucide-react';
 import Link from 'next/link';
 import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
 import { getPropertyById } from '@/services/properties';
+import { getSettings } from '@/services/settings';
 
 const containerStyle = {
   width: '100%',
@@ -24,6 +25,7 @@ const defaultCenter = {
 
 export function PropertyDetailsClientView({ propertyId }: { propertyId: string }) {
   const [property, setProperty] = useState<Property | undefined>(undefined);
+  const [settings, setSettings] = useState<Settings | null>(null);
   const [loading, setLoading] = useState(true);
   const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
@@ -36,8 +38,12 @@ export function PropertyDetailsClientView({ propertyId }: { propertyId: string }
   useEffect(() => {
     const fetchProperty = async () => {
       setLoading(true);
-      const prop = await getPropertyById(propertyId);
+      const [prop, settingsData] = await Promise.all([
+        getPropertyById(propertyId),
+        getSettings()
+      ]);
       setProperty(prop);
+      setSettings(settingsData);
       setLoading(false);
     }
     fetchProperty();
@@ -75,6 +81,7 @@ export function PropertyDetailsClientView({ propertyId }: { propertyId: string }
   };
 
   const { mainPrice, mainSymbol, secondaryPrice, secondarySymbol } = getPriceDisplay();
+  const imageUrl = property.imageUrls?.[0] ?? settings?.defaultPropertyImageUrl ?? '/appartment.webp';
 
   return (
     <div className="bg-secondary">
@@ -88,7 +95,7 @@ export function PropertyDetailsClientView({ propertyId }: { propertyId: string }
           <div className="lg:col-span-2">
             <Card className="overflow-hidden mb-8">
               <Image
-                src={property.imageUrls[0] ?? '/appartment.webp'}
+                src={imageUrl}
                 data-ai-hint="luxury property interior"
                 alt={property.title}
                 width={1200}

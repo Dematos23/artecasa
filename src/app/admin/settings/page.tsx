@@ -24,6 +24,8 @@ const storage = getStorage(app);
 
 
 const settingsSchema = z.object({
+  logoUrl: z.string().optional(),
+  defaultPropertyImageUrl: z.string().optional(),
   heroImages: z.array(z.string()).optional().default([]),
 
   whatsappNumber: z.string().min(1, 'El número de WhatsApp es obligatorio.').regex(/^\d+$/, 'Debe contener solo números.'),
@@ -71,12 +73,83 @@ const settingsSchema = z.object({
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
 
+const SingleImageUploader = ({
+  label,
+  currentImageUrl,
+  onImageChange,
+}: {
+  label: string;
+  currentImageUrl: string | null | undefined;
+  onImageChange: (file: File | null) => void;
+}) => {
+  const [preview, setPreview] = useState<string | null>(currentImageUrl || null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setPreview(currentImageUrl || null);
+  }, [currentImageUrl]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+      onImageChange(file);
+    }
+  };
+
+  const handleButtonClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  return (
+    <div className="space-y-2">
+      <Label>{label}</Label>
+      <div className="flex items-center gap-4">
+        {preview ? (
+          <Image
+            src={preview}
+            alt={`${label} preview`}
+            width={100}
+            height={100}
+            className="h-20 w-auto object-contain rounded-md border p-1"
+          />
+        ) : (
+          <div className="h-20 w-20 flex items-center justify-center bg-secondary rounded-md text-muted-foreground text-sm">
+            Sin imagen
+          </div>
+        )}
+        <Button type="button" variant="outline" onClick={handleButtonClick}>
+          {preview ? 'Cambiar Imagen' : 'Subir Imagen'}
+        </Button>
+        <input
+          type="file"
+          ref={fileInputRef}
+          className="hidden"
+          accept="image/*"
+          onChange={handleFileChange}
+        />
+      </div>
+    </div>
+  );
+};
+
+
 export default function SettingsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  // Hero images state
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
   const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
+  
+  // Single image state
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [defaultPropertyImageFile, setDefaultPropertyImageFile] = useState<File | null>(null);
+
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsSchema),
@@ -161,11 +234,9 @@ export default function SettingsPage() {
     const existingUrls = form.getValues('heroImages') || [];
     const urlToRemove = imagePreviews[indexToRemove];
 
-    // Check if the URL is an existing one from Firestore
     if (existingUrls.includes(urlToRemove)) {
         setImagesToDelete(prev => [...prev, urlToRemove]);
     } else {
-        // It's a new image that hasn't been uploaded yet, remove from newImageFiles
         const fileIndex = newImageFiles.findIndex(file => URL.createObjectURL(file) === urlToRemove);
         if (fileIndex > -1) {
             const updatedFiles = [...newImageFiles];
@@ -174,20 +245,47 @@ export default function SettingsPage() {
         }
     }
     
-    // Update the previews
     const newPreviews = imagePreviews.filter((_, index) => index !== indexToRemove);
     setImagePreviews(newPreviews);
 
-    // Revoke the object URL to prevent memory leaks
     if (urlToRemove.startsWith('blob:')) {
         URL.revokeObjectURL(urlToRemove);
     }
   };
 
 
+  const uploadSingleImage = async (file: File, path: string, oldUrl?: string): Promise<string> => {
+      // Delete old image if it exists
+      if (oldUrl) {
+          try {
+              const oldImageRef = ref(storage, oldUrl);
+              await deleteObject(oldImageRef);
+          } catch (error: any) {
+              if (error.code !== 'storage/object-not-found') {
+                  console.error(`Error deleting old image from ${path}:`, error);
+              }
+          }
+      }
+      // Upload new image
+      const storageRef = ref(storage, `${path}/${Date.now()}_${file.name}`);
+      await uploadBytes(storageRef, file);
+      return getDownloadURL(storageRef);
+  };
+
+
   const onSubmit = async (data: SettingsFormValues) => {
     try {
-      // 1. Delete images marked for deletion
+      let { logoUrl, defaultPropertyImageUrl } = data;
+
+      // 1. Upload Logo and Default Property Image if they have changed
+      if (logoFile) {
+        logoUrl = await uploadSingleImage(logoFile, 'branding', data.logoUrl);
+      }
+      if (defaultPropertyImageFile) {
+        defaultPropertyImageUrl = await uploadSingleImage(defaultPropertyImageFile, 'branding', data.defaultPropertyImageUrl);
+      }
+      
+      // 2. Delete hero images marked for deletion
       await Promise.all(
         imagesToDelete.map(async (url) => {
           try {
@@ -201,7 +299,7 @@ export default function SettingsPage() {
         })
       );
 
-      // 2. Upload new images
+      // 3. Upload new hero images
       const uploadedImageUrls = await Promise.all(
           newImageFiles.map(async (file) => {
               const storageRef = ref(storage, `hero/${Date.now()}_${file.name}`);
@@ -210,22 +308,26 @@ export default function SettingsPage() {
           })
       );
 
-      // 3. Combine old and new URLs
+      // 4. Combine old and new hero URLs
       const existingUrls = form.getValues('heroImages')?.filter(url => !imagesToDelete.includes(url)) || [];
       const finalImageUrls = [...existingUrls, ...uploadedImageUrls];
       
       const settingsData = {
         ...data,
+        logoUrl,
+        defaultPropertyImageUrl,
         heroImages: finalImageUrls,
       };
 
-      // 4. Save settings to Firestore
+      // 5. Save settings to Firestore
       await saveSettings(settingsData);
 
-      // 5. Reset states
+      // 6. Reset states
       setNewImageFiles([]);
       setImagesToDelete([]);
-      form.reset(settingsData); // Reset form with the new data
+      setLogoFile(null);
+      setDefaultPropertyImageFile(null);
+      form.reset(settingsData); 
       setImagePreviews(finalImageUrls);
 
       toast({
@@ -251,6 +353,29 @@ export default function SettingsPage() {
       <h1 className="text-3xl font-bold font-headline mb-6">Configuración General</h1>
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+
+               <Card>
+                <CardHeader>
+                  <CardTitle>Branding y Medios</CardTitle>
+                  <CardDescription>
+                    Gestiona el logo del sitio y otras imágenes por defecto.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <SingleImageUploader
+                    label="Logo del Sitio"
+                    currentImageUrl={form.watch('logoUrl')}
+                    onImageChange={setLogoFile}
+                  />
+                  <hr/>
+                   <SingleImageUploader
+                    label="Imagen por Defecto para Propiedades"
+                    currentImageUrl={form.watch('defaultPropertyImageUrl')}
+                    onImageChange={setDefaultPropertyImageFile}
+                  />
+                </CardContent>
+              </Card>
+
               <Card>
                 <CardHeader>
                   <CardTitle>Imágenes del Carrusel Principal (Hero)</CardTitle>

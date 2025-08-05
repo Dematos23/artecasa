@@ -34,7 +34,13 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
             <Link href="/" className="flex items-center gap-2 mb-4">
-               <Image src="/logo.png" alt="Artecasa Logo" width={120} height={30} className="h-12 w-auto" />
+               <Image 
+                    src={settings?.logoUrl || '/logo.png'} 
+                    alt="Artecasa Logo" 
+                    width={120} 
+                    height={30} 
+                    className="h-12 w-auto" 
+                />
             </Link>
             <p className="text-sm text-muted-foreground">
               Tu socio para encontrar la casa de lujo perfecta.

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -11,6 +12,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
+import { getSettings } from '@/services/settings';
+import type { Settings } from '@/types';
 
 const auth = getAuth(app);
 
@@ -20,7 +23,16 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [settings, setSettings] = useState<Settings | null>(null);
   const { toast } = useToast();
+
+   useEffect(() => {
+    async function fetchSettingsData() {
+        const settingsData = await getSettings();
+        setSettings(settingsData);
+    }
+    fetchSettingsData();
+  }, []);
 
   useEffect(() => {
     if (!loading && user) {
@@ -33,7 +45,6 @@ export default function LoginPage() {
     setIsSubmitting(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      // The useEffect will handle the redirect
     } catch (error: any) {
         if (error.code === 'auth/user-not-found') {
             try {
@@ -70,7 +81,14 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
           <div className="mx-auto mb-4">
-            <Image src="/logo.png" alt="Artecasa Logo" width={240} height={60} className="h-20 w-auto" priority />
+            <Image 
+                src={settings?.logoUrl || "/logo.png"} 
+                alt="Artecasa Logo" 
+                width={240} 
+                height={60} 
+                className="h-20 w-auto" 
+                priority 
+            />
           </div>
           <CardTitle className="font-headline text-2xl">Acceso de Administrador</CardTitle>
           <CardDescription>Ingresa tus credenciales para acceder al panel.</CardDescription>

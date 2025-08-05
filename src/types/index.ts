@@ -76,6 +76,8 @@ export interface Lead {
 }
 
 export interface Settings {
+  logoUrl?: string;
+  defaultPropertyImageUrl?: string;
   heroImages?: string[];
 
   whatsappNumber: string;

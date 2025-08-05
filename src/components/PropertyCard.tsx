@@ -1,16 +1,29 @@
 
+"use client";
 import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import type { Property } from '@/types';
+import type { Property, Settings } from '@/types';
 import { BedDouble, Bath, Car, Building } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { getSettings } from '@/services/settings';
 
 interface PropertyCardProps {
   property: Property;
 }
 
 export function PropertyCard({ property }: PropertyCardProps) {
+  const [settings, setSettings] = useState<Settings | null>(null);
+
+  useEffect(() => {
+    async function fetchSettingsData() {
+        const settingsData = await getSettings();
+        setSettings(settingsData);
+    }
+    fetchSettingsData();
+  }, []);
+  
   const getPreferredPrice = () => {
     switch (property.preferredCurrency) {
         case 'USD':
@@ -18,7 +31,6 @@ export function PropertyCard({ property }: PropertyCardProps) {
         case 'PEN':
             return { price: property.pricePEN, currencySymbol: 'S/' };
         default:
-            // Fallback for older properties without preferredCurrency
             const price = property.modality === 'alquiler' ? property.pricePEN : property.priceUSD;
             const currencySymbol = property.modality === 'alquiler' ? 'S/' : '$';
             return { price, currencySymbol };
@@ -27,12 +39,14 @@ export function PropertyCard({ property }: PropertyCardProps) {
 
   const { price, currencySymbol } = getPreferredPrice();
 
+  const imageUrl = property.imageUrls?.[0] ?? settings?.defaultPropertyImageUrl ?? '/appartment.webp';
+
   return (
     <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 group">
       <Link href={`/properties/${property.id}`}>
         <div className="relative">
           <Image
-            src={property.imageUrls?.[0] ?? '/appartment.webp'}
+            src={imageUrl}
             data-ai-hint="house exterior"
             alt={property.title}
             width={400}

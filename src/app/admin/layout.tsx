@@ -21,7 +21,10 @@ import {
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
 import { auth } from '@/lib/firebase';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { getSettings } from '@/services/settings';
+import type { Settings as AppSettings } from '@/types';
+
 
 function AdminSidebarButton({ href, children }: { href: string, children: React.ReactNode }) {
   const pathname = usePathname();
@@ -49,11 +52,17 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const { user, loading } = useAuth();
+  const [settings, setSettings] = useState<AppSettings | null>(null);
   
   React.useEffect(() => {
     if (!loading && !user) {
       redirect('/login');
     }
+    async function fetchSettings() {
+      const settingsData = await getSettings();
+      setSettings(settingsData);
+    }
+    fetchSettings();
   }, [user, loading]);
   
   const handleLogout = async () => {
@@ -75,7 +84,14 @@ export default function AdminLayout({
         <Sidebar>
             <SidebarHeader>
             <Link href="/" className="flex items-center justify-center">
-                <Image src="/logo.png" alt="Artecasa Logo" width={160} height={40} className="h-16 w-auto" priority />
+                <Image 
+                    src={settings?.logoUrl || "/logo.png"} 
+                    alt="Artecasa Logo" 
+                    width={160} 
+                    height={40} 
+                    className="h-16 w-auto" 
+                    priority 
+                />
             </Link>
             </SidebarHeader>
             <SidebarContent>

@@ -18,7 +18,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { Avatar, AvatarFallback } from '../ui/avatar';
+import { getSettings } from '@/services/settings';
+import type { Settings } from '@/types';
+import { useEffect, useState } from 'react';
 
 
 const navLinks = [
@@ -30,10 +33,30 @@ const navLinks = [
 export function Header() {
   const pathname = usePathname();
   const { user } = useAuth();
+  const [settings, setSettings] = useState<Settings | null>(null);
+
+   useEffect(() => {
+    async function fetchSettingsData() {
+        const settingsData = await getSettings();
+        setSettings(settingsData);
+    }
+    fetchSettingsData();
+  }, []);
 
   const handleLogout = async () => {
     await auth.signOut();
   };
+
+  const Logo = () => (
+    <Image 
+        src={settings?.logoUrl || '/logo.png'} 
+        alt="Artecasa Logo" 
+        width={120} 
+        height={30} 
+        className="h-16 w-auto" 
+        priority 
+    />
+  );
 
 
   const NavItems = ({ className }: { className?: string }) => (
@@ -72,7 +95,7 @@ export function Header() {
                </SheetDescription>
               <div className="flex flex-col gap-4 p-4">
                 <Link href="/" className="mr-6 flex items-center mb-4">
-                  <Image src="/logo.png" alt="Artecasa Logo" width={120} height={30} className="h-16 w-auto" priority />
+                  <Logo />
                 </Link>
                 <NavItems className="flex-col items-start gap-4" />
               </div>
@@ -83,7 +106,7 @@ export function Header() {
         {/* Logo */}
         <div className="flex justify-center md:justify-start flex-1 md:flex-none">
             <Link href="/" className="flex items-center">
-              <Image src="/logo.png" alt="Artecasa Logo" width={120} height={30} className="h-16 w-auto" priority />
+              <Logo />
             </Link>
         </div>
 
