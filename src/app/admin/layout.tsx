@@ -155,7 +155,7 @@ export default function AdminLayout({
             </header>
              <div className="p-4 sm:p-6 lg:p-8 h-full">
                 {showLoader ? (
-                     <div className="flex justify-center items-center h-full">
+                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80">
                         <Loader2 className="h-16 w-16 animate-spin text-primary" />
                     </div>
                 ) : (
