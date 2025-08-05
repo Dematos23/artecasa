@@ -15,9 +15,17 @@ import { useToast } from '@/hooks/use-toast';
 import { getSettings, saveSettings } from '@/services/settings';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
+import { app } from '@/lib/firebase';
+import { UploadCloud, X } from 'lucide-react';
+import Image from 'next/image';
+
+const storage = getStorage(app);
 
 
 const settingsSchema = z.object({
+  heroImages: z.array(z.string()).optional().default([]),
+
   whatsappNumber: z.string().min(1, 'El número de WhatsApp es obligatorio.').regex(/^\d+$/, 'Debe contener solo números.'),
   
   facebookUrl: z.string().url({ message: "Debe ser una URL válida." }).optional().or(z.literal('')),
@@ -63,23 +71,17 @@ const settingsSchema = z.object({
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
 
-const socialFields: { name: keyof SettingsFormValues, label: string }[] = [
-    { name: 'showFacebook', label: 'Facebook' },
-    { name: 'showInstagram', label: 'Instagram' },
-    { name: 'showTiktok', label: 'TikTok' },
-    { name: 'showX', label: 'X (Twitter)' },
-    { name: 'showWhatsapp', label: 'WhatsApp' },
-    { name: 'showLinkedin', label: 'LinkedIn' },
-    { name: 'showTelegram', label: 'Telegram' },
-];
-
 export default function SettingsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
+  const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsSchema),
     defaultValues: {
+      heroImages: [],
       whatsappNumber: '',
       facebookUrl: '',
       instagramUrl: '',
@@ -128,6 +130,7 @@ export default function SettingsPage() {
         const settings = await getSettings();
         if (settings) {
           form.reset(settings);
+          setImagePreviews(settings.heroImages || []);
         }
       } catch (error) {
         console.error("Error fetching settings:", error);
@@ -144,9 +147,87 @@ export default function SettingsPage() {
   }, [form, toast]);
 
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+        setNewImageFiles(prev => [...prev, ...files]);
+
+        const newPreviews = files.map(file => URL.createObjectURL(file));
+        setImagePreviews(prev => [...prev, ...newPreviews]);
+    }
+  };
+
+  const removeImage = (indexToRemove: number) => {
+    const existingUrls = form.getValues('heroImages') || [];
+    const urlToRemove = imagePreviews[indexToRemove];
+
+    // Check if the URL is an existing one from Firestore
+    if (existingUrls.includes(urlToRemove)) {
+        setImagesToDelete(prev => [...prev, urlToRemove]);
+    } else {
+        // It's a new image that hasn't been uploaded yet, remove from newImageFiles
+        const fileIndex = newImageFiles.findIndex(file => URL.createObjectURL(file) === urlToRemove);
+        if (fileIndex > -1) {
+            const updatedFiles = [...newImageFiles];
+            updatedFiles.splice(fileIndex, 1);
+            setNewImageFiles(updatedFiles);
+        }
+    }
+    
+    // Update the previews
+    const newPreviews = imagePreviews.filter((_, index) => index !== indexToRemove);
+    setImagePreviews(newPreviews);
+
+    // Revoke the object URL to prevent memory leaks
+    if (urlToRemove.startsWith('blob:')) {
+        URL.revokeObjectURL(urlToRemove);
+    }
+  };
+
+
   const onSubmit = async (data: SettingsFormValues) => {
     try {
-      await saveSettings(data);
+      // 1. Delete images marked for deletion
+      await Promise.all(
+        imagesToDelete.map(async (url) => {
+          try {
+            const imageRef = ref(storage, url);
+            await deleteObject(imageRef);
+          } catch (error: any) {
+             if (error.code !== 'storage/object-not-found') {
+                console.error("Error deleting image from storage: ", error);
+             }
+          }
+        })
+      );
+
+      // 2. Upload new images
+      const uploadedImageUrls = await Promise.all(
+          newImageFiles.map(async (file) => {
+              const storageRef = ref(storage, `hero/${Date.now()}_${file.name}`);
+              await uploadBytes(storageRef, file);
+              return getDownloadURL(storageRef);
+          })
+      );
+
+      // 3. Combine old and new URLs
+      const existingUrls = form.getValues('heroImages')?.filter(url => !imagesToDelete.includes(url)) || [];
+      const finalImageUrls = [...existingUrls, ...uploadedImageUrls];
+      
+      const settingsData = {
+        ...data,
+        heroImages: finalImageUrls,
+      };
+
+      // 4. Save settings to Firestore
+      await saveSettings(settingsData);
+
+      // 5. Reset states
+      setNewImageFiles([]);
+      setImagesToDelete([]);
+      form.reset(settingsData); // Reset form with the new data
+      setImagePreviews(finalImageUrls);
+
       toast({
         title: "Éxito",
         description: "La configuración se ha guardado correctamente.",
@@ -170,6 +251,49 @@ export default function SettingsPage() {
       <h1 className="text-3xl font-bold font-headline mb-6">Configuración General</h1>
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Imágenes del Carrusel Principal (Hero)</CardTitle>
+                  <CardDescription>
+                    Sube, elimina y gestiona las imágenes que aparecen en el carrusel de la página de inicio.
+                  </CardDescription>
+                </CardHeader>
+                 <CardContent>
+                    <div>
+                      <Label>Imágenes</Label>
+                      <FormControl>
+                        <div className="mt-2 flex justify-center rounded-lg border border-dashed border-input px-6 py-10">
+                            <div className="text-center">
+                                <UploadCloud className="mx-auto h-12 w-12 text-gray-300" />
+                                <div className="mt-4 flex text-sm leading-6 text-gray-600">
+                                    <label htmlFor="file-upload" className="relative cursor-pointer rounded-md bg-white font-semibold text-primary focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2 hover:text-accent-foreground" >
+                                        <span>Sube tus archivos</span>
+                                        <input id="file-upload" name="newImages" type="file" className="sr-only" multiple onChange={handleImageChange} accept="image/*" />
+                                    </label>
+                                    <p className="pl-1">o arrástralos aquí</p>
+                                </div>
+                                <p className="text-xs leading-5 text-gray-600">PNG, JPG, GIF hasta 10MB</p>
+                            </div>
+                        </div>
+                      </FormControl>
+                       {imagePreviews.length > 0 && (
+                         <div className="mt-4 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
+                            {imagePreviews.map((previewUrl, index) => (
+                               <div key={previewUrl + index} className="relative group">
+                                 <Image src={previewUrl} alt={`Vista previa de imagen ${index + 1}`} width={150} height={150} className="h-24 w-24 object-cover rounded-md" />
+                                  <div className="absolute top-0 right-0 -mt-2 -mr-2 flex gap-1">
+                                    <button type="button" onClick={() => removeImage(index)} title="Eliminar imagen" className="h-6 w-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" >
+                                        <X className="h-4 w-4" />
+                                    </button>
+                                  </div>
+                               </div>
+                            ))}
+                         </div>
+                       )}
+                    </div>
+                </CardContent>
+              </Card>
+
               
               <Card>
                 <CardHeader>

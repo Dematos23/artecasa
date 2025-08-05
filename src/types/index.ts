@@ -76,6 +76,8 @@ export interface Lead {
 }
 
 export interface Settings {
+  heroImages?: string[];
+
   whatsappNumber: string;
   
   facebookUrl?: string;

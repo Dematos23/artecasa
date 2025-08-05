@@ -17,7 +17,6 @@ import { getProperties } from '@/services/properties';
 import { getSettings } from '@/services/settings';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const heroImages = ['/hero1.webp', '/hero2.webp'];
 
 export default function Home() {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -45,6 +44,8 @@ export default function Home() {
 
   const featuredProperty = properties.find(p => p.featured);
   const recentProperties = properties.filter(p => !p.featured).slice(0, 3);
+  const heroImages = settings?.heroImages?.length ? settings.heroImages : ['/hero1.webp', '/hero2.webp'];
+
 
   const plugin = React.useRef(
     Autoplay({ delay: 5000, stopOnInteraction: true })
