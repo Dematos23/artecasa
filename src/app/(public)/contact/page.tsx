@@ -29,7 +29,7 @@ export default function ContactPage() {
 
     const handleWhatsAppClick = () => {
         if (!settings?.whatsappNumber) return;
-        const text = `Hola, mi nombre es ${name}.\n\nCorreo: ${email}\nTeléfono: ${phone}\n\nMensaje: ${message}`;
+        const text = `Hola, he visitado la web de Artecasa mi nombre es ${name}`;
         const encodedText = encodeURIComponent(text);
         window.open(`https://wa.me/${settings.whatsappNumber}?text=${encodedText}`, '_blank');
     };
