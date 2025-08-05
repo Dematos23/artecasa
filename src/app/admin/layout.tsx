@@ -113,7 +113,6 @@ export default function AdminLayout({
             </SidebarMenu>
             </SidebarContent>
             <SidebarFooter>
-              <div className="border-t -mx-2 p-2 pt-2">
                 <SidebarMenu>
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild>
@@ -124,8 +123,6 @@ export default function AdminLayout({
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 </SidebarMenu>
-              </div>
-              <div className="border-t -mx-2 p-2 pt-2">
                 <div className="flex items-center gap-2 p-2 rounded-md bg-secondary">
                 <User className="h-8 w-8 rounded-full bg-primary/20 text-primary p-1.5" />
                 <div className="flex flex-col">
@@ -136,7 +133,6 @@ export default function AdminLayout({
                     <LogOut />
                 </Button>
                 </div>
-            </div>
             </SidebarFooter>
         </Sidebar>
         <main className="flex-1 w-full overflow-y-auto">
