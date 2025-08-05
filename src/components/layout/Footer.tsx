@@ -1,19 +1,13 @@
 
 "use client";
 
-import { Facebook, Instagram, Linkedin, MessageCircle, Send, Youtube } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import type { Settings } from '@/types';
 import { getSettings } from '@/services/settings';
-
-const XIcon = (props: React.SVGProps<SVGSVGElement>) => (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-);
-const TiktokIcon = (props: React.SVGProps<SVGSVGElement>) => (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M12.52.02c1.31-.02 2.61.16 3.8.59v5.15a4.2 4.2 0 0 1-3.2-2.32c-1.4-2.58-3.98-4.5-7.12-4.52v5.5a8.9 8.9 0 0 0 4.24 7.64v5.31c-3.1-.05-6.02-.9-8.36-2.5v-5.5a4.2 4.2 0 0 1 3.2-2.32c1.4-2.58 3.98-4.5 7.12-4.52z"/><path d="M12.52.02c1.31-.02 2.61.16 3.8.59v5.15a4.2 4.2 0 0 1-3.2-2.32c-1.4-2.58-3.98-4.5-7.12-4.52v5.5a8.9 8.9 0 0 0 4.24 7.64v5.31c-3.1-.05-6.02-.9-8.36-2.5v-5.5a4.2 4.2 0 0 1 3.2-2.32c1.4-2.58 3.98-4.5 7.12-4.52z"/></svg>
-);
+import { FaFacebook, FaInstagram, FaLinkedin, FaTiktok, FaWhatsapp, FaYoutube, FaTelegramPlane } from 'react-icons/fa';
+import { FaXTwitter } from 'react-icons/fa6';
 
 
 export function Footer() {
@@ -27,6 +21,10 @@ export function Footer() {
     }
     fetchSettingsData();
   }, []);
+
+  const socialIconProps = {
+    className: "h-6 w-6 text-primary hover:text-accent-foreground transition-colors",
+  };
 
   return (
     <footer className="bg-secondary text-secondary-foreground">
@@ -59,43 +57,43 @@ export function Footer() {
             <h3 className="font-semibold text-foreground mb-4 font-headline">Síguenos</h3>
             <div className="flex flex-wrap gap-4">
               {settings?.showFacebook && settings.facebookUrl && (
-                <a href={settings.facebookUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-accent-foreground transition-colors">
-                    <Facebook size={24} />
+                <a href={settings.facebookUrl} target="_blank" rel="noopener noreferrer">
+                    <FaFacebook {...socialIconProps} />
                 </a>
               )}
               {settings?.showInstagram && settings.instagramUrl && (
-                <a href={settings.instagramUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-accent-foreground transition-colors">
-                    <Instagram size={24} />
+                <a href={settings.instagramUrl} target="_blank" rel="noopener noreferrer">
+                    <FaInstagram {...socialIconProps} />
                 </a>
               )}
                {settings?.showTiktok && settings.tiktokUrl && (
-                <a href={settings.tiktokUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-accent-foreground transition-colors">
-                    <TiktokIcon className="h-6 w-6" />
+                <a href={settings.tiktokUrl} target="_blank" rel="noopener noreferrer">
+                    <FaTiktok {...socialIconProps} />
                 </a>
               )}
               {settings?.showX && settings.xUrl && (
-                <a href={settings.xUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-accent-foreground transition-colors">
-                    <XIcon className="h-6 w-6" />
+                <a href={settings.xUrl} target="_blank" rel="noopener noreferrer">
+                    <FaXTwitter {...socialIconProps} />
                 </a>
               )}
               {settings?.showYoutube && settings.youtubeUrl && (
-                <a href={settings.youtubeUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-accent-foreground transition-colors">
-                    <Youtube size={24} />
+                <a href={settings.youtubeUrl} target="_blank" rel="noopener noreferrer">
+                    <FaYoutube {...socialIconProps} />
                 </a>
               )}
               {settings?.showWhatsapp && settings.whatsappUrl && (
-                <a href={settings.whatsappUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-accent-foreground transition-colors">
-                    <MessageCircle size={24} />
+                <a href={settings.whatsappUrl} target="_blank" rel="noopener noreferrer">
+                    <FaWhatsapp {...socialIconProps} />
                 </a>
               )}
               {settings?.showLinkedin && settings.linkedinUrl && (
-                <a href={settings.linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-accent-foreground transition-colors">
-                    <Linkedin size={24} />
+                <a href={settings.linkedinUrl} target="_blank" rel="noopener noreferrer">
+                    <FaLinkedin {...socialIconProps} />
                 </a>
               )}
               {settings?.showTelegram && settings.telegramUrl && (
-                <a href={settings.telegramUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-accent-foreground transition-colors">
-                    <Send size={24} />
+                <a href={settings.telegramUrl} target="_blank" rel="noopener noreferrer">
+                    <FaTelegramPlane {...socialIconProps} />
                 </a>
               )}
             </div>
