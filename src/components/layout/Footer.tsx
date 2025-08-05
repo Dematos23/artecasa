@@ -1,9 +1,24 @@
+
+"use client";
+
 import { Facebook, Instagram } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useEffect, useState } from 'react';
+import type { Settings } from '@/types';
+import { getSettings } from '@/services/settings';
 
 export function Footer() {
   const year = new Date().getFullYear();
+  const [settings, setSettings] = useState<Settings | null>(null);
+
+  useEffect(() => {
+    async function fetchSettingsData() {
+        const settingsData = await getSettings();
+        setSettings(settingsData);
+    }
+    fetchSettingsData();
+  }, []);
 
   return (
     <footer className="bg-secondary text-secondary-foreground">
@@ -29,13 +44,13 @@ export function Footer() {
           <div>
             <h3 className="font-semibold text-foreground mb-4 font-headline">Síguenos</h3>
             <div className="flex space-x-4">
-              <a href="#" className="text-primary hover:text-accent-foreground transition-colors">
+              <a href={settings?.facebookUrl || '#'} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-accent-foreground transition-colors">
                 <Facebook size={24} />
               </a>
-              <a href="#" className="text-primary hover:text-accent-foreground transition-colors">
+              <a href={settings?.tiktokUrl || '#'} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-accent-foreground transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-tiktok"><path d="M12.52.02c1.31-.02 2.61.16 3.8.59v5.15a4.2 4.2 0 0 1-3.2-2.32c-1.4-2.58-3.98-4.5-7.12-4.52v5.5a8.9 8.9 0 0 0 4.24 7.64v5.31c-3.1-.05-6.02-.9-8.36-2.5v-5.5a4.2 4.2 0 0 1 3.2-2.32c1.4-2.58 3.98-4.5 7.12-4.52z"/><path d="M12.52.02c1.31-.02 2.61.16 3.8.59v5.15a4.2 4.2 0 0 1-3.2-2.32c-1.4-2.58-3.98-4.5-7.12-4.52v5.5a8.9 8.9 0 0 0 4.24 7.64v5.31c-3.1-.05-6.02-.9-8.36-2.5v-5.5a4.2 4.2 0 0 1 3.2-2.32c1.4-2.58 3.98-4.5 7.12-4.52z"/></svg>
               </a>
-              <a href="#" className="text-primary hover:text-accent-foreground transition-colors">
+              <a href={settings?.instagramUrl || '#'} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-accent-foreground transition-colors">
                 <Instagram size={24} />
               </a>
             </div>
