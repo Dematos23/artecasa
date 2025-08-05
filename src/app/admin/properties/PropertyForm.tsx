@@ -47,7 +47,9 @@ const propertySchema = z.object({
   title: z.string().min(1, { message: 'El título es obligatorio.' }),
   priceUSD: z.coerce.number().min(0, { message: 'El precio debe ser un número positivo.' }),
   pricePEN: z.coerce.number().min(0, { message: 'El precio debe ser un número positivo.' }),
-  preferredCurrency: z.enum(['USD', 'PEN']).default('USD'),
+  preferredCurrency: z.enum(['USD', 'PEN'], {
+    required_error: 'Debes seleccionar una moneda preferida.',
+  }),
   modality: z.enum(['venta', 'alquiler'], {
     required_error: 'Debes seleccionar una modalidad.',
   }),
@@ -194,7 +196,7 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
         title: '',
         priceUSD: '',
         pricePEN: '',
-        preferredCurrency: 'USD',
+        preferredCurrency: undefined,
         modality: 'venta' as const,
         propertyType: undefined,
         region: '',
@@ -381,7 +383,7 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
                         name="preferredCurrency"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Moneda Preferida</FormLabel>
+                                <FormLabel>Moneda Preferida <span className="text-primary">*</span></FormLabel>
                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                                     <FormControl>
                                         <SelectTrigger>
@@ -620,6 +622,8 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
     </Dialog>
   );
 }
+
+    
 
     
 
