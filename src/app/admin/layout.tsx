@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { redirect, usePathname } from 'next/navigation';
-import { Home, Building2, Users, User, LogOut, ArrowLeft, Settings, Inbox } from 'lucide-react';
+import { Home, Building2, Users, User, LogOut, ArrowLeft, Settings, Inbox, Loader2 } from 'lucide-react';
 
 import {
   Sidebar,
@@ -73,7 +73,7 @@ export default function AdminLayout({
   if (loading || !user) {
     return (
         <div className="flex min-h-screen items-center justify-center bg-secondary p-4">
-          <p>Cargando...</p>
+           <Loader2 className="h-16 w-16 animate-spin text-primary" />
         </div>
     );
   }
