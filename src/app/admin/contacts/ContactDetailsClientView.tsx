@@ -122,19 +122,27 @@ export function ContactDetailsClientView({ contactId, onClose, onEdit, onNavigat
   
   const fetchContactData = async () => {
     setLoading(true);
-    const contactData = await getContactById(contactId);
-    if (contactData) {
-        setContact(contactData);
-        const { owned, interested, tenantOf } = await getContactProperties(contactData);
-        setOwnedProperties(owned);
-        setInterestedProperties(interested);
-        setTenantOfProperty(tenantOf);
+    try {
+        const contactData = await getContactById(contactId);
+        if (contactData) {
+            setContact(contactData);
+            const { owned, interested, tenantOf } = await getContactProperties(contactData);
+            setOwnedProperties(owned);
+            setInterestedProperties(interested);
+            setTenantOfProperty(tenantOf);
+        }
+    } catch (error) {
+        console.error("Error fetching contact data:", error);
+        toast({ variant: "destructive", title: "Error", description: "No se pudo cargar la información del contacto." });
+    } finally {
+        setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
-    fetchContactData();
+    if (contactId) {
+      fetchContactData();
+    }
   }, [contactId]);
 
   const handleAssociationSaved = () => {
@@ -175,7 +183,7 @@ export function ContactDetailsClientView({ contactId, onClose, onEdit, onNavigat
 
   if (loading) {
     return (
-      <div className="text-center">
+      <div className="text-center p-8">
         <h1 className="text-2xl font-bold mb-4">Cargando contacto...</h1>
       </div>
     );
@@ -183,7 +191,7 @@ export function ContactDetailsClientView({ contactId, onClose, onEdit, onNavigat
 
   if (!contact) {
     return (
-      <div className="text-center">
+      <div className="text-center p-8">
         <h1 className="text-2xl font-bold mb-4">Contacto no encontrado</h1>
         <Button asChild>
           <Link href="/admin/contacts">
@@ -287,3 +295,5 @@ export function ContactDetailsClientView({ contactId, onClose, onEdit, onNavigat
     </>
   );
 }
+
+    
