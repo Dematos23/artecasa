@@ -13,7 +13,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Form, FormControl, FormField, FormItem, FormMessage, FormLabel } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { getSettings, saveSettings } from '@/services/settings';
+import { getSettings } from '@/services/settings';
+import { saveSettingsAndGenerateTheme } from '@/actions/settings';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
@@ -21,6 +22,7 @@ import { app } from '@/lib/firebase';
 import { UploadCloud, X, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { ColorPicker } from '@/components/ui/color-picker';
+import type { Settings } from '@/types';
 
 const storage = getStorage(app);
 
@@ -218,7 +220,7 @@ export default function SettingsPage() {
       try {
         const settings = await getSettings();
         if (settings) {
-          form.reset(settings);
+          form.reset(settings as any);
           setImagePreviews(settings.heroImages || []);
         }
       } catch (error) {
@@ -328,23 +330,24 @@ export default function SettingsPage() {
       const existingUrls = form.getValues('heroImages')?.filter(url => !imagesToDelete.includes(url)) || [];
       const finalImageUrls = [...existingUrls, ...uploadedImageUrls];
       
-      const settingsData = {
+      const settingsData: Settings = {
         ...data,
         logoUrl,
         defaultPropertyImageUrl,
         heroImages: finalImageUrls,
       };
 
-      // 5. Save settings to Firestore
-      await saveSettings(settingsData);
+      // 5. Save settings to Firestore and regenerate theme
+      await saveSettingsAndGenerateTheme(settingsData);
 
       toast({
         title: "Éxito",
-        description: "La configuración se ha guardado correctamente.",
+        description: "La configuración se ha guardado correctamente. Los cambios pueden tardar unos momentos en reflejarse.",
       });
 
       // 6. Reload to show changes in the layout
-      window.location.reload();
+      setTimeout(() => window.location.reload(), 1500);
+
 
     } catch (error) {
       console.error("Error saving settings:", error);
