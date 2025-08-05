@@ -11,9 +11,8 @@ import { cn } from "@/lib/utils";
 import {
   HexColorPicker,
   HexColorInput,
-  colord,
-  extend,
 } from "react-colorful";
+import colord, { extend } from "colord"; 
 import hslPlugin from "colord/plugins/hsl";
 import { Label } from "./label";
 import { Input } from "./input";
