@@ -198,7 +198,10 @@ export async function saveSettings(settings: Settings): Promise<void> {
 export async function getSettings(): Promise<Settings | null> {
   const docSnap = await getDoc(settingsDocRef);
   if (docSnap.exists()) {
-    return docSnap.data() as Settings;
+    const data = docSnap.data();
+    // Convert Firestore Timestamp to ISO string if it's a Timestamp object
+    const updatedAt = data.updatedAt?.toDate ? data.updatedAt.toDate().toISOString() : null;
+    return { ...data, updatedAt } as Settings;
   }
   return null;
 }

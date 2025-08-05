@@ -128,4 +128,6 @@ export interface Settings {
   accentColor?: string;
   bodyFont?: string;
   headlineFont?: string;
+
+  updatedAt?: string | Timestamp | null;
 }
