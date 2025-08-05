@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormMessage, FormLabel } from '@/components/ui/form';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { getSettings, saveSettings } from '@/services/settings';
 import { Textarea } from '@/components/ui/textarea';
@@ -21,7 +22,6 @@ import { UploadCloud, X, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 
 const storage = getStorage(app);
-
 
 const settingsSchema = z.object({
   logoUrl: z.string().optional(),
@@ -69,9 +69,19 @@ const settingsSchema = z.object({
   thankYouTitle: z.string().optional(),
   thankYouSubtitle: z.string().optional(),
   thankYouButtonText: z.string().optional(),
+
+  // Theme settings
+  primaryColor: z.string().optional(),
+  backgroundColor: z.string().optional(),
+  accentColor: z.string().optional(),
+  bodyFont: z.string().optional(),
+  headlineFont: z.string().optional(),
 });
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
+
+const fontOptions = ['Montserrat', 'Lato', 'Roboto', 'Oswald', 'Raleway', 'Merriweather', 'Playfair Display'];
+
 
 const SingleImageUploader = ({
   label,
@@ -193,6 +203,11 @@ export default function SettingsPage() {
       thankYouTitle: '',
       thankYouSubtitle: '',
       thankYouButtonText: '',
+      primaryColor: '',
+      backgroundColor: '',
+      accentColor: '',
+      bodyFont: 'Montserrat',
+      headlineFont: 'Montserrat',
     },
   });
 
@@ -415,7 +430,72 @@ export default function SettingsPage() {
                 </CardContent>
               </Card>
 
-              
+              <Card>
+                <CardHeader>
+                  <CardTitle>Apariencia del Sitio</CardTitle>
+                  <CardDescription>
+                    Personaliza los colores y la tipografía de tu sitio web.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className='space-y-6'>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <FormField control={form.control} name="primaryColor" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Color Primario (HSL)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Ej: 45 53% 51%" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}/>
+                    <FormField control={form.control} name="backgroundColor" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Color de Fondo (HSL)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Ej: 0 0% 100%" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}/>
+                    <FormField control={form.control} name="accentColor" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Color de Énfasis (HSL)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Ej: 240 10% 3.9%" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}/>
+                  </div>
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField control={form.control} name="bodyFont" render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Fuente Principal</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                                <SelectContent>
+                                    {fontOptions.map(font => <SelectItem key={font} value={font}>{font}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                        </FormItem>
+                      )}/>
+                      <FormField control={form.control} name="headlineFont" render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Fuente de Encabezados</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                                <SelectContent>
+                                     {fontOptions.map(font => <SelectItem key={font} value={font}>{font}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                        </FormItem>
+                      )}/>
+                   </div>
+                </CardContent>
+              </Card>
+
               <Card>
                 <CardHeader>
                   <CardTitle>Textos de la Página de Inicio</CardTitle>

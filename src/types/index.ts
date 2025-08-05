@@ -121,4 +121,11 @@ export interface Settings {
   thankYouTitle?: string;
   thankYouSubtitle?: string;
   thankYouButtonText?: string;
+
+  // Theme settings
+  primaryColor?: string;
+  backgroundColor?: string;
+  accentColor?: string;
+  bodyFont?: string;
+  headlineFont?: string;
 }
