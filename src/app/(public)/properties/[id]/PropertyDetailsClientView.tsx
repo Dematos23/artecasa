@@ -49,6 +49,15 @@ export function PropertyDetailsClientView({ propertyId }: { propertyId: string }
     fetchProperty();
   }, [propertyId]);
 
+  const handleWhatsAppInquiry = () => {
+    if (!settings?.whatsappNumber || !property) return;
+    const propertyUrl = window.location.href;
+    const text = `Hola, estoy interesado/a en la propiedad: "${property.title}". Puedes verla aquí: ${propertyUrl}`;
+    const encodedText = encodeURIComponent(text);
+    window.open(`https://wa.me/${settings.whatsappNumber}?text=${encodedText}`, '_blank');
+  };
+
+
   if (loading) {
      return (
       <div className="container mx-auto py-24 text-center">
@@ -166,11 +175,9 @@ export function PropertyDetailsClientView({ propertyId }: { propertyId: string }
                     </div>
                    )}
                 </div>
-                <Button asChild size="lg" className="w-full mt-8">
-                  <Link href="/contact">
+                <Button size="lg" className="w-full mt-8" onClick={handleWhatsAppInquiry} disabled={!settings?.whatsappNumber}>
                     <Phone className="mr-2" />
                     Consultar sobre esta Propiedad
-                  </Link>
                 </Button>
               </CardContent>
             </Card>
