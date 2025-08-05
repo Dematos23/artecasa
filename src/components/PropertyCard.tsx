@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { Property, Settings } from '@/types';
-import { BedDouble, Bath, Car, Building } from 'lucide-react';
+import { BedDouble, Bath, Building } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { getSettings } from '@/services/settings';
 
@@ -83,12 +83,6 @@ export function PropertyCard({ property }: PropertyCardProps) {
               <div className="flex items-center gap-2">
                 <Bath className="w-4 h-4 text-primary" />
                 <span>{property.bathrooms} Baños</span>
-              </div>
-            )}
-             {property.garage !== undefined && (
-              <div className="flex items-center gap-2">
-                <Car className="w-4 h-4 text-primary" />
-                <span>{property.garage} Cochera</span>
               </div>
             )}
           </div>
