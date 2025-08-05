@@ -15,13 +15,15 @@ import Autoplay from "embla-carousel-autoplay"
 import React, { useState, useEffect } from 'react';
 import { getProperties } from '@/services/properties';
 import { getSettings } from '@/services/settings';
-import { Skeleton } from '@/components/ui/skeleton';
-
 
 export default function Home() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [settings, setSettings] = useState<Settings | null>(null);
+
+  const plugin = React.useRef(
+    Autoplay({ delay: 5000, stopOnInteraction: true })
+  )
 
   useEffect(() => {
     const fetchPageData = async () => {
@@ -53,11 +55,6 @@ export default function Home() {
   const featuredProperty = properties.find(p => p.featured);
   const recentProperties = properties.filter(p => !p.featured).slice(0, 3);
   const heroImages = settings?.heroImages || [];
-
-
-  const plugin = React.useRef(
-    Autoplay({ delay: 5000, stopOnInteraction: true })
-  )
 
   return (
     <div className="bg-background">
