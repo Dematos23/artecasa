@@ -322,18 +322,14 @@ export default function SettingsPage() {
       // 5. Save settings to Firestore
       await saveSettings(settingsData);
 
-      // 6. Reset states
-      setNewImageFiles([]);
-      setImagesToDelete([]);
-      setLogoFile(null);
-      setDefaultPropertyImageFile(null);
-      form.reset(settingsData); 
-      setImagePreviews(finalImageUrls);
-
       toast({
         title: "Éxito",
         description: "La configuración se ha guardado correctamente.",
       });
+
+      // 6. Reload to show changes in the layout
+      window.location.reload();
+
     } catch (error) {
       console.error("Error saving settings:", error);
       toast({
