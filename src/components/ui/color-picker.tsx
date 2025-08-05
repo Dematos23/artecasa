@@ -11,16 +11,14 @@ import { cn } from "@/lib/utils";
 import {
   HexColorPicker,
   HexColorInput,
-  hslToHsv,
-  hsvToHsl,
   colord,
   extend,
 } from "react-colorful";
-import hsl from "colord/plugins/hsl";
+import hslPlugin from "colord/plugins/hsl";
 import { Label } from "./label";
 import { Input } from "./input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./tabs";
-extend([hsl]);
+extend([hslPlugin]);
 
 interface ColorPickerProps {
   hsl: string | undefined;
@@ -36,13 +34,6 @@ const colorPalette = [
   "hsl(240 3.8% 46.1%)",
   "hsl(0 84.2% 60.2%)",
 ];
-
-const convertHslStringToHsl = (hslString: string) => {
-  const [h, s, l] = hslString.split(" ").map((val, i) => {
-    return i === 0 ? parseFloat(val) : parseFloat(val.replace("%", ""));
-  });
-  return { h, s, l };
-};
 
 const convertHslToHslString = (hsl: { h: number; s: number; l: number }) => {
   return `${hsl.h.toFixed(0)} ${hsl.s.toFixed(0)}% ${hsl.l.toFixed(0)}%`;
