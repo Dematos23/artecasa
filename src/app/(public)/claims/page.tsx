@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { documentTypes } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
-import { processClaim } from '@/ai/flows/claims-flow';
+import { handleClaimSubmit } from '@/actions/claims';
 
 const claimSchema = z.object({
   fullName: z.string().min(3, 'El nombre es muy corto.'),
@@ -36,17 +36,36 @@ export default function ClaimsPage() {
 
     const form = useForm<ClaimFormValues>({
         resolver: zodResolver(claimSchema),
+        defaultValues: {
+            fullName: '',
+            documentNumber: '',
+            phone: '',
+            email: '',
+            address: '',
+            productOrService: '',
+            claimedAmount: 0,
+            description: '',
+            clientRequest: '',
+        }
     });
 
     const onSubmit = async (data: ClaimFormValues) => {
         setIsSubmitting(true);
         try {
-            const result = await processClaim(data);
-            toast({
-                title: "Reclamo Enviado",
-                description: `Tu reclamo ha sido registrado con el código: ${result.correlative}`,
-            });
-            form.reset();
+            const result = await handleClaimSubmit(data);
+            if(result.success) {
+                toast({
+                    title: "Reclamo Enviado",
+                    description: `Tu reclamo ha sido registrado con el código: ${result.correlative}`,
+                });
+                form.reset();
+            } else {
+                 toast({
+                    variant: "destructive",
+                    title: "Error",
+                    description: result.error || "No se pudo enviar tu reclamo.",
+                });
+            }
         } catch (error) {
             console.error("Error submitting claim:", error);
             toast({
