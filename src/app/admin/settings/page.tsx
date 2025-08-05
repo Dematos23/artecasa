@@ -20,6 +20,7 @@ import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "fire
 import { app } from '@/lib/firebase';
 import { UploadCloud, X, Loader2 } from 'lucide-react';
 import Image from 'next/image';
+import { ColorPicker } from '@/components/ui/color-picker';
 
 const storage = getStorage(app);
 
@@ -439,33 +440,54 @@ export default function SettingsPage() {
                 </CardHeader>
                 <CardContent className='space-y-6'>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <FormField control={form.control} name="primaryColor" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Color Primario (HSL)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Ej: 45 53% 51%" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}/>
-                    <FormField control={form.control} name="backgroundColor" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Color de Fondo (HSL)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Ej: 0 0% 100%" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}/>
-                    <FormField control={form.control} name="accentColor" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Color de Énfasis (HSL)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Ej: 240 10% 3.9%" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}/>
+                    <FormField
+                      control={form.control}
+                      name="primaryColor"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Color Primario</FormLabel>
+                          <FormControl>
+                            <ColorPicker
+                              hsl={field.value}
+                              onHslChange={field.onChange}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="backgroundColor"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Color de Fondo</FormLabel>
+                          <FormControl>
+                            <ColorPicker
+                              hsl={field.value}
+                              onHslChange={field.onChange}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="accentColor"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Color de Énfasis</FormLabel>
+                          <FormControl>
+                            <ColorPicker
+                              hsl={field.value}
+                              onHslChange={field.onChange}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <FormField control={form.control} name="bodyFont" render={({ field }) => (

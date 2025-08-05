@@ -23,6 +23,10 @@ export default {
         code: ['monospace'],
       },
       colors: {
+        'color-picker': {
+          DEFAULT: 'hsl(var(--color-picker))',
+          foreground: 'hsl(var(--color-picker-foreground))',
+        },
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {
