@@ -12,12 +12,7 @@ import {
   HexColorPicker,
   HexColorInput,
 } from "react-colorful";
-import colord, { extend } from "colord"; 
-import hslPlugin from "colord/plugins/hsl";
 import { Label } from "./label";
-import { Input } from "./input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./tabs";
-extend([hslPlugin]);
 
 interface ColorPickerProps {
   hsl: string | undefined;
@@ -34,20 +29,86 @@ const colorPalette = [
   "hsl(0 84.2% 60.2%)",
 ];
 
-const convertHslToHslString = (hsl: { h: number; s: number; l: number }) => {
-  return `${hsl.h.toFixed(0)} ${hsl.s.toFixed(0)}% ${hsl.l.toFixed(0)}%`;
-};
+// --- Conversion functions ---
+function hexToHsl(hex: string): string {
+    hex = hex.replace(/^#/, '');
+    if (hex.length === 3) {
+        hex = hex.split('').map(char => char + char).join('');
+    }
+
+    const r = parseInt(hex.substring(0, 2), 16) / 255;
+    const g = parseInt(hex.substring(2, 4), 16) / 255;
+    const b = parseInt(hex.substring(4, 6), 16) / 255;
+
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+
+    let h = 0, s = 0, l = (max + min) / 2;
+
+    if (max !== min) {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+    }
+    
+    return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
+}
+
+function hslToHex(hslStr: string): string {
+    const [h, s, l] = hslStr.match(/\d+/g)!.map(Number);
+    const sNormalized = s / 100;
+    const lNormalized = l / 100;
+
+    const c = (1 - Math.abs(2 * lNormalized - 1)) * sNormalized;
+    const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+    const m = lNormalized - c / 2;
+    let r = 0, g = 0, b = 0;
+
+    if (h >= 0 && h < 60) {
+        r = c; g = x; b = 0;
+    } else if (h >= 60 && h < 120) {
+        r = x; g = c; b = 0;
+    } else if (h >= 120 && h < 180) {
+        r = 0; g = c; b = x;
+    } else if (h >= 180 && h < 240) {
+        r = 0; g = x; b = c;
+    } else if (h >= 240 && h < 300) {
+        r = x; g = 0; b = c;
+    } else if (h >= 300 && h < 360) {
+        r = c; g = 0; b = x;
+    }
+
+    const toHex = (c: number) => {
+        const hex = Math.round((c + m) * 255).toString(16);
+        return hex.length === 1 ? '0' + hex : hex;
+    };
+    
+    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
 
 export const ColorPicker = ({
   hsl,
   onHslChange,
   className,
 }: ColorPickerProps) => {
-  const color = colord(hsl ? `hsl(${hsl})` : "#000");
 
-  const handleHexChange = (hex: string) => {
-    onHslChange(colord(hex).toHslString().replace(/hsl\(|\)/g, ""));
+  const hexColor = React.useMemo(() => {
+    return hsl ? hslToHex(hsl) : "#000000";
+  }, [hsl]);
+
+  const handleHexChange = (newHex: string) => {
+    onHslChange(hexToHsl(newHex));
   };
+  
+  const handlePaletteClick = (hslColor: string) => {
+    onHslChange(hslColor.replace(/hsl\(|\)/g, ''));
+  }
 
   return (
     <Popover>
@@ -69,87 +130,36 @@ export const ColorPicker = ({
             ) : (
               <div className="h-4 w-4 rounded-full border border-gray-400" />
             )}
-            <div className="truncate flex-1">{hsl ? hsl : "Pick a color"}</div>
+            <div className="truncate flex-1">{hsl ? `hsl(${hsl})` : "Elige un color"}</div>
           </div>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-64">
-        <Tabs defaultValue="hex" className="w-full">
-          <TabsList className="w-full mb-4">
-            <TabsTrigger value="hex" className="flex-1">
-              HEX
-            </TabsTrigger>
-            <TabsTrigger value="hsl" className="flex-1">
-              HSL
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="hex" className="flex flex-col gap-y-4">
-            <HexColorPicker
-              color={color.toHex()}
-              onChange={handleHexChange}
-              className="w-full"
-            />
-            <div className="flex flex-col gap-y-2">
-              <Label>Hex</Label>
-              <HexColorInput
-                prefixed
-                className={cn(
-                  "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-                  className
-                )}
-                color={color.toHex()}
-                onChange={handleHexChange}
-              />
-            </div>
-          </TabsContent>
-          <TabsContent value="hsl" className="flex flex-col gap-y-4">
-            <div className="flex flex-col gap-y-2">
-              <Label>H</Label>
-              <Input
-                type="number"
-                value={color.toHsl().h}
-                onChange={(e) => {
-                  const newHsl = {
-                    ...color.toHsl(),
-                    h: Number(e.target.value),
-                  };
-                  onHslChange(convertHslToHslString(newHsl));
-                }}
-              />
-              <Label>S</Label>
-              <Input
-                type="number"
-                value={color.toHsl().s}
-                onChange={(e) => {
-                  const newHsl = {
-                    ...color.toHsl(),
-                    s: Number(e.target.value),
-                  };
-                  onHslChange(convertHslToHslString(newHsl));
-                }}
-              />
-              <Label>L</Label>
-              <Input
-                type="number"
-                value={color.toHsl().l}
-                onChange={(e) => {
-                  const newHsl = {
-                    ...color.toHsl(),
-                    l: Number(e.target.value),
-                  };
-                  onHslChange(convertHslToHslString(newHsl));
-                }}
-              />
-            </div>
-          </TabsContent>
-        </Tabs>
+        <HexColorPicker
+          color={hexColor}
+          onChange={handleHexChange}
+          className="w-full"
+        />
+        <div className="flex flex-col gap-y-2 mt-4">
+          <Label>Hex</Label>
+          <HexColorInput
+            prefixed
+            className={cn(
+              "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+              className
+            )}
+            color={hexColor}
+            onChange={handleHexChange}
+          />
+        </div>
+        
         <div className="flex flex-wrap gap-2 mt-4">
           {colorPalette.map((c) => (
             <div
               key={c}
               style={{ background: c }}
               className="rounded-md h-6 w-6 cursor-pointer active:scale-105"
-              onClick={() => onHslChange(c.replace(/hsl\(|\)/g, ""))}
+              onClick={() => handlePaletteClick(c)}
             />
           ))}
         </div>
