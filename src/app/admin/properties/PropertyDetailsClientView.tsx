@@ -69,9 +69,11 @@ export function PropertyDetailsClientView({ propertyId, onClose, onEdit }: { pro
     <div>
         <div className="flex justify-between items-center mb-6">
             <BackButton />
-            <Button size="sm" onClick={handleEdit}>
-                <Edit className="mr-2 h-4 w-4" /> Editar Propiedad
-            </Button>
+            {onEdit && (
+                <Button size="sm" onClick={handleEdit}>
+                    <Edit className="mr-2 h-4 w-4" /> Editar Propiedad
+                </Button>
+            )}
         </div>
 
         <Card>
