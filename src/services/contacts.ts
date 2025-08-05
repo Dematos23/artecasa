@@ -45,6 +45,14 @@ export async function getContactById(id: string): Promise<Contact | undefined> {
     }
 }
 
+// Function to get the full name of a contact by ID
+export async function getContactNameById(id: string): Promise<string> {
+    const contact = await getContactById(id);
+    if (!contact) return 'Desconocido';
+    return [contact.firstname, contact.secondname, contact.firstlastname, contact.secondlastname].filter(Boolean).join(' ');
+}
+
+
 // Function to get the properties (owned and interested) for a contact
 export async function getContactProperties(contact: Contact): Promise<{ owned: Property[], interested: Property[], tenantOf?: Property }> {
     let owned: Property[] = [];
@@ -200,3 +208,5 @@ export async function updateContactAssociationType(
 
     await batch.commit();
 }
+
+    

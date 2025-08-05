@@ -4,7 +4,7 @@
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import type { Property, PropertyType } from '@/types';
+import type { Property, PropertyType, Contact } from '@/types';
 import { propertyTypes } from '@/types';
 import {
   Dialog,
@@ -35,10 +35,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
-import { UploadCloud, X, Star } from 'lucide-react';
+import { UploadCloud, X, Star, ChevronsUpDown, Check } from 'lucide-react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { peruLocations } from '@/lib/peru-locations';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 
 
 const propertySchema = z.object({
@@ -69,6 +71,7 @@ const propertySchema = z.object({
     lat: z.number(),
     lng: z.number(),
   }).optional(),
+  ownerId: z.string().optional(),
 });
 
 
@@ -78,6 +81,7 @@ interface PropertyFormProps {
   onSave: (property: Omit<Property, 'id'>, newImages: File[]) => void;
   property?: Property;
   googleMapsApiKey: string | undefined;
+  contacts: Contact[];
 }
 
 const containerStyle = {
@@ -132,19 +136,26 @@ function MapView({ address, location, onLocationChange }: { address: string, loc
     );
 }
 
-export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiKey }: PropertyFormProps) {
+const getFullName = (contact: Pick<Contact, 'firstname' | 'secondname' | 'firstlastname' | 'secondlastname'>) => {
+    return [contact.firstname, contact.secondname, contact.firstlastname, contact.secondlastname].filter(Boolean).join(' ');
+}
+
+
+export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiKey, contacts }: PropertyFormProps) {
   const form = useForm<z.infer<typeof propertySchema>>({
     resolver: zodResolver(propertySchema),
   });
   
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
+  const [ownerComboboxOpen, setOwnerComboboxOpen] = useState(false);
   
   const watchedAddress = useWatch({ control: form.control, name: 'address' });
   const watchedRegion = useWatch({ control: form.control, name: 'region' });
   const watchedProvince = useWatch({ control: form.control, name: 'province' });
   const watchedDistrict = useWatch({ control: form.control, name: 'district' });
   const watchedLocation = useWatch({ control: form.control, name: 'location' });
+  const watchedOwnerId = useWatch({ control: form.control, name: 'ownerId' });
 
   const provinces = useMemo(() => {
     const regionData = peruLocations.find(r => r.region === watchedRegion);
@@ -199,6 +210,7 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
         imageUrls: [],
         featured: false,
         newImages: [],
+        ownerId: '',
     };
     form.reset(defaultVals as any);
     setImagePreviews(property?.imageUrls || []);
@@ -386,6 +398,49 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
                         )}
                     />
                 </div>
+                 <FormField
+                        control={form.control}
+                        name="ownerId"
+                        render={({ field }) => (
+                            <FormItem className="flex flex-col">
+                                <FormLabel>Propietario (Opcional)</FormLabel>
+                                <Popover open={ownerComboboxOpen} onOpenChange={setOwnerComboboxOpen}>
+                                    <PopoverTrigger asChild>
+                                        <FormControl>
+                                            <Button variant="outline" role="combobox" className={cn("w-full justify-between", !field.value && "text-muted-foreground")}>
+                                                {field.value ? getFullName(contacts.find(c => c.id === field.value)!) : "Seleccionar un contacto"}
+                                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                            </Button>
+                                        </FormControl>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                                        <Command>
+                                            <CommandInput placeholder="Buscar contacto..." />
+                                            <CommandList>
+                                                <CommandEmpty>No se encontró ningún contacto.</CommandEmpty>
+                                                <CommandGroup>
+                                                    {contacts.map((contact) => (
+                                                        <CommandItem
+                                                            value={contact.id}
+                                                            key={contact.id}
+                                                            onSelect={(value) => {
+                                                                form.setValue("ownerId", value === watchedOwnerId ? "" : value)
+                                                                setOwnerComboboxOpen(false)
+                                                            }}
+                                                        >
+                                                            <Check className={cn("mr-2 h-4 w-4", contact.id === field.value ? "opacity-100" : "opacity-0")} />
+                                                            {getFullName(contact)}
+                                                        </CommandItem>
+                                                    ))}
+                                                </CommandGroup>
+                                            </CommandList>
+                                        </Command>
+                                    </PopoverContent>
+                                </Popover>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
                 <FormField
                     control={form.control}
                     name="description"
@@ -565,5 +620,7 @@ export function PropertyForm({ isOpen, onClose, onSave, property, googleMapsApiK
     </Dialog>
   );
 }
+
+    
 
     

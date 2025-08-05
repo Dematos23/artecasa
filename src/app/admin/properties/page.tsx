@@ -21,7 +21,7 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { app } from '@/lib/firebase';
 import Image from 'next/image';
 import { getProperties, addProperty, updateProperty, deleteProperty } from '@/services/properties';
-import { getContacts } from '@/services/contacts';
+import { getContacts, getContactNameById } from '@/services/contacts';
 import { useToast } from '@/hooks/use-toast';
 import {
   AlertDialog,
@@ -267,6 +267,7 @@ export default function AdminPropertiesPage() {
         onSave={handleSave}
         property={selectedProperty}
         googleMapsApiKey={googleMapsApiKey}
+        contacts={contacts}
       />
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
@@ -494,3 +495,5 @@ export default function AdminPropertiesPage() {
     </>
   );
 }
+
+    
