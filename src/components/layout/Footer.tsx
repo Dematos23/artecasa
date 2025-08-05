@@ -50,7 +50,7 @@ export function Footer() {
               <li><Link href="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">Inicio</Link></li>
               <li><Link href="/properties" className="text-sm text-muted-foreground hover:text-primary transition-colors">Propiedades</Link></li>
               <li><Link href="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">Contacto</Link></li>
-              <li><Link href="/login" className="text-sm text-muted-foreground hover:text-primary transition-colors">Acceso Admin</Link></li>
+              <li><Link href="/claims" className="text-sm text-muted-foreground hover:text-primary transition-colors">Reclamos</Link></li>
             </ul>
           </div>
           <div>
