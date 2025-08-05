@@ -36,7 +36,7 @@ export interface Property {
     lng: number;
   };
   ownerId?: string;
-  preferredCurrency?: 'USD' | 'PEN';
+  preferredCurrency: 'USD' | 'PEN';
 }
 
 // Type for new property data, omitting id which will be generated
@@ -81,6 +81,7 @@ export interface Settings {
   heroImages?: string[];
 
   whatsappNumber: string;
+  claimsEmail?: string;
   
   facebookUrl?: string;
   instagramUrl?: string;
@@ -132,4 +133,23 @@ export interface Settings {
   headlineFont?: string;
 
   updatedAt?: string | Timestamp | null;
+}
+
+export const documentTypes = ['DNI', 'CE', 'Pasaporte'] as const;
+export type DocumentType = (typeof documentTypes)[number];
+
+export interface Claim {
+    id: string;
+    correlative: string;
+    fullName: string;
+    documentType: DocumentType;
+    documentNumber: string;
+    phone: string;
+    email: string;
+    address: string;
+    productOrService: string;
+    claimedAmount: number;
+    description: string;
+    clientRequest: string;
+    createdAt: Timestamp;
 }

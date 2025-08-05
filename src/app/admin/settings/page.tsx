@@ -33,6 +33,7 @@ const settingsSchema = z.object({
   heroImages: z.array(z.string()).optional().default([]),
 
   whatsappNumber: z.string().min(1, 'El número de WhatsApp es obligatorio.').regex(/^\d+$/, 'Debe contener solo números.'),
+  claimsEmail: z.string().email({ message: "Debe ser un correo electrónico válido." }).optional().or(z.literal('')),
   
   facebookUrl: z.string().url({ message: "Debe ser una URL válida." }).optional().or(z.literal('')),
   instagramUrl: z.string().url({ message: "Debe ser una URL válida." }).optional().or(z.literal('')),
@@ -174,6 +175,7 @@ export default function SettingsPage() {
     defaultValues: {
       heroImages: [],
       whatsappNumber: '',
+      claimsEmail: '',
       facebookUrl: '',
       instagramUrl: '',
       tiktokUrl: '',
@@ -346,19 +348,16 @@ export default function SettingsPage() {
         defaultPropertyImageUrl,
         heroImages: finalImageUrls,
       };
-
-      // 5. Save settings to Firestore
+      
       await saveSettings(settingsData);
       
-      // 6. Regenerate theme files via server action
       await generateThemeFromSettings(settingsData);
 
       toast({
         title: "Éxito",
         description: "La configuración se ha guardado correctamente. Los cambios pueden tardar unos momentos en reflejarse.",
       });
-
-      // 7. Reload to show changes in the layout
+      
       setTimeout(() => window.location.reload(), 1500);
 
 
@@ -883,20 +882,33 @@ export default function SettingsPage() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Configuración de WhatsApp</CardTitle>
+                  <CardTitle>Configuración de Contacto</CardTitle>
                   <CardDescription>
-                    Ingresa el número de teléfono de WhatsApp (solo números, incluyendo el código de país) para la integración en el formulario de contacto.
+                    Configuraciones para el formulario de contacto y el libro de reclamaciones.
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-4">
                    <FormField
                     control={form.control}
                     name="whatsappNumber"
                     render={({ field }) => (
                         <FormItem>
-                        <Label htmlFor="whatsappNumber">Número de WhatsApp</Label>
+                        <Label htmlFor="whatsappNumber">Número de WhatsApp (para consultas)</Label>
                         <FormControl>
                             <Input id="whatsappNumber" placeholder="Ej: 51987654321" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="claimsEmail"
+                    render={({ field }) => (
+                        <FormItem>
+                        <Label htmlFor="claimsEmail">Correo para Libro de Reclamaciones</Label>
+                        <FormControl>
+                            <Input id="claimsEmail" placeholder="reclamaciones@empresa.com" {...field} />
                         </FormControl>
                         <FormMessage />
                         </FormItem>
@@ -915,5 +927,3 @@ export default function SettingsPage() {
     </div>
   );
 }
-
-    
