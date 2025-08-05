@@ -1,4 +1,3 @@
-
 'use server';
 
 import { ai } from '@/ai/genkit';
@@ -6,7 +5,6 @@ import { z } from 'zod';
 import { getSettings } from '@/services/settings';
 import { addClaim } from '@/services/claims';
 import { documentTypes, DocumentType } from '@/types';
-import {generate} from 'genkit/generate';
 
 const ClaimInputSchema = z.object({
   fullName: z.string(),
@@ -46,12 +44,11 @@ const claimsFlow = ai.defineFlow(
         throw new Error("Claims email not configured in settings.");
     }
     
-    // 3. Generate email content
-    const emailPrompt = `
-      Genera un correo electrónico de confirmación para un libro de reclamaciones.
-      El correo debe ser formal y claro.
-      Incluye TODA la siguiente información del reclamo, bien formateada.
-      No agregues ninguna nota, comentario o texto adicional que no sea parte del cuerpo del correo.
+    // 3. Generate email content from a simple template
+    const emailContent = `
+      Estimado/a ${input.fullName},
+
+      Hemos recibido su reclamo y le confirmamos su registro con la siguiente información:
 
       - Código de Reclamo: ${correlative}
       - Nombre Completo: ${input.fullName}
@@ -64,13 +61,11 @@ const claimsFlow = ai.defineFlow(
       - Descripción del Reclamo: ${input.description}
       - Pedido del Cliente: ${input.clientRequest}
 
-      Finaliza el correo indicando que el reclamo será atendido según los plazos legales.
-    `;
-    
-    const { output: emailContent } = await generate({
-        model: 'googleai/gemini-2.0-flash',
-        prompt: emailPrompt,
-    });
+      Su reclamo será atendido según los plazos legales establecidos. Gracias por comunicarse con nosotros.
+
+      Atentamente,
+      El equipo de Artecasa
+    `.trim();
     
     // This is a placeholder for sending an email.
     // In a real application, you would integrate an email service like SendGrid, Resend, etc.
