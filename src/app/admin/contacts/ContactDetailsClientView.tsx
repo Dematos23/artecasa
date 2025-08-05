@@ -203,12 +203,16 @@ export function ContactDetailsClientView({ contactId, onClose, onEdit, onNavigat
   }
 
   const BackButton = () => (
-    <Button asChild variant="outline" size="sm" onClick={onClose}>
-        {onClose ? (
-            <span className='flex items-center cursor-pointer'><ArrowLeft className="mr-2" /> Volver a Contactos</span>
-        ) : (
-            <Link href="/admin/contacts"><ArrowLeft className="mr-2" /> Volver a Contactos</Link>
-        )}
+    <Button asChild variant="outline" size="sm">
+      {onClose ? (
+        <span onClick={onClose} className="flex items-center cursor-pointer">
+          <ArrowLeft className="mr-2" /> Volver a Contactos
+        </span>
+      ) : (
+        <Link href="/admin/contacts" className="flex items-center">
+          <ArrowLeft className="mr-2" /> Volver a Contactos
+        </Link>
+      )}
     </Button>
   );
 
@@ -295,5 +299,3 @@ export function ContactDetailsClientView({ contactId, onClose, onEdit, onNavigat
     </>
   );
 }
-
-    
