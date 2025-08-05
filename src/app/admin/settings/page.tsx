@@ -13,9 +13,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Form, FormControl, FormField, FormItem, FormMessage, FormLabel } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { getSettings } from '@/services/settings';
+import { getSettings, saveSettings } from '@/services/settings';
 import { useAuth } from '@/context/AuthContext';
-import { saveSettingsAndGenerateTheme } from '@/actions/settings';
+import { generateThemeFromSettings } from '@/actions/settings';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
@@ -245,7 +245,7 @@ export default function SettingsPage() {
     if (user) {
       fetchSettings();
     }
-  }, [form, toast]);
+  }, [form, toast, user]);
 
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -347,15 +347,18 @@ export default function SettingsPage() {
         heroImages: finalImageUrls,
       };
 
-      // 5. Save settings to Firestore and regenerate theme
-      await saveSettingsAndGenerateTheme(settingsData);
+      // 5. Save settings to Firestore
+      await saveSettings(settingsData);
+      
+      // 6. Regenerate theme files via server action
+      await generateThemeFromSettings(settingsData);
 
       toast({
         title: "Éxito",
         description: "La configuración se ha guardado correctamente. Los cambios pueden tardar unos momentos en reflejarse.",
       });
 
-      // 6. Reload to show changes in the layout
+      // 7. Reload to show changes in the layout
       setTimeout(() => window.location.reload(), 1500);
 
 
@@ -912,3 +915,5 @@ export default function SettingsPage() {
     </div>
   );
 }
+
+    

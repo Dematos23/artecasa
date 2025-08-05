@@ -15,3 +15,13 @@ export async function getSettings(): Promise<Settings | null> {
   }
   return null;
 }
+
+
+export async function saveSettings(settings: Omit<Settings, 'updatedAt'>) {
+    await setDoc(settingsDocRef, {
+        ...settings,
+        updatedAt: serverTimestamp()
+    }, { merge: true });
+}
+
+    
