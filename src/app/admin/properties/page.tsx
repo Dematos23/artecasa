@@ -233,17 +233,19 @@ export default function AdminPropertiesPage() {
   if (loading) {
       return null;
   }
-
+  
+  if (viewingPropertyId) {
+    return (
+      <PropertyDetailsClientView
+        propertyId={viewingPropertyId}
+        onClose={handleCloseDetails}
+        onEdit={handleEditFromDetails}
+      />
+    );
+  }
 
   return (
     <>
-      {viewingPropertyId && (
-        <PropertyDetailsClientView
-          propertyId={viewingPropertyId}
-          onClose={handleCloseDetails}
-          onEdit={handleEditFromDetails}
-        />
-      )}
       <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
