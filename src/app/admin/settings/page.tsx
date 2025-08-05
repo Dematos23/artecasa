@@ -137,44 +137,244 @@ export default function SettingsPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className='space-y-4'>
-                   <FormField control={form.control} name="homepageTitle" render={({ field }) => ( <FormItem> <Label>Título Principal (Hero)</Label> <FormControl> <Input placeholder="Artecasa" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
-                   <FormField control={form.control} name="homepageSubtitle" render={({ field }) => ( <FormItem> <Label>Subtítulo (Hero)</Label> <FormControl> <Textarea placeholder="Donde la Casa de Tus Sueños se Hace Realidad" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
-                   <FormField control={form.control} name="homepageHeroButtonText" render={({ field }) => ( <FormItem> <Label>Texto del Botón (Hero)</Label> <FormControl> <Input placeholder="Explorar Propiedades" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
+ <FormField control={form.control} name="homepageTitle" render={({ field }) => (
+ <FormItem>
+ <div> {/* Wrap contents in a single div */}
+ <Label>Título Principal (Hero)</Label>
+ <FormControl>
+ <Input placeholder="Artecasa" {...field} />
+ </FormControl>
+ <FormMessage />
+ </div>
+ </FormItem>
+ )}/>
+ <FormField control={form.control} name="homepageSubtitle" render={({ field }) => (
+ <FormItem>
+ <div> {/* Wrap contents in a single div */}
+ <Label>Subtítulo (Hero)</Label>
+ <FormControl>
+ <Textarea placeholder="Donde la Casa de Tus Sueños se Hace Realidad" {...field} />
+ </FormControl>
+ <FormMessage />
+ </div>
+ </FormItem>
+ )}/>
+ <FormField control={form.control} name="homepageHeroButtonText" render={({ field }) => (
+ <FormItem>
+ <div> {/* Wrap contents in a single div */}
+ <Label>Texto del Botón (Hero)</Label>
+ <FormControl>
+ <Input placeholder="Explorar Propiedades" {...field} />
+ </FormControl>
+ <FormMessage />
+ </div>
+ </FormItem>
+ )}/>
                    <hr/>
-                   <FormField control={form.control} name="featuredPropertyTitle" render={({ field }) => ( <FormItem> <Label>Título Sección Destacada</Label> <FormControl> <Input placeholder="Propiedad Destacada" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
-                   <FormField control={form.control} name="featuredPropertyButtonText" render={({ field }) => ( <FormItem> <Label>Texto Botón Sección Destacada</Label> <FormControl> <Input placeholder="Ver Detalles" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
+ <FormField control={form.control} name="featuredPropertyTitle" render={({ field }) => (
+ <FormItem>
+ <div> {/* Wrap contents in a single div */}
+ <Label>Título Sección Destacada</Label>
+ <FormControl>
+ <Input placeholder="Propiedad Destacada" {...field} />
+ </FormControl>
+ <FormMessage />
+ </div>
+ </FormItem>
+ )}/>
+ <FormField control={form.control} name="featuredPropertyButtonText" render={({ field }) => (
+ <FormItem>
+ <div> {/* Wrap contents in a single div */}
+ <Label>Texto Botón Sección Destacada</Label>
+ <FormControl>
+ <Input placeholder="Ver Detalles" {...field} />
+ </FormControl>
+ <FormMessage />
+ </div>
+ </FormItem>
+ )}/>
                    <hr/>
-                   <FormField control={form.control} name="discoverPropertiesTitle" render={({ field }) => ( <FormItem> <Label>Título Sección Descubrir</Label> <FormControl> <Input placeholder="Descubre Nuestras Propiedades" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
-                   <FormField control={form.control} name="discoverPropertiesSubtitle" render={({ field }) => ( <FormItem> <Label>Subtítulo Sección Descubrir</Label> <FormControl> <Textarea placeholder="Una cuidada selección..." {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
-                   <FormField control={form.control} name="discoverPropertiesButtonText" render={({ field }) => ( <FormItem> <Label>Texto Botón Sección Descubrir</Label> <FormControl> <Input placeholder="Ver Todas las Propiedades" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
+ <FormField control={form.control} name="discoverPropertiesTitle" render={({ field }) => (
+ <FormItem>
+ <div> {/* Wrap contents in a single div */}
+ <Label>Título Sección Descubrir</Label>
+ <FormControl>
+ <Input placeholder="Descubre Nuestras Propiedades" {...field} />
+ </FormControl>
+ <FormMessage />
+ </div>
+ </FormItem>
+ )}/>
+ <FormField control={form.control} name="discoverPropertiesSubtitle" render={({ field }) => (
+ <FormItem>
+ <div> {/* Wrap contents in a single div */}
+ <Label>Subtítulo Sección Descubrir</Label>
+ <FormControl>
+ <Textarea placeholder="Una cuidada selección..." {...field} />
+ </FormControl>
+ <FormMessage />
+ </div>
+ </FormItem>
+ )}/>
+ <FormField control={form.control} name="discoverPropertiesButtonText" render={({ field }) => (
+ <FormItem>
+ <div> {/* Wrap contents in a single div */}
+ <Label>Texto Botón Sección Descubrir</Label>
+ <FormControl>
+ <Input placeholder="Ver Todas las Propiedades" {...field} />
+ </FormControl>
+ <FormMessage />
+ </div>
+ </FormItem>
+ )}/>
 
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Textos de la Página de Contacto</CardTitle>
-                  <CardDescription>
-                    Edita el contenido que se muestra en la página de contacto.
-                  </CardDescription>
+ <CardTitle>Textos de la Página de Contacto</CardTitle>
+ <CardDescription>
+ Edita el contenido que se muestra en la página de contacto.
+ </CardDescription>
                 </CardHeader>
                 <CardContent className='space-y-4'>
-                   <FormField control={form.control} name="contactTitle" render={({ field }) => ( <FormItem> <Label>Título de la Página</Label> <FormControl> <Input placeholder="Contáctanos" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
-                   <FormField control={form.control} name="contactSubtitle" render={({ field }) => ( <FormItem> <Label>Subtítulo / Descripción</Label> <FormControl> <Textarea placeholder="Estamos aquí para ayudarte..." {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
-                   <hr/>
-                   <FormField control={form.control} name="contactAddressTitle" render={({ field }) => ( <FormItem> <Label>Título Tarjeta Dirección</Label> <FormControl> <Input placeholder="Dirección de la Oficina" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
-                   <FormField control={form.control} name="contactAddressContent" render={({ field }) => ( <FormItem> <Label>Contenido Tarjeta Dirección</Label> <FormControl> <Input placeholder="123 Luxury Avenue..." {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
-                   <hr/>
-                   <FormField control={form.control} name="contactEmailTitle" render={({ field }) => ( <FormItem> <Label>Título Tarjeta Correo</Label> <FormControl> <Input placeholder="Envíanos un Correo" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
-                   <FormField control={form.control} name="contactEmailContent" render={({ field }) => ( <FormItem> <Label>Contenido Tarjeta Correo</Label> <FormControl> <Input placeholder="contact@artecasa.com" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
-                   <hr/>
-                   <FormField control={form.control} name="contactPhoneTitle" render={({ field }) => ( <FormItem> <Label>Título Tarjeta Teléfono</Label> <FormControl> <Input placeholder="Llámanos" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
-                   <FormField control={form.control} name="contactPhoneContent" render={({ field }) => ( <FormItem> <Label>Contenido Tarjeta Teléfono</Label> <FormControl> <Input placeholder="+1 (234) 567-890" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
-                   <hr/>
-                   <FormField control={form.control} name="contactFormTitle" render={({ field }) => ( <FormItem> <Label>Título del Formulario</Label> <FormControl> <Input placeholder="Envíanos un Mensaje" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
-                   <FormField control={form.control} name="contactFormSubtitle" render={({ field }) => ( <FormItem> <Label>Subtítulo del Formulario</Label> <FormControl> <Textarea placeholder="Completa el formulario..." {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
-                   <FormField control={form.control} name="contactFormSubmitButtonText" render={({ field }) => ( <FormItem> <Label>Texto Botón de Envío</Label> <FormControl> <Input placeholder="Enviar Mensaje" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
-                   <FormField control={form.control} name="contactFormWhatsappButtonText" render={({ field }) => ( <FormItem> <Label>Texto Botón de WhatsApp</Label> <FormControl> <Input placeholder="WhatsApp" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
+ <FormField control={form.control} name="contactTitle" render={({ field }) => (
+ <FormItem>
+ <div> {/* Wrap contents in a single div */}
+ <Label>Título de la Página</Label>
+ <FormControl>
+ <Input placeholder="Contáctanos" {...field} />
+ </FormControl>
+ <FormMessage />
+ </div>
+ </FormItem>
+ )}/>
+ <FormField control={form.control} name="contactSubtitle" render={({ field }) => (
+ <FormItem>
+ <div> {/* Wrap contents in a single div */}
+ <Label>Subtítulo / Descripción</Label>
+ <FormControl>
+ <Textarea placeholder="Estamos aquí para ayudarte..." {...field} />
+ </FormControl>
+ <FormMessage />
+ </div>
+ </FormItem>
+ )}/>
+ <hr/>
+ <FormField control={form.control} name="contactAddressTitle" render={({ field }) => (
+ <FormItem>
+ <div> {/* Wrap contents in a single div */}
+ <Label>Título Tarjeta Dirección</Label>
+ <FormControl>
+ <Input placeholder="Dirección de la Oficina" {...field} />
+ </FormControl>
+ <FormMessage />
+ </div>
+ </FormItem>
+ )}/>
+ <FormField control={form.control} name="contactAddressContent" render={({ field }) => (
+ <FormItem>
+ <div> {/* Wrap contents in a single div */}
+ <Label>Contenido Tarjeta Dirección</Label>
+ <FormControl>
+ <Input placeholder="123 Luxury Avenue..." {...field} />
+ </FormControl>
+ <FormMessage />
+ </div>
+ </FormItem>
+ )}/>
+ <hr/>
+ <FormField control={form.control} name="contactEmailTitle" render={({ field }) => (
+ <FormItem>
+ <div> {/* Wrap contents in a single div */}
+ <Label>Título Tarjeta Correo</Label>
+ <FormControl>
+ <Input placeholder="Envíanos un Correo" {...field} />
+ </FormControl>
+ <FormMessage />
+ </div>
+ </FormItem>
+ )}/>
+ <FormField control={form.control} name="contactEmailContent" render={({ field }) => (
+ <FormItem>
+ <div> {/* Wrap contents in a single div */}
+ <Label>Contenido Tarjeta Correo</Label>
+ <FormControl>
+ <Input placeholder="contact@artecasa.com" {...field} />
+ </FormControl>
+ <FormMessage />
+ </div>
+ </FormItem>
+ )}/>
+ <hr/>
+ <FormField control={form.control} name="contactPhoneTitle" render={({ field }) => (
+ <FormItem>
+ <div> {/* Wrap contents in a single div */}
+ <Label>Título Tarjeta Teléfono</Label>
+ <FormControl>
+ <Input placeholder="Llámanos" {...field} />
+ </FormControl>
+ <FormMessage />
+ </div>
+ </FormItem>
+ )}/>
+ <FormField control={form.control} name="contactPhoneContent" render={({ field }) => (
+ <FormItem>
+ <div> {/* Wrap contents in a single div */}
+ <Label>Contenido Tarjeta Teléfono</Label>
+ <FormControl>
+ <Input placeholder="+1 (234) 567-890" {...field} />
+ </FormControl>
+ <FormMessage />
+ </div>
+ </FormItem>
+ )}/>
+ <hr/>
+ <FormField control={form.control} name="contactFormTitle" render={({ field }) => (
+ <FormItem>
+ <div> {/* Wrap contents in a single div */}
+ <Label>Título del Formulario</Label>
+ <FormControl>
+ <Input placeholder="Envíanos un Mensaje" {...field} />
+ </FormControl>
+ <FormMessage />
+ </div>
+ </FormItem>
+ )}/>
+ <FormField control={form.control} name="contactFormSubtitle" render={({ field }) => (
+ <FormItem>
+ <div> {/* Wrap contents in a single div */}
+ <Label>Subtítulo del Formulario</Label>
+ <FormControl>
+ <Textarea placeholder="Completa el formulario..." {...field} />
+ </FormControl>
+ <FormMessage />
+ </div>
+ </FormItem>
+ )}/>
+ <FormField control={form.control} name="contactFormSubmitButtonText" render={({ field }) => (
+ <FormItem>
+ <div> {/* Wrap contents in a single div */}
+ <Label>Texto Botón de Envío</Label>
+ <FormControl>
+ <Input placeholder="Enviar Mensaje" {...field} />
+ </FormControl>
+ <FormMessage />
+ </div>
+ </FormItem>
+ )}/>
+ <FormField control={form.control} name="contactFormWhatsappButtonText" render={({ field }) => (
+ <FormItem>
+ <div> {/* Wrap contents in a single div */}
+ <Label>Texto Botón de WhatsApp</Label>
+ <FormControl>
+ <Input placeholder="WhatsApp" {...field} />
+ </FormControl>
+ <FormMessage />
+ </div>
+ </FormItem>
+ )}/>
 
                 </CardContent>
               </Card>
@@ -187,9 +387,39 @@ export default function SettingsPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className='space-y-4'>
-                   <FormField control={form.control} name="thankYouTitle" render={({ field }) => ( <FormItem> <Label>Título de Agradecimiento</Label> <FormControl> <Input placeholder="¡Gracias por contactarnos!" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
-                   <FormField control={form.control} name="thankYouSubtitle" render={({ field }) => ( <FormItem> <Label>Subtítulo de Agradecimiento</Label> <FormControl> <Textarea placeholder="Hemos recibido tu mensaje..." {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
-                   <FormField control={form.control} name="thankYouButtonText" render={({ field }) => ( <FormItem> <Label>Texto del Botón de Agradecimiento</Label> <FormControl> <Input placeholder="Volver al Inicio" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
+ <FormField control={form.control} name="thankYouTitle" render={({ field }) => (
+ <FormItem>
+ <div> {/* Wrap contents in a single div */}
+ <Label>Título de Agradecimiento</Label>
+ <FormControl>
+ <Input placeholder="¡Gracias por contactarnos!" {...field} />
+ </FormControl>
+ <FormMessage />
+ </div>
+ </FormItem>
+ )}/>
+ <FormField control={form.control} name="thankYouSubtitle" render={({ field }) => (
+ <FormItem>
+ <div> {/* Wrap contents in a single div */}
+ <Label>Subtítulo de Agradecimiento</Label>
+ <FormControl>
+ <Textarea placeholder="Hemos recibido tu mensaje..." {...field} />
+ </FormControl>
+ <FormMessage />
+ </div>
+ </FormItem>
+ )}/>
+ <FormField control={form.control} name="thankYouButtonText" render={({ field }) => (
+ <FormItem>
+ <div> {/* Wrap contents in a single div */}
+ <Label>Texto del Botón de Agradecimiento</Label>
+ <FormControl>
+ <Input placeholder="Volver al Inicio" {...field} />
+ </FormControl>
+ <FormMessage />
+ </div>
+ </FormItem>
+ )}/>
                 </CardContent>
               </Card>
 
@@ -208,10 +438,12 @@ export default function SettingsPage() {
                     render={({ field }) => (
                         <FormItem>
                         <Label htmlFor="whatsappNumber">Número de WhatsApp</Label>
-                        <FormControl>
-                            <Input id="whatsappNumber" placeholder="Ej: 51987654321" {...field} />
-                        </FormControl>
-                        <FormMessage />
+ <div> {/* Wrap contents in a single div */}
+ <FormControl>
+ <Input id="whatsappNumber" placeholder="Ej: 51987654321" {...field} />
+ </FormControl>
+ <FormMessage />
+ </div>
                         </FormItem>
                     )}
                   />

@@ -103,7 +103,7 @@ export default function ContactPage() {
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4">
                   <Button type="submit" className="flex-1">{settings?.contactFormSubmitButtonText || 'Enviar Mensaje'}</Button>
-                  <Button type="button" onClick={handleWhatsAppClick} variant="outline" className="flex-1 border-green-500 text-green-600 hover:bg-green-500 hover:text-white" disabled={!settings?.whatsappNumber}>
+                  <Button type="button" onClick={handleWhatsAppClick} variant="secondary" className="flex-1 bg-green-500 text-white hover:bg-green-600" disabled={!settings?.whatsappNumber}>
                       <MessageCircle className="mr-2" /> {settings?.contactFormWhatsappButtonText || 'WhatsApp'}
                   </Button>
                 </div>
