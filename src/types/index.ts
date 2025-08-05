@@ -77,9 +77,23 @@ export interface Lead {
 
 export interface Settings {
   whatsappNumber: string;
+  
   facebookUrl?: string;
   instagramUrl?: string;
   tiktokUrl?: string;
+  xUrl?: string;
+  whatsappUrl?: string;
+  linkedinUrl?: string;
+  telegramUrl?: string;
+
+  showFacebook?: boolean;
+  showInstagram?: boolean;
+  showTiktok?: boolean;
+  showX?: boolean;
+  showWhatsapp?: boolean;
+  showLinkedin?: boolean;
+  showTelegram?: boolean;
+
   homepageTitle?: string;
   homepageSubtitle?: string;
   homepageHeroButtonText?: string;

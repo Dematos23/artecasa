@@ -10,17 +10,32 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormMessage, FormLabel } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { getSettings, saveSettings } from '@/services/settings';
 import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
 
 
 const settingsSchema = z.object({
   whatsappNumber: z.string().min(1, 'El número de WhatsApp es obligatorio.').regex(/^\d+$/, 'Debe contener solo números.'),
+  
   facebookUrl: z.string().url({ message: "Debe ser una URL válida." }).optional().or(z.literal('')),
   instagramUrl: z.string().url({ message: "Debe ser una URL válida." }).optional().or(z.literal('')),
   tiktokUrl: z.string().url({ message: "Debe ser una URL válida." }).optional().or(z.literal('')),
+  xUrl: z.string().url({ message: "Debe ser una URL válida." }).optional().or(z.literal('')),
+  whatsappUrl: z.string().url({ message: "Debe ser una URL válida." }).optional().or(z.literal('')),
+  linkedinUrl: z.string().url({ message: "Debe ser una URL válida." }).optional().or(z.literal('')),
+  telegramUrl: z.string().url({ message: "Debe ser una URL válida." }).optional().or(z.literal('')),
+
+  showFacebook: z.boolean().optional(),
+  showInstagram: z.boolean().optional(),
+  showTiktok: z.boolean().optional(),
+  showX: z.boolean().optional(),
+  showWhatsapp: z.boolean().optional(),
+  showLinkedin: z.boolean().optional(),
+  showTelegram: z.boolean().optional(),
+
   homepageTitle: z.string().optional(),
   homepageSubtitle: z.string().optional(),
   homepageHeroButtonText: z.string().optional(),
@@ -48,6 +63,16 @@ const settingsSchema = z.object({
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
 
+const socialFields: { name: keyof SettingsFormValues, label: string }[] = [
+    { name: 'showFacebook', label: 'Facebook' },
+    { name: 'showInstagram', label: 'Instagram' },
+    { name: 'showTiktok', label: 'TikTok' },
+    { name: 'showX', label: 'X (Twitter)' },
+    { name: 'showWhatsapp', label: 'WhatsApp' },
+    { name: 'showLinkedin', label: 'LinkedIn' },
+    { name: 'showTelegram', label: 'Telegram' },
+];
+
 export default function SettingsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
@@ -59,6 +84,17 @@ export default function SettingsPage() {
       facebookUrl: '',
       instagramUrl: '',
       tiktokUrl: '',
+      xUrl: '',
+      whatsappUrl: '',
+      linkedinUrl: '',
+      telegramUrl: '',
+      showFacebook: false,
+      showInstagram: false,
+      showTiktok: false,
+      showX: false,
+      showWhatsapp: false,
+      showLinkedin: false,
+      showTelegram: false,
       homepageTitle: '',
       homepageSubtitle: '',
       homepageHeroButtonText: '',
@@ -143,204 +179,204 @@ export default function SettingsPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className='space-y-4'>
- <FormField control={form.control} name="homepageTitle" render={({ field }) => (
- <FormItem>
- <Label>Título Principal (Hero)</Label>
- <FormControl>
- <Input placeholder="Artecasa" {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}/>
- <FormField control={form.control} name="homepageSubtitle" render={({ field }) => (
- <FormItem>
- <Label>Subtítulo (Hero)</Label>
- <FormControl>
- <Textarea placeholder="Donde la Casa de Tus Sueños se Hace Realidad" {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}/>
- <FormField control={form.control} name="homepageHeroButtonText" render={({ field }) => (
- <FormItem>
- <Label>Texto del Botón (Hero)</Label>
- <FormControl>
- <Input placeholder="Explorar Propiedades" {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}/>
+                 <FormField control={form.control} name="homepageTitle" render={({ field }) => (
+                 <FormItem>
+                 <Label>Título Principal (Hero)</Label>
+                 <FormControl>
+                 <Input placeholder="Artecasa" {...field} />
+                 </FormControl>
+                 <FormMessage />
+                 </FormItem>
+                 )}/>
+                 <FormField control={form.control} name="homepageSubtitle" render={({ field }) => (
+                 <FormItem>
+                 <Label>Subtítulo (Hero)</Label>
+                 <FormControl>
+                 <Textarea placeholder="Donde la Casa de Tus Sueños se Hace Realidad" {...field} />
+                 </FormControl>
+                 <FormMessage />
+                 </FormItem>
+                 )}/>
+                 <FormField control={form.control} name="homepageHeroButtonText" render={({ field }) => (
+                 <FormItem>
+                 <Label>Texto del Botón (Hero)</Label>
+                 <FormControl>
+                 <Input placeholder="Explorar Propiedades" {...field} />
+                 </FormControl>
+                 <FormMessage />
+                 </FormItem>
+                 )}/>
                    <hr/>
- <FormField control={form.control} name="featuredPropertyTitle" render={({ field }) => (
- <FormItem>
- <Label>Título Sección Destacada</Label>
- <FormControl>
- <Input placeholder="Propiedad Destacada" {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}/>
- <FormField control={form.control} name="featuredPropertyButtonText" render={({ field }) => (
- <FormItem>
- <Label>Texto Botón Sección Destacada</Label>
- <FormControl>
- <Input placeholder="Ver Detalles" {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}/>
+                 <FormField control={form.control} name="featuredPropertyTitle" render={({ field }) => (
+                 <FormItem>
+                 <Label>Título Sección Destacada</Label>
+                 <FormControl>
+                 <Input placeholder="Propiedad Destacada" {...field} />
+                 </FormControl>
+                 <FormMessage />
+                 </FormItem>
+                 )}/>
+                 <FormField control={form.control} name="featuredPropertyButtonText" render={({ field }) => (
+                 <FormItem>
+                 <Label>Texto Botón Sección Destacada</Label>
+                 <FormControl>
+                 <Input placeholder="Ver Detalles" {...field} />
+                 </FormControl>
+                 <FormMessage />
+                 </FormItem>
+                 )}/>
                    <hr/>
- <FormField control={form.control} name="discoverPropertiesTitle" render={({ field }) => (
- <FormItem>
- <Label>Título Sección Descubrir</Label>
- <FormControl>
- <Input placeholder="Descubre Nuestras Propiedades" {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}/>
- <FormField control={form.control} name="discoverPropertiesSubtitle" render={({ field }) => (
- <FormItem>
- <Label>Subtítulo Sección Descubrir</Label>
- <FormControl>
- <Textarea placeholder="Una cuidada selección..." {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}/>
- <FormField control={form.control} name="discoverPropertiesButtonText" render={({ field }) => (
- <FormItem>
- <Label>Texto Botón Sección Descubrir</Label>
- <FormControl>
- <Input placeholder="Ver Todas las Propiedades" {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}/>
+                 <FormField control={form.control} name="discoverPropertiesTitle" render={({ field }) => (
+                 <FormItem>
+                 <Label>Título Sección Descubrir</Label>
+                 <FormControl>
+                 <Input placeholder="Descubre Nuestras Propiedades" {...field} />
+                 </FormControl>
+                 <FormMessage />
+                 </FormItem>
+                 )}/>
+                 <FormField control={form.control} name="discoverPropertiesSubtitle" render={({ field }) => (
+                 <FormItem>
+                 <Label>Subtítulo Sección Descubrir</Label>
+                 <FormControl>
+                 <Textarea placeholder="Una cuidada selección..." {...field} />
+                 </FormControl>
+                 <FormMessage />
+                 </FormItem>
+                 )}/>
+                 <FormField control={form.control} name="discoverPropertiesButtonText" render={({ field }) => (
+                 <FormItem>
+                 <Label>Texto Botón Sección Descubrir</Label>
+                 <FormControl>
+                 <Input placeholder="Ver Todas las Propiedades" {...field} />
+                 </FormControl>
+                 <FormMessage />
+                 </FormItem>
+                 )}/>
 
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader>
- <CardTitle>Textos de la Página de Contacto</CardTitle>
- <CardDescription>
- Edita el contenido que se muestra en la página de contacto.
- </CardDescription>
+                 <CardTitle>Textos de la Página de Contacto</CardTitle>
+                 <CardDescription>
+                 Edita el contenido que se muestra en la página de contacto.
+                 </CardDescription>
                 </CardHeader>
                 <CardContent className='space-y-4'>
- <FormField control={form.control} name="contactTitle" render={({ field }) => (
- <FormItem>
- <Label>Título de la Página</Label>
- <FormControl>
- <Input placeholder="Contáctanos" {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}/>
- <FormField control={form.control} name="contactSubtitle" render={({ field }) => (
- <FormItem>
- <Label>Subtítulo / Descripción</Label>
- <FormControl>
- <Textarea placeholder="Estamos aquí para ayudarte..." {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}/>
- <hr/>
- <FormField control={form.control} name="contactAddressTitle" render={({ field }) => (
- <FormItem>
- <Label>Título Tarjeta Dirección</Label>
- <FormControl>
- <Input placeholder="Dirección de la Oficina" {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}/>
- <FormField control={form.control} name="contactAddressContent" render={({ field }) => (
- <FormItem>
- <Label>Contenido Tarjeta Dirección</Label>
- <FormControl>
- <Input placeholder="123 Luxury Avenue..." {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}/>
- <hr/>
- <FormField control={form.control} name="contactEmailTitle" render={({ field }) => (
- <FormItem>
- <Label>Título Tarjeta Correo</Label>
- <FormControl>
- <Input placeholder="Envíanos un Correo" {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}/>
- <FormField control={form.control} name="contactEmailContent" render={({ field }) => (
- <FormItem>
- <Label>Contenido Tarjeta Correo</Label>
- <FormControl>
- <Input placeholder="contact@artecasa.com" {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}/>
- <hr/>
- <FormField control={form.control} name="contactPhoneTitle" render={({ field }) => (
- <FormItem>
- <Label>Título Tarjeta Teléfono</Label>
- <FormControl>
- <Input placeholder="Llámanos" {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}/>
- <FormField control={form.control} name="contactPhoneContent" render={({ field }) => (
- <FormItem>
- <Label>Contenido Tarjeta Teléfono</Label>
- <FormControl>
- <Input placeholder="+1 (234) 567-890" {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}/>
- <hr/>
- <FormField control={form.control} name="contactFormTitle" render={({ field }) => (
- <FormItem>
- <Label>Título del Formulario</Label>
- <FormControl>
- <Input placeholder="Envíanos un Mensaje" {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}/>
- <FormField control={form.control} name="contactFormSubtitle" render={({ field }) => (
- <FormItem>
- <Label>Subtítulo del Formulario</Label>
- <FormControl>
- <Textarea placeholder="Completa el formulario..." {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}/>
- <FormField control={form.control} name="contactFormSubmitButtonText" render={({ field }) => (
- <FormItem>
- <Label>Texto Botón de Envío</Label>
- <FormControl>
- <Input placeholder="Enviar Mensaje" {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}/>
- <FormField control={form.control} name="contactFormWhatsappButtonText" render={({ field }) => (
- <FormItem>
- <Label>Texto Botón de WhatsApp</Label>
- <FormControl>
- <Input placeholder="WhatsApp" {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}/>
+                 <FormField control={form.control} name="contactTitle" render={({ field }) => (
+                 <FormItem>
+                 <Label>Título de la Página</Label>
+                 <FormControl>
+                 <Input placeholder="Contáctanos" {...field} />
+                 </FormControl>
+                 <FormMessage />
+                 </FormItem>
+                 )}/>
+                 <FormField control={form.control} name="contactSubtitle" render={({ field }) => (
+                 <FormItem>
+                 <Label>Subtítulo / Descripción</Label>
+                 <FormControl>
+                 <Textarea placeholder="Estamos aquí para ayudarte..." {...field} />
+                 </FormControl>
+                 <FormMessage />
+                 </FormItem>
+                 )}/>
+                 <hr/>
+                 <FormField control={form.control} name="contactAddressTitle" render={({ field }) => (
+                 <FormItem>
+                 <Label>Título Tarjeta Dirección</Label>
+                 <FormControl>
+                 <Input placeholder="Dirección de la Oficina" {...field} />
+                 </FormControl>
+                 <FormMessage />
+                 </FormItem>
+                 )}/>
+                 <FormField control={form.control} name="contactAddressContent" render={({ field }) => (
+                 <FormItem>
+                 <Label>Contenido Tarjeta Dirección</Label>
+                 <FormControl>
+                 <Input placeholder="123 Luxury Avenue..." {...field} />
+                 </FormControl>
+                 <FormMessage />
+                 </FormItem>
+                 )}/>
+                 <hr/>
+                 <FormField control={form.control} name="contactEmailTitle" render={({ field }) => (
+                 <FormItem>
+                 <Label>Título Tarjeta Correo</Label>
+                 <FormControl>
+                 <Input placeholder="Envíanos un Correo" {...field} />
+                 </FormControl>
+                 <FormMessage />
+                 </FormItem>
+                 )}/>
+                 <FormField control={form.control} name="contactEmailContent" render={({ field }) => (
+                 <FormItem>
+                 <Label>Contenido Tarjeta Correo</Label>
+                 <FormControl>
+                 <Input placeholder="contact@artecasa.com" {...field} />
+                 </FormControl>
+                 <FormMessage />
+                 </FormItem>
+                 )}/>
+                 <hr/>
+                 <FormField control={form.control} name="contactPhoneTitle" render={({ field }) => (
+                 <FormItem>
+                 <Label>Título Tarjeta Teléfono</Label>
+                 <FormControl>
+                 <Input placeholder="Llámanos" {...field} />
+                 </FormControl>
+                 <FormMessage />
+                 </FormItem>
+                 )}/>
+                 <FormField control={form.control} name="contactPhoneContent" render={({ field }) => (
+                 <FormItem>
+                 <Label>Contenido Tarjeta Teléfono</Label>
+                 <FormControl>
+                 <Input placeholder="+1 (234) 567-890" {...field} />
+                 </FormControl>
+                 <FormMessage />
+                 </FormItem>
+                 )}/>
+                 <hr/>
+                 <FormField control={form.control} name="contactFormTitle" render={({ field }) => (
+                 <FormItem>
+                 <Label>Título del Formulario</Label>
+                 <FormControl>
+                 <Input placeholder="Envíanos un Mensaje" {...field} />
+                 </FormControl>
+                 <FormMessage />
+                 </FormItem>
+                 )}/>
+                 <FormField control={form.control} name="contactFormSubtitle" render={({ field }) => (
+                 <FormItem>
+                 <Label>Subtítulo del Formulario</Label>
+                 <FormControl>
+                 <Textarea placeholder="Completa el formulario..." {...field} />
+                 </FormControl>
+                 <FormMessage />
+                 </FormItem>
+                 )}/>
+                 <FormField control={form.control} name="contactFormSubmitButtonText" render={({ field }) => (
+                 <FormItem>
+                 <Label>Texto Botón de Envío</Label>
+                 <FormControl>
+                 <Input placeholder="Enviar Mensaje" {...field} />
+                 </FormControl>
+                 <FormMessage />
+                 </FormItem>
+                 )}/>
+                 <FormField control={form.control} name="contactFormWhatsappButtonText" render={({ field }) => (
+                 <FormItem>
+                 <Label>Texto Botón de WhatsApp</Label>
+                 <FormControl>
+                 <Input placeholder="WhatsApp" {...field} />
+                 </FormControl>
+                 <FormMessage />
+                 </FormItem>
+                 )}/>
 
                 </CardContent>
               </Card>
@@ -353,33 +389,33 @@ export default function SettingsPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className='space-y-4'>
- <FormField control={form.control} name="thankYouTitle" render={({ field }) => (
- <FormItem>
- <Label>Título de Agradecimiento</Label>
- <FormControl>
- <Input placeholder="¡Gracias por contactarnos!" {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}/>
- <FormField control={form.control} name="thankYouSubtitle" render={({ field }) => (
- <FormItem>
- <Label>Subtítulo de Agradecimiento</Label>
- <FormControl>
- <Textarea placeholder="Hemos recibido tu mensaje..." {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}/>
- <FormField control={form.control} name="thankYouButtonText" render={({ field }) => (
- <FormItem>
- <Label>Texto del Botón de Agradecimiento</Label>
- <FormControl>
- <Input placeholder="Volver al Inicio" {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}/>
+                 <FormField control={form.control} name="thankYouTitle" render={({ field }) => (
+                 <FormItem>
+                 <Label>Título de Agradecimiento</Label>
+                 <FormControl>
+                 <Input placeholder="¡Gracias por contactarnos!" {...field} />
+                 </FormControl>
+                 <FormMessage />
+                 </FormItem>
+                 )}/>
+                 <FormField control={form.control} name="thankYouSubtitle" render={({ field }) => (
+                 <FormItem>
+                 <Label>Subtítulo de Agradecimiento</Label>
+                 <FormControl>
+                 <Textarea placeholder="Hemos recibido tu mensaje..." {...field} />
+                 </FormControl>
+                 <FormMessage />
+                 </FormItem>
+                 )}/>
+                 <FormField control={form.control} name="thankYouButtonText" render={({ field }) => (
+                 <FormItem>
+                 <Label>Texto del Botón de Agradecimiento</Label>
+                 <FormControl>
+                 <Input placeholder="Volver al Inicio" {...field} />
+                 </FormControl>
+                 <FormMessage />
+                 </FormItem>
+                 )}/>
                 </CardContent>
               </Card>
 
@@ -387,49 +423,81 @@ export default function SettingsPage() {
                 <CardHeader>
                   <CardTitle>Configuración de Redes Sociales</CardTitle>
                   <CardDescription>
-                    Ingresa las URLs completas de tus perfiles de redes sociales.
+                    Ingresa las URLs completas de tus perfiles y activa los que quieras mostrar en el pie de página.
                   </CardDescription>
                 </CardHeader>
-                <CardContent className='space-y-4'>
-                   <FormField
-                    control={form.control}
-                    name="facebookUrl"
-                    render={({ field }) => (
-                        <FormItem>
-                        <Label>URL de Facebook</Label>
-                        <FormControl>
-                            <Input placeholder="https://facebook.com/tu-pagina" {...field} />
-                        </FormControl>
-                        <FormMessage />
+                <CardContent className='space-y-6'>
+                    
+                    <FormField control={form.control} name="showFacebook" render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                            <div className="space-y-0.5">
+                                <FormLabel className="text-base">Facebook</FormLabel>
+                                <FormControl><Input className='mt-2' placeholder="https://facebook.com/tu-pagina" {...form.register('facebookUrl')} /></FormControl>
+                            </div>
+                            <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
                         </FormItem>
-                    )}
-                  />
-                   <FormField
-                    control={form.control}
-                    name="instagramUrl"
-                    render={({ field }) => (
-                        <FormItem>
-                        <Label>URL de Instagram</Label>
-                        <FormControl>
-                            <Input placeholder="https://instagram.com/tu-usuario" {...field} />
-                        </FormControl>
-                        <FormMessage />
+                    )}/>
+                    
+                    <FormField control={form.control} name="showInstagram" render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                            <div className="space-y-0.5">
+                                <FormLabel className="text-base">Instagram</FormLabel>
+                                <FormControl><Input className='mt-2' placeholder="https://instagram.com/tu-usuario" {...form.register('instagramUrl')} /></FormControl>
+                            </div>
+                            <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
                         </FormItem>
-                    )}
-                  />
-                   <FormField
-                    control={form.control}
-                    name="tiktokUrl"
-                    render={({ field }) => (
-                        <FormItem>
-                        <Label>URL de TikTok</Label>
-                        <FormControl>
-                            <Input placeholder="https://tiktok.com/@tu-usuario" {...field} />
-                        </FormControl>
-                        <FormMessage />
+                    )}/>
+                    
+                    <FormField control={form.control} name="showTiktok" render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                            <div className="space-y-0.5">
+                                <FormLabel className="text-base">TikTok</FormLabel>
+                                <FormControl><Input className='mt-2' placeholder="https://tiktok.com/@tu-usuario" {...form.register('tiktokUrl')} /></FormControl>
+                            </div>
+                            <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
                         </FormItem>
-                    )}
-                  />
+                    )}/>
+
+                    <FormField control={form.control} name="showX" render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                            <div className="space-y-0.5">
+                                <FormLabel className="text-base">X (Twitter)</FormLabel>
+                                <FormControl><Input className='mt-2' placeholder="https://x.com/tu-usuario" {...form.register('xUrl')} /></FormControl>
+                            </div>
+                            <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
+                        </FormItem>
+                    )}/>
+
+                     <FormField control={form.control} name="showWhatsapp" render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                            <div className="space-y-0.5">
+                                <FormLabel className="text-base">WhatsApp</FormLabel>
+                                <FormControl><Input className='mt-2' placeholder="https://wa.me/..." {...form.register('whatsappUrl')} /></FormControl>
+                            </div>
+                            <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
+                        </FormItem>
+                    )}/>
+
+                     <FormField control={form.control} name="showLinkedin" render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                            <div className="space-y-0.5">
+                                <FormLabel className="text-base">LinkedIn</FormLabel>
+                                <FormControl><Input className='mt-2' placeholder="https://linkedin.com/in/tu-perfil" {...form.register('linkedinUrl')} /></FormControl>
+                            </div>
+                            <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
+                        </FormItem>
+                    )}/>
+
+                    <FormField control={form.control} name="showTelegram" render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                            <div className="space-y-0.5">
+                                <FormLabel className="text-base">Telegram</FormLabel>
+                                <FormControl><Input className='mt-2' placeholder="https://t.me/tu-usuario" {...form.register('telegramUrl')} /></FormControl>
+                            </div>
+                            <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
+                        </FormItem>
+                    )}/>
+
                 </CardContent>
               </Card>
 
