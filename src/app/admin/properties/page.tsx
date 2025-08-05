@@ -222,14 +222,6 @@ export default function AdminPropertiesPage() {
     setPriceCurrency('USD');
   }
 
-  if (viewingPropertyId) {
-    return <PropertyDetailsClientView 
-        propertyId={viewingPropertyId} 
-        onClose={handleCloseDetails} 
-        onEdit={handleEditFromDetails}
-    />;
-  }
-  
   const priceButtonText = useMemo(() => {
     const symbol = priceCurrency === 'PEN' ? 'S/' : '$';
     if (minPrice && maxPrice) return `${symbol}${Number(minPrice).toLocaleString()} - ${symbol}${Number(maxPrice).toLocaleString()}`;
@@ -241,6 +233,13 @@ export default function AdminPropertiesPage() {
 
   return (
     <>
+      {viewingPropertyId && (
+        <PropertyDetailsClientView
+          propertyId={viewingPropertyId}
+          onClose={handleCloseDetails}
+          onEdit={handleEditFromDetails}
+        />
+      )}
       <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

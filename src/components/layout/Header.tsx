@@ -72,7 +72,7 @@ export function Header() {
                </SheetDescription>
               <div className="flex flex-col gap-4 p-4">
                 <Link href="/" className="mr-6 flex items-center mb-4">
-                  <Image src="/logo.png" alt="Artecasa Logo" width={120} height={30} className="h-16 w-auto" />
+                  <Image src="/logo.png" alt="Artecasa Logo" width={120} height={30} className="h-16 w-auto" priority />
                 </Link>
                 <NavItems className="flex-col items-start gap-4" />
               </div>
@@ -83,7 +83,7 @@ export function Header() {
         {/* Logo */}
         <div className="flex justify-center md:justify-start flex-1 md:flex-none">
             <Link href="/" className="flex items-center">
-              <Image src="/logo.png" alt="Artecasa Logo" width={120} height={30} className="h-16 w-auto" />
+              <Image src="/logo.png" alt="Artecasa Logo" width={120} height={30} className="h-16 w-auto" priority />
             </Link>
         </div>
 
