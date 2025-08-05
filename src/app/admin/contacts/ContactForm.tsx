@@ -97,8 +97,8 @@ export function ContactForm({ isOpen, onClose, onSave, contact }: ContactFormPro
             {contact ? 'Actualiza los detalles del contacto.' : 'Completa el formulario para crear un nuevo contacto.'}
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4 pr-2">
-            <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4 pr-2 max-h-[70vh] overflow-y-auto">
+            <div className="space-y-4 pr-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                         <Label htmlFor="firstname">Primer Nombre <span className="text-primary">*</span></Label>
