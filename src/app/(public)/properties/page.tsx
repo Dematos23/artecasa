@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Check, ChevronsUpDown } from 'lucide-react';
+import { Check, ChevronsUpDown, MapPin, X } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { getProperties } from '@/services/properties';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -18,6 +18,9 @@ import { cn } from '@/lib/utils';
 import { useClickAway } from 'react-use';
 import { Label } from '@/components/ui/label';
 import { propertyTypes } from '@/types';
+import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
+import Image from 'next/image';
+import Link from 'next/link';
 
 
 // Generate a flat list of location strings for the combobox
@@ -43,6 +46,18 @@ const rentPriceRanges = [
     { label: 'S/3k - S/5k', min: 3000, max: 5000 },
     { label: 'S/5k+', min: 5000, max: Infinity },
 ];
+
+const mapContainerStyle = {
+  width: '100%',
+  height: '100%',
+  minHeight: '400px',
+  borderRadius: '0.75rem' 
+};
+
+const defaultCenter = {
+  lat: -9.189967,
+  lng: -75.015152
+};
 
 
 function LocationCombobox({ value, onChange, className }: { value: string, onChange: (value: string) => void, className?: string }) {
@@ -132,6 +147,13 @@ function LocationCombobox({ value, onChange, className }: { value: string, onCha
 export default function PropertiesPage() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
+  const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
+  const { isLoaded } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: googleMapsApiKey || "",
+    preventGoogleFontsLoading: true,
+  });
 
   // Filter states
   const [locationQuery, setLocationQuery] = useState('');
@@ -141,6 +163,9 @@ export default function PropertiesPage() {
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [priceCurrency, setPriceCurrency] = useState('PEN');
+  
+  // Map state
+  const [activeMarker, setActiveMarker] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProperties = async () => {
@@ -211,6 +236,19 @@ export default function PropertiesPage() {
     setMinPrice(min.toString());
     setMaxPrice(max === Infinity ? '' : max.toString());
   }
+  
+  const mapBounds = useMemo(() => {
+    if (!isLoaded || filteredProperties.length === 0) return undefined;
+    
+    const bounds = new window.google.maps.LatLngBounds();
+    filteredProperties.forEach(prop => {
+        if (prop.location) {
+            bounds.extend(new window.google.maps.LatLng(prop.location.lat, prop.location.lng));
+        }
+    });
+
+    return bounds;
+  }, [isLoaded, filteredProperties]);
 
   const priceButtonText = useMemo(() => {
     const symbol = priceCurrency === 'PEN' ? 'S/' : '$';
@@ -219,6 +257,23 @@ export default function PropertiesPage() {
     if (maxPrice) return `Hasta ${symbol}${Number(maxPrice).toLocaleString()}`;
     return 'Rango de Precio';
   }, [minPrice, maxPrice, priceCurrency]);
+  
+  const mapRef = useRef<google.maps.Map | null>(null);
+
+  useEffect(() => {
+    if (mapRef.current && mapBounds) {
+        if (filteredProperties.length === 1 && filteredProperties[0].location) {
+            mapRef.current.setCenter(filteredProperties[0].location);
+            mapRef.current.setZoom(15);
+        } else if (filteredProperties.length > 1) {
+            mapRef.current.fitBounds(mapBounds);
+        } else {
+             mapRef.current.setCenter(defaultCenter);
+             mapRef.current.setZoom(5);
+        }
+    }
+  }, [filteredProperties, mapBounds]);
+  
 
   return (
     <div className="container mx-auto py-8 md:py-12 px-4 md:px-6">
@@ -325,28 +380,91 @@ export default function PropertiesPage() {
             <Button onClick={handleClearFilters} variant="secondary" size="sm">Limpiar Búsqueda</Button>
         </div>
       </Card>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="lg:order-2">
+            <div className="text-lg font-semibold mb-4">{filteredProperties.length} propiedades encontradas</div>
+            {loading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {[...Array(4)].map((_, i) => (
+                    <div key={i} className="space-y-4">
+                    <Skeleton className="h-56 w-full" />
+                    <Skeleton className="h-6 w-3/4" />
+                    <Skeleton className="h-4 w-1/2" />
+                    </div>
+                ))}
+                </div>
+            ) : filteredProperties.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-6">
+                {filteredProperties.map((property) => (
+                    <PropertyCard key={property.id} property={property} />
+                ))}
+                </div>
+            ) : (
+                <div className="text-center py-16">
+                    <p className="text-muted-foreground">No se encontraron propiedades. Intenta ajustar tu búsqueda.</p>
+                </div>
+            )}
+        </div>
 
-      {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="space-y-4">
-              <Skeleton className="h-56 w-full" />
-              <Skeleton className="h-6 w-3/4" />
-              <Skeleton className="h-4 w-1/2" />
-            </div>
-          ))}
+        <div className="lg:order-1 h-[400px] lg:h-auto lg:sticky lg:top-24">
+            {isLoaded ? (
+                <GoogleMap
+                    mapContainerStyle={mapContainerStyle}
+                    center={defaultCenter}
+                    zoom={5}
+                    options={{
+                        fullscreenControl: false,
+                        streetViewControl: false,
+                        mapTypeControl: false,
+                        zoomControl: true,
+                    }}
+                    onLoad={(map) => { mapRef.current = map; }}
+                >
+                    {filteredProperties.map(prop => (
+                        prop.location && (
+                            <Marker 
+                                key={prop.id} 
+                                position={prop.location}
+                                onClick={() => setActiveMarker(prop.id)}
+                            />
+                        )
+                    ))}
+
+                    {activeMarker && (
+                        <InfoWindow
+                            position={properties.find(p => p.id === activeMarker)?.location}
+                            onCloseClick={() => setActiveMarker(null)}
+                        >
+                            <div className="p-1 max-w-xs">
+                                {(() => {
+                                    const prop = properties.find(p => p.id === activeMarker);
+                                    if (!prop) return null;
+                                    const price = prop.modality === 'alquiler' ? prop.pricePEN : prop.priceUSD;
+                                    const symbol = prop.modality === 'alquiler' ? 'S/' : '$';
+
+                                    return (
+                                        <div className="flex gap-3 items-center">
+                                            {prop.imageUrls[0] && <Image src={prop.imageUrls[0]} alt={prop.title} width={80} height={80} className="rounded-md object-cover"/>}
+                                            <div>
+                                                <h4 className="font-bold text-sm truncate">{prop.title}</h4>
+                                                <p className="text-primary font-semibold">{symbol}{Number(price).toLocaleString()}</p>
+                                                <Link href={`/properties/${prop.id}`} className="text-xs text-blue-600 hover:underline">
+                                                    Ver detalles
+                                                </Link>
+                                            </div>
+                                        </div>
+                                    )
+                                })()}
+                            </div>
+                        </InfoWindow>
+                    )}
+                </GoogleMap>
+            ) : (
+                <Skeleton className="w-full h-full rounded-xl" />
+            )}
         </div>
-      ) : filteredProperties.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-          {filteredProperties.map((property) => (
-            <PropertyCard key={property.id} property={property} />
-          ))}
-        </div>
-      ) : (
-         <div className="text-center py-16">
-            <p className="text-muted-foreground">No se encontraron propiedades. Intenta ajustar tu búsqueda.</p>
-        </div>
-      )}
+      </div>
     </div>
   );
 }
