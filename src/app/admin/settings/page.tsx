@@ -14,6 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormMessage, FormLabel } from '
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { getSettings } from '@/services/settings';
+import { useAuth } from '@/context/AuthContext';
 import { saveSettingsAndGenerateTheme } from '@/actions/settings';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
@@ -154,7 +155,9 @@ const SingleImageUploader = ({
 
 
 export default function SettingsPage() {
-  const [isLoading, setIsLoading] = useState(true);
+  const { user, loading: authLoading } = useAuth();
+  const [settingsLoading, setSettingsLoading] = useState(true);
+  const isLoading = authLoading || settingsLoading;
   const { toast } = useToast();
   // Hero images state
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
@@ -220,7 +223,7 @@ export default function SettingsPage() {
 
   useEffect(() => {
     async function fetchSettings() {
-      setIsLoading(true);
+      setSettingsLoading(true);
       try {
         const settings = await getSettings();
         if (settings) {
@@ -235,10 +238,13 @@ export default function SettingsPage() {
           description: "No se pudieron cargar las configuraciones.",
         });
       } finally {
-        setIsLoading(false);
+        setSettingsLoading(false);
       }
     }
-    fetchSettings();
+
+    if (user) {
+      fetchSettings();
+    }
   }, [form, toast]);
 
 
@@ -363,7 +369,14 @@ export default function SettingsPage() {
     }
   };
   
-  if (isLoading) {
+  if (authLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+  if (!user) {
     return null;
   }
 

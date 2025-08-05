@@ -2,7 +2,8 @@
 'use server';
 
 import type { Settings } from '@/types';
-import { saveSettings } from '@/services/settings';
+import { db } from '@/lib/firebase';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import fs from 'fs-extra';
 import path from 'path';
 
@@ -181,7 +182,11 @@ export default {
     await fs.writeFile(tailwindConfigPath, tailwindConfigContent);
 }
 
-export async function saveSettingsAndGenerateTheme(settings: Settings) {
-    await saveSettings(settings);
+export async function saveSettingsAndGenerateTheme(settings: Omit<Settings, 'updatedAt'>) {
+    const settingsDocRef = doc(db, 'settings', 'global');
+    await setDoc(settingsDocRef, {
+        ...settings,
+        updatedAt: serverTimestamp()
+    }, { merge: true });
     await generateTheme(settings);
 }

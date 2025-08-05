@@ -1,16 +1,9 @@
 
 import { db } from '@/lib/firebase';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 import type { Settings } from '@/types';
 
 const settingsDocRef = doc(db, 'settings', 'global');
-
-export async function saveSettings(settings: Omit<Settings, 'updatedAt'>): Promise<void> {
-  await setDoc(settingsDocRef, { 
-    ...settings,
-    updatedAt: serverTimestamp() 
-  }, { merge: true });
-}
 
 export async function getSettings(): Promise<Settings | null> {
   const docSnap = await getDoc(settingsDocRef);
