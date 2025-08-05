@@ -44,7 +44,7 @@ export default function Home() {
 
   const featuredProperty = properties.find(p => p.featured);
   const recentProperties = properties.filter(p => !p.featured).slice(0, 3);
-  const heroImages = settings?.heroImages?.length ? settings.heroImages : ['/hero1.webp', '/hero2.webp'];
+  const heroImages = settings?.heroImages || [];
 
 
   const plugin = React.useRef(
@@ -54,32 +54,36 @@ export default function Home() {
   return (
     <div className="bg-background">
       <section className="relative h-[70vh] min-h-[500px] max-h-[700px] w-full flex items-center justify-center">
-        <Carousel
-          plugins={[plugin.current]}
-          className="absolute w-full h-full"
-          opts={{ loop: true }}
-          onMouseEnter={plugin.current.stop}
-          onMouseLeave={plugin.current.reset}
-        >
-          <CarouselContent className="h-full">
-            {heroImages.map((src, index) => (
-              <CarouselItem key={index} className="relative h-full">
-                <Image
-                  src={src}
-                  alt={`Imagen de fondo de una casa de lujo moderna ${index + 1}`}
-                  fill
-                  style={{ objectFit: 'cover' }}
-                  className="w-full h-full"
-                  priority={index === 0}
-                />
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-        </Carousel>
+        {loading || heroImages.length === 0 ? (
+          <Skeleton className="w-full h-full" />
+        ) : (
+          <Carousel
+            plugins={[plugin.current]}
+            className="absolute w-full h-full"
+            opts={{ loop: true }}
+            onMouseEnter={plugin.current.stop}
+            onMouseLeave={plugin.current.reset}
+          >
+            <CarouselContent className="h-full">
+              {heroImages.map((src, index) => (
+                <CarouselItem key={index} className="relative h-full">
+                  <Image
+                    src={src}
+                    alt={`Imagen de fondo de una casa de lujo moderna ${index + 1}`}
+                    fill
+                    style={{ objectFit: 'cover' }}
+                    className="w-full h-full"
+                    priority={index === 0}
+                  />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
+        )}
         <div className="absolute inset-0 bg-black/50 z-10" />
         <div className="relative z-20 flex flex-col items-center justify-center h-full text-center text-white px-4 md:px-6">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold font-headline text-primary mb-4">{settings?.homepageTitle || 'Artecasa'}</h1>
-          <p className="text-lg sm:text-xl md:text-2xl max-w-3xl">{settings?.homepageSubtitle || 'Donde la Casa de Tus Sueños se Hace Realidad'}</p>
+           {loading ? <Skeleton className="h-12 w-48 mb-4" /> : <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold font-headline text-primary mb-4">{settings?.homepageTitle || 'Artecasa'}</h1>}
+           {loading ? <Skeleton className="h-8 w-80" /> : <p className="text-lg sm:text-xl md:text-2xl max-w-3xl">{settings?.homepageSubtitle || 'Donde la Casa de Tus Sueños se Hace Realidad'}</p>}
           <Button asChild size="lg" className="mt-8">
             <Link href="/properties">
               {settings?.homepageHeroButtonText || 'Explorar Propiedades'} <ArrowRight className="ml-2" />
@@ -88,7 +92,23 @@ export default function Home() {
         </div>
       </section>
 
-      {!loading && featuredProperty && (
+      {loading ? (
+        <section className="py-12 md:py-24 bg-secondary">
+          <div className="container mx-auto px-4 md:px-6">
+             <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
+               <div className="md:w-1/2">
+                  <Skeleton className="w-full h-96" />
+               </div>
+               <div className="md:w-1/2 space-y-4">
+                  <Skeleton className="h-8 w-3/4" />
+                  <Skeleton className="h-6 w-1/2" />
+                  <Skeleton className="h-4 w-1/3" />
+                  <Skeleton className="h-10 w-48" />
+               </div>
+             </div>
+          </div>
+        </section>
+      ) : featuredProperty && (
         <section className="py-12 md:py-24 bg-secondary">
           <div className="container mx-auto px-4 md:px-6">
             <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
