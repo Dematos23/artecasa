@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { PropertyCard } from '@/components/PropertyCard';
 import type { Property, Settings } from '@/types';
 import Link from 'next/link';
-import { ArrowRight, BedDouble, Bath, Car, MapPin } from 'lucide-react';
+import { ArrowRight, BedDouble, Bath, Car, MapPin, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import {
   Carousel,
@@ -42,6 +42,14 @@ export default function Home() {
     fetchPageData();
   }, []);
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-[80vh]">
+        <Loader2 className="h-16 w-16 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   const featuredProperty = properties.find(p => p.featured);
   const recentProperties = properties.filter(p => !p.featured).slice(0, 3);
   const heroImages = settings?.heroImages || [];
@@ -54,8 +62,10 @@ export default function Home() {
   return (
     <div className="bg-background">
       <section className="relative h-[70vh] min-h-[500px] max-h-[700px] w-full flex items-center justify-center">
-        {loading || heroImages.length === 0 ? (
-          <Skeleton className="w-full h-full" />
+        {heroImages.length === 0 ? (
+          <div className="w-full h-full bg-secondary flex items-center justify-center">
+            <p className="text-muted-foreground">No hay imágenes en el carrusel.</p>
+          </div>
         ) : (
           <Carousel
             plugins={[plugin.current]}
@@ -82,8 +92,8 @@ export default function Home() {
         )}
         <div className="absolute inset-0 bg-black/50 z-10" />
         <div className="relative z-20 flex flex-col items-center justify-center h-full text-center text-white px-4 md:px-6">
-           {loading ? <Skeleton className="h-12 w-48 mb-4" /> : <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold font-headline text-primary mb-4">{settings?.homepageTitle || 'Artecasa'}</h1>}
-           {loading ? <Skeleton className="h-8 w-80" /> : <p className="text-lg sm:text-xl md:text-2xl max-w-3xl">{settings?.homepageSubtitle || 'Donde la Casa de Tus Sueños se Hace Realidad'}</p>}
+           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold font-headline text-primary mb-4">{settings?.homepageTitle || 'Artecasa'}</h1>
+           <p className="text-lg sm:text-xl md:text-2xl max-w-3xl">{settings?.homepageSubtitle || 'Donde la Casa de Tus Sueños se Hace Realidad'}</p>
           <Button asChild size="lg" className="mt-8">
             <Link href="/properties">
               {settings?.homepageHeroButtonText || 'Explorar Propiedades'} <ArrowRight className="ml-2" />
@@ -92,23 +102,7 @@ export default function Home() {
         </div>
       </section>
 
-      {loading ? (
-        <section className="py-12 md:py-24 bg-secondary">
-          <div className="container mx-auto px-4 md:px-6">
-             <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
-               <div className="md:w-1/2">
-                  <Skeleton className="w-full h-96" />
-               </div>
-               <div className="md:w-1/2 space-y-4">
-                  <Skeleton className="h-8 w-3/4" />
-                  <Skeleton className="h-6 w-1/2" />
-                  <Skeleton className="h-4 w-1/3" />
-                  <Skeleton className="h-10 w-48" />
-               </div>
-             </div>
-          </div>
-        </section>
-      ) : featuredProperty && (
+      {featuredProperty && (
         <section className="py-12 md:py-24 bg-secondary">
           <div className="container mx-auto px-4 md:px-6">
             <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
@@ -157,17 +151,7 @@ export default function Home() {
               {settings?.discoverPropertiesSubtitle || 'Una cuidada selección de las mejores casas de lujo, adaptadas a tu estilo de vida.'}
             </p>
           </div>
-          {loading ? (
-             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="space-y-4">
-                    <Skeleton className="h-56 w-full" />
-                    <Skeleton className="h-6 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
-                </div>
-              ))}
-            </div>
-          ) : recentProperties.length > 0 ? (
+          {recentProperties.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
               {recentProperties.map((property) => (
                 <PropertyCard key={property.id} property={property} />
