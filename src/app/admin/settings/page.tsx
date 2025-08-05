@@ -17,7 +17,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { app } from '@/lib/firebase';
-import { UploadCloud, X } from 'lucide-react';
+import { UploadCloud, X, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 
 const storage = getStorage(app);
@@ -341,7 +341,11 @@ export default function SettingsPage() {
   };
   
   if (isLoading) {
-    return <p>Cargando configuración...</p>
+    return (
+      <div className="flex justify-center items-center h-[80vh]">
+        <Loader2 className="h-16 w-16 animate-spin text-primary" />
+      </div>
+    );
   }
 
   return (

@@ -2,7 +2,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Building2, Users, Eye } from 'lucide-react';
+import { Building2, Users, Eye, Loader2 } from 'lucide-react';
 import { getProperties } from '@/services/properties';
 import { getContacts } from '@/services/contacts';
 import { useEffect, useState } from 'react';
@@ -31,6 +31,14 @@ export default function AdminDashboardPage() {
     }
     fetchData();
   }, []);
+  
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-[80vh]">
+        <Loader2 className="h-16 w-16 animate-spin text-primary" />
+      </div>
+    );
+  }
 
 
   return (

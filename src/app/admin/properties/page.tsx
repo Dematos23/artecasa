@@ -11,7 +11,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { PlusCircle, MoreHorizontal, Search, ChevronsUpDown } from 'lucide-react';
+import { PlusCircle, MoreHorizontal, Search, ChevronsUpDown, Loader2 } from 'lucide-react';
 import type { Property, Contact } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -346,7 +346,9 @@ export default function AdminPropertiesPage() {
       </Card>
       
       {loading ? (
-        <p>Cargando propiedades...</p>
+        <div className="flex justify-center items-center h-[50vh]">
+          <Loader2 className="h-16 w-16 animate-spin text-primary" />
+        </div>
       ) : (
         <>
           {/* Mobile View - Cards */}
@@ -492,6 +494,3 @@ export default function AdminPropertiesPage() {
     </>
   );
 }
-
-
-    

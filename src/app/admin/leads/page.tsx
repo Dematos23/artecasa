@@ -10,7 +10,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { MoreHorizontal, UserPlus, Trash2, Search } from 'lucide-react';
+import { MoreHorizontal, UserPlus, Trash2, Search, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import type { Lead } from '@/types';
@@ -126,7 +126,9 @@ export default function AdminLeadsPage() {
 
 
         {loading ? (
-        <p>Cargando leads...</p>
+           <div className="flex justify-center items-center h-[50vh]">
+              <Loader2 className="h-16 w-16 animate-spin text-primary" />
+            </div>
         ) : (
         <Card>
             <CardContent className="p-0">

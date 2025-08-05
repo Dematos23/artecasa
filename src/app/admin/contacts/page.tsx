@@ -10,7 +10,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { MoreHorizontal, PlusCircle, Search } from 'lucide-react';
+import { MoreHorizontal, PlusCircle, Search, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
@@ -246,7 +246,9 @@ export default function AdminContactsPage() {
           </div>
 
           {loading ? (
-            <p>Cargando contactos...</p>
+            <div className="flex justify-center items-center h-[50vh]">
+              <Loader2 className="h-16 w-16 animate-spin text-primary" />
+            </div>
           ) : (
             <>
               {/* Mobile View - Cards */}
