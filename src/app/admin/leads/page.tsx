@@ -102,6 +102,10 @@ export default function AdminLeadsPage() {
     }
   };
 
+  if (loading) {
+    return null;
+  }
+
 
   return (
     <>
@@ -125,11 +129,6 @@ export default function AdminLeadsPage() {
         </div>
 
 
-        {loading ? (
-           <div className="flex justify-center items-center h-[50vh]">
-              <Loader2 className="h-16 w-16 animate-spin text-primary" />
-            </div>
-        ) : (
         <Card>
             <CardContent className="p-0">
                 <Table>
@@ -182,7 +181,6 @@ export default function AdminLeadsPage() {
                  )}
             </CardContent>
         </Card>
-        )}
     </>
   );
 }

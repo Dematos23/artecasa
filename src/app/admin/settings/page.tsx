@@ -341,11 +341,7 @@ export default function SettingsPage() {
   };
   
   if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-[80vh]">
-        <Loader2 className="h-16 w-16 animate-spin text-primary" />
-      </div>
-    );
+    return null;
   }
 
   return (

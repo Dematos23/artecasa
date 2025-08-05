@@ -53,14 +53,17 @@ export default function AdminLayout({
 }) {
   const { user, loading } = useAuth();
   const [settings, setSettings] = useState<AppSettings | null>(null);
+  const [isSettingsLoading, setIsSettingsLoading] = useState(true);
   
-  React.useEffect(() => {
+  useEffect(() => {
     if (!loading && !user) {
       redirect('/login');
     }
     async function fetchSettings() {
+      setIsSettingsLoading(true);
       const settingsData = await getSettings();
       setSettings(settingsData);
+      setIsSettingsLoading(false);
     }
     fetchSettings();
   }, [user, loading]);
@@ -70,13 +73,7 @@ export default function AdminLayout({
     redirect('/login');
   };
 
-  if (loading || !user) {
-    return (
-        <div className="flex min-h-screen items-center justify-center bg-secondary p-4">
-           <Loader2 className="h-16 w-16 animate-spin text-primary" />
-        </div>
-    );
-  }
+  const showLoader = loading || isSettingsLoading || !user;
 
   return (
     <SidebarProvider>
@@ -156,8 +153,14 @@ export default function AdminLayout({
                 <SidebarTrigger />
                 <h1 className='text-xl font-bold font-headline ml-4'>Panel de Administrador</h1>
             </header>
-             <div className="p-4 sm:p-6 lg:p-8">
-                {children}
+             <div className="p-4 sm:p-6 lg:p-8 h-full">
+                {showLoader ? (
+                     <div className="flex justify-center items-center h-full">
+                        <Loader2 className="h-16 w-16 animate-spin text-primary" />
+                    </div>
+                ) : (
+                    children
+                )}
             </div>
         </main>
         </div>

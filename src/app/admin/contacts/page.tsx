@@ -179,6 +179,10 @@ export default function AdminContactsPage() {
     router.push(`/admin/properties?edit=${propertyId}`);
   }
 
+  if (loading) {
+      return null;
+  }
+
 
   if (viewingContactId) {
     return <ContactDetailsClientView contactId={viewingContactId} onClose={handleCloseDetails} onEdit={openFormForEdit} onNavigateToProperty={handleNavigateToProperty} />;
@@ -245,102 +249,96 @@ export default function AdminContactsPage() {
               </div>
           </div>
 
-          {loading ? (
-            <div className="flex justify-center items-center h-[50vh]">
-              <Loader2 className="h-16 w-16 animate-spin text-primary" />
+          <>
+            {/* Mobile View - Cards */}
+            <div className="md:hidden space-y-4">
+                {filteredContacts.map((contact) => (
+                <Card key={contact.id}>
+                  <CardHeader>
+                    <CardTitle className="text-base truncate">
+                      <span className="font-bold cursor-pointer" onClick={() => handleViewDetails(contact.id)}>{getFullName(contact)}</span>
+                    </CardTitle>
+                    <CardDescription>{contact.email}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="flex justify-between items-center">
+                      <div className="flex gap-1 flex-wrap">
+                        {contact.types.map(type => (
+                            <Badge key={type} variant="secondary" className="capitalize">{type}</Badge>
+                        ))}
+                      </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <span className="sr-only">Abrir menú</span>
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleViewDetails(contact.id)}>Ver Detalles</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => openFormForEdit(contact)}>Editar</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDeleteClick(contact.id)} className="text-destructive">Eliminar</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </CardContent>
+                </Card>
+                ))}
             </div>
-          ) : (
-            <>
-              {/* Mobile View - Cards */}
-              <div className="md:hidden space-y-4">
+
+            {/* Desktop View - Table */}
+            <div className="hidden md:block overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nombre</TableHead>
+                    <TableHead>Correo Electrónico</TableHead>
+                    <TableHead>Teléfono</TableHead>
+                    <TableHead>Tipo</TableHead>
+                    <TableHead>Acciones</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {filteredContacts.map((contact) => (
-                  <Card key={contact.id}>
-                    <CardHeader>
-                      <CardTitle className="text-base truncate">
-                        <span className="font-bold cursor-pointer" onClick={() => handleViewDetails(contact.id)}>{getFullName(contact)}</span>
-                      </CardTitle>
-                      <CardDescription>{contact.email}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex justify-between items-center">
+                    <TableRow key={contact.id}>
+                      <TableCell className="font-medium">
+                         <span className="font-bold cursor-pointer" onClick={() => handleViewDetails(contact.id)}>{getFullName(contact)}</span>
+                      </TableCell>
+                      <TableCell>{contact.email || '-'}</TableCell>
+                      <TableCell>{contact.phone || '-'}</TableCell>
+                      <TableCell>
                         <div className="flex gap-1 flex-wrap">
                           {contact.types.map(type => (
                               <Badge key={type} variant="secondary" className="capitalize">{type}</Badge>
                           ))}
                         </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Abrir menú</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleViewDetails(contact.id)}>Ver Detalles</DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => openFormForEdit(contact)}>Editar</DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleDeleteClick(contact.id)} className="text-destructive">Eliminar</DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </CardContent>
-                  </Card>
-                  ))}
-              </div>
-
-              {/* Desktop View - Table */}
-              <div className="hidden md:block overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Nombre</TableHead>
-                      <TableHead>Correo Electrónico</TableHead>
-                      <TableHead>Teléfono</TableHead>
-                      <TableHead>Tipo</TableHead>
-                      <TableHead>Acciones</TableHead>
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <span className="sr-only">Abrir menú</span>
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleViewDetails(contact.id)}>Ver Detalles</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => openFormForEdit(contact)}>Editar</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleDeleteClick(contact.id)} className="text-destructive">Eliminar</DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredContacts.map((contact) => (
-                      <TableRow key={contact.id}>
-                        <TableCell className="font-medium">
-                           <span className="font-bold cursor-pointer" onClick={() => handleViewDetails(contact.id)}>{getFullName(contact)}</span>
-                        </TableCell>
-                        <TableCell>{contact.email || '-'}</TableCell>
-                        <TableCell>{contact.phone || '-'}</TableCell>
-                        <TableCell>
-                          <div className="flex gap-1 flex-wrap">
-                            {contact.types.map(type => (
-                                <Badge key={type} variant="secondary" className="capitalize">{type}</Badge>
-                            ))}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" className="h-8 w-8 p-0">
-                                <span className="sr-only">Abrir menú</span>
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => handleViewDetails(contact.id)}>Ver Detalles</DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => openFormForEdit(contact)}>Editar</DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleDeleteClick(contact.id)} className="text-destructive">Eliminar</DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-               {filteredContacts.length === 0 && !loading && (
-                    <div className="text-center py-16">
-                        <p className="text-muted-foreground">
-                            {searchQuery || typeFilter !== 'all' ? "No se encontraron contactos que coincidan con tu búsqueda." : "Aún no hay contactos para mostrar."}
-                        </p>
-                    </div>
-                )}
-            </>
-          )}
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+             {filteredContacts.length === 0 && !loading && (
+                  <div className="text-center py-16">
+                      <p className="text-muted-foreground">
+                          {searchQuery || typeFilter !== 'all' ? "No se encontraron contactos que coincidan con tu búsqueda." : "Aún no hay contactos para mostrar."}
+                      </p>
+                  </div>
+              )}
+          </>
         </>
     </>
   );

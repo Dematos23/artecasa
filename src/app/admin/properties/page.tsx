@@ -230,6 +230,10 @@ export default function AdminPropertiesPage() {
     return 'Rango de Precio';
   }, [minPrice, maxPrice, priceCurrency]);
 
+  if (loading) {
+      return null;
+  }
+
 
   return (
     <>
@@ -345,42 +349,118 @@ export default function AdminPropertiesPage() {
         </div>
       </Card>
       
-      {loading ? (
-        <div className="flex justify-center items-center h-[50vh]">
-          <Loader2 className="h-16 w-16 animate-spin text-primary" />
+      <>
+        {/* Mobile View - Cards */}
+        <div className="md:hidden space-y-4">
+          {filteredProperties.map((property) => {
+            const price = property.modality === 'alquiler' ? property.pricePEN : property.priceUSD;
+            const currencySymbol = property.modality === 'alquiler' ? 'S/' : '$';
+            return (
+              <Card key={property.id}>
+                {property.imageUrls?.[0] && (
+                    <div className='cursor-pointer' onClick={() => handleViewDetails(property.id)}>
+                        <Image
+                            src={property.imageUrls[0]}
+                            alt={property.title}
+                            width={400}
+                            height={200}
+                            className="w-full h-48 object-cover rounded-t-lg"
+                        />
+                    </div>
+                )}
+                <CardHeader className={property.imageUrls?.[0] ? 'pt-4' : ''}>
+                  <CardTitle className="text-base truncate">
+                    <span className="font-bold cursor-pointer" onClick={() => handleViewDetails(property.id)}>
+                      {property.title}
+                    </span>
+                  </CardTitle>
+                  <CardDescription className="capitalize">{property.modality} - {currencySymbol}{Number(price).toLocaleString()}</CardDescription>
+                </CardHeader>
+                <CardContent className="flex justify-between items-center">
+                    <Badge variant={property.featured ? 'default' : 'secondary'}>
+                      {property.featured ? 'Destacada' : 'Estándar'}
+                    </Badge>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <span className="sr-only">Abrir menú</span>
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                         <DropdownMenuItem onClick={() => handleViewDetails(property.id)}>Ver Detalles</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => openFormForEdit(property)}>Editar</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDeleteClick(property)} className="text-destructive">Eliminar</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                </CardContent>
+              </Card>
+            )
+          })}
         </div>
-      ) : (
-        <>
-          {/* Mobile View - Cards */}
-          <div className="md:hidden space-y-4">
-            {filteredProperties.map((property) => {
-              const price = property.modality === 'alquiler' ? property.pricePEN : property.priceUSD;
-              const currencySymbol = property.modality === 'alquiler' ? 'S/' : '$';
-              return (
-                <Card key={property.id}>
-                  {property.imageUrls?.[0] && (
-                      <div className='cursor-pointer' onClick={() => handleViewDetails(property.id)}>
-                          <Image
-                              src={property.imageUrls[0]}
-                              alt={property.title}
-                              width={400}
-                              height={200}
-                              className="w-full h-48 object-cover rounded-t-lg"
-                          />
-                      </div>
-                  )}
-                  <CardHeader className={property.imageUrls?.[0] ? 'pt-4' : ''}>
-                    <CardTitle className="text-base truncate">
+          
+        {/* Desktop View - Table */}
+        <div className="hidden md:block overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-16">Imagen</TableHead>
+                <TableHead>Título</TableHead>
+                <TableHead>Propietario</TableHead>
+                <TableHead>Precio</TableHead>
+                <TableHead>Modalidad</TableHead>
+                <TableHead>Estado</TableHead>
+                <TableHead>Acciones</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredProperties.map((property) => {
+                const getPreferredPrice = () => {
+                  switch (property.preferredCurrency) {
+                      case 'USD':
+                          return { price: property.priceUSD, currencySymbol: '$' };
+                      case 'PEN':
+                          return { price: property.pricePEN, currencySymbol: 'S/' };
+                      default:
+                          const price = property.modality === 'alquiler' ? property.pricePEN : property.priceUSD;
+                          const currencySymbol = property.modality === 'alquiler' ? 'S/' : '$';
+                          return { price, currencySymbol };
+                  }
+                };
+                const { price, currencySymbol } = getPreferredPrice();
+                return (
+                  <TableRow key={property.id}>
+                    <TableCell>
+                        <div className='cursor-pointer' onClick={() => handleViewDetails(property.id)}>
+                            {property.imageUrls?.[0] ? (
+                                <Image
+                                    src={property.imageUrls[0]}
+                                    alt={property.title}
+                                    width={64}
+                                    height={64}
+                                    className="w-16 h-16 object-cover rounded-md"
+                                />
+                            ) : (
+                                <div className="w-16 h-16 bg-secondary rounded-md flex items-center justify-center text-muted-foreground">
+                                    <PlusCircle className="w-6 h-6"/>
+                                </div>
+                            )}
+                        </div>
+                    </TableCell>
+                    <TableCell>
                       <span className="font-bold cursor-pointer" onClick={() => handleViewDetails(property.id)}>
                         {property.title}
                       </span>
-                    </CardTitle>
-                    <CardDescription className="capitalize">{property.modality} - {currencySymbol}{Number(price).toLocaleString()}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="flex justify-between items-center">
+                    </TableCell>
+                    <TableCell>{getOwnerName(property.ownerId, contacts)}</TableCell>
+                    <TableCell>{currencySymbol}{Number(price).toLocaleString()}</TableCell>
+                    <TableCell className="capitalize">{property.modality}</TableCell>
+                    <TableCell>
                       <Badge variant={property.featured ? 'default' : 'secondary'}>
                         {property.featured ? 'Destacada' : 'Estándar'}
                       </Badge>
+                    </TableCell>
+                    <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" className="h-8 w-8 p-0">
@@ -389,108 +469,26 @@ export default function AdminPropertiesPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                           <DropdownMenuItem onClick={() => handleViewDetails(property.id)}>Ver Detalles</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleViewDetails(property.id)}>Ver Detalles</DropdownMenuItem>
                           <DropdownMenuItem onClick={() => openFormForEdit(property)}>Editar</DropdownMenuItem>
                           <DropdownMenuItem onClick={() => handleDeleteClick(property)} className="text-destructive">Eliminar</DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
-                  </CardContent>
-                </Card>
-              )
-            })}
-          </div>
-            
-          {/* Desktop View - Table */}
-          <div className="hidden md:block overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-16">Imagen</TableHead>
-                  <TableHead>Título</TableHead>
-                  <TableHead>Propietario</TableHead>
-                  <TableHead>Precio</TableHead>
-                  <TableHead>Modalidad</TableHead>
-                  <TableHead>Estado</TableHead>
-                  <TableHead>Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredProperties.map((property) => {
-                  const getPreferredPrice = () => {
-                    switch (property.preferredCurrency) {
-                        case 'USD':
-                            return { price: property.priceUSD, currencySymbol: '$' };
-                        case 'PEN':
-                            return { price: property.pricePEN, currencySymbol: 'S/' };
-                        default:
-                            const price = property.modality === 'alquiler' ? property.pricePEN : property.priceUSD;
-                            const currencySymbol = property.modality === 'alquiler' ? 'S/' : '$';
-                            return { price, currencySymbol };
-                    }
-                  };
-                  const { price, currencySymbol } = getPreferredPrice();
-                  return (
-                    <TableRow key={property.id}>
-                      <TableCell>
-                          <div className='cursor-pointer' onClick={() => handleViewDetails(property.id)}>
-                              {property.imageUrls?.[0] ? (
-                                  <Image
-                                      src={property.imageUrls[0]}
-                                      alt={property.title}
-                                      width={64}
-                                      height={64}
-                                      className="w-16 h-16 object-cover rounded-md"
-                                  />
-                              ) : (
-                                  <div className="w-16 h-16 bg-secondary rounded-md flex items-center justify-center text-muted-foreground">
-                                      <PlusCircle className="w-6 h-6"/>
-                                  </div>
-                              )}
-                          </div>
-                      </TableCell>
-                      <TableCell>
-                        <span className="font-bold cursor-pointer" onClick={() => handleViewDetails(property.id)}>
-                          {property.title}
-                        </span>
-                      </TableCell>
-                      <TableCell>{getOwnerName(property.ownerId, contacts)}</TableCell>
-                      <TableCell>{currencySymbol}{Number(price).toLocaleString()}</TableCell>
-                      <TableCell className="capitalize">{property.modality}</TableCell>
-                      <TableCell>
-                        <Badge variant={property.featured ? 'default' : 'secondary'}>
-                          {property.featured ? 'Destacada' : 'Estándar'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                              <span className="sr-only">Abrir menú</span>
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleViewDetails(property.id)}>Ver Detalles</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => openFormForEdit(property)}>Editar</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleDeleteClick(property)} className="text-destructive">Eliminar</DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  )
-                })}
-              </TableBody>
-            </Table>
-          </div>
-           {filteredProperties.length === 0 && !loading && (
-              <div className="text-center py-16">
-                  <p className="text-muted-foreground">
-                      No se encontraron propiedades que coincidan con tus filtros.
-                  </p>
-              </div>
-            )}
-        </>
-      )}
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
+            </TableBody>
+          </Table>
+        </div>
+         {filteredProperties.length === 0 && (
+            <div className="text-center py-16">
+                <p className="text-muted-foreground">
+                    No se encontraron propiedades que coincidan con tus filtros.
+                </p>
+            </div>
+          )}
+      </>
     </>
   );
 }
