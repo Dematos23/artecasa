@@ -54,8 +54,8 @@ const mapContainerStyle = {
 };
 
 const defaultCenter = {
-  lat: -9.189967,
-  lng: -75.015152
+  lat: -12.046374,
+  lng: -77.042793
 };
 
 
@@ -274,7 +274,7 @@ export default function PropertiesPage() {
             mapRef.current.setZoom(15);
         } else {
              mapRef.current.setCenter(defaultCenter);
-             mapRef.current.setZoom(5);
+             mapRef.current.setZoom(10);
         }
     }
   }, [filteredProperties, mapBounds, isLoaded]);
@@ -434,7 +434,7 @@ export default function PropertiesPage() {
                 <GoogleMap
                     mapContainerStyle={mapContainerStyle}
                     center={defaultCenter}
-                    zoom={8}
+                    zoom={10}
                     options={{
                         fullscreenControl: true,
                         streetViewControl: true,
@@ -458,7 +458,7 @@ export default function PropertiesPage() {
                             position={properties.find(p => p.id === activeMarker)?.location}
                             onCloseClick={() => setActiveMarker(null)}
                         >
-                            <div className="p-1 max-w-xs bg-background">
+                            <div className="p-2 max-w-xs bg-background">
                                 {(() => {
                                     const prop = properties.find(p => p.id === activeMarker);
                                     if (!prop) return null;
