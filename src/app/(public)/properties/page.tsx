@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Check, ChevronsUpDown, MapPin, X } from 'lucide-react';
+import { Check, ChevronsUpDown, MapPin, X, LayoutGrid, Map as MapIcon } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { getProperties } from '@/services/properties';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -49,8 +49,7 @@ const rentPriceRanges = [
 
 const mapContainerStyle = {
   width: '100%',
-  height: '100%',
-  minHeight: '400px',
+  height: '70vh', // Increased height for better map view
   borderRadius: '0.75rem' 
 };
 
@@ -147,6 +146,7 @@ function LocationCombobox({ value, onChange, className }: { value: string, onCha
 export default function PropertiesPage() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
   const { isLoaded } = useJsApiLoader({
@@ -283,13 +283,13 @@ export default function PropertiesPage() {
   return (
     <div className="container mx-auto py-8 md:py-12 px-4 md:px-6">
       <Card className="p-4 md:p-6 mb-8 bg-secondary">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
-          <div className="lg:col-span-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 xl:grid-cols-7 gap-4 items-end">
+          <div className="lg:col-span-2 xl:col-span-2">
             <Label>Ubicación</Label>
             <LocationCombobox value={locationQuery} onChange={setLocationQuery} />
           </div>
 
-          <div>
+          <div className="xl:col-span-1">
             <Label>Tipo de Operación</Label>
             <Select value={modalityFilter} onValueChange={handleModalityChange}>
               <SelectTrigger>
@@ -303,7 +303,7 @@ export default function PropertiesPage() {
             </Select>
           </div>
 
-           <div>
+           <div className="xl:col-span-1">
             <Label>Tipo de Propiedad</Label>
             <Select value={propertyTypeFilter} onValueChange={setPropertyTypeFilter}>
               <SelectTrigger>
@@ -318,7 +318,7 @@ export default function PropertiesPage() {
             </Select>
           </div>
 
-          <div>
+          <div className="xl:col-span-1">
              <Label>Dormitorios</Label>
              <Select value={bedroomsFilter} onValueChange={setBedroomsFilter}>
               <SelectTrigger>
@@ -335,7 +335,7 @@ export default function PropertiesPage() {
             </Select>
           </div>
 
-          <div>
+          <div className="lg:col-span-2 xl:col-span-1">
             <Label>Rango de Precio</Label>
             <Popover>
               <PopoverTrigger asChild>
@@ -380,18 +380,33 @@ export default function PropertiesPage() {
               </PopoverContent>
             </Popover>
           </div>
+          <div className="xl:col-span-1">
+            <Label>Vista</Label>
+             <Select value={viewMode} onValueChange={(value) => setViewMode(value as 'list' | 'map')}>
+              <SelectTrigger>
+                <SelectValue placeholder="Seleccionar vista" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="list"><div className="flex items-center gap-2"><LayoutGrid className="h-4 w-4"/> Vista de Lista</div></SelectItem>
+                <SelectItem value="map"><div className="flex items-center gap-2"><MapIcon className="h-4 w-4"/> Vista de Mapa</div></SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
         <div className="mt-6 flex justify-end">
             <Button onClick={handleClearFilters} variant="secondary" size="sm">Limpiar Búsqueda</Button>
         </div>
       </Card>
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="lg:order-2">
-            <div className="text-lg font-semibold mb-4">{filteredProperties.length} propiedades encontradas</div>
+      <div className="mb-4">
+        <div className="text-lg font-semibold">{filteredProperties.length} propiedades encontradas</div>
+      </div>
+
+      {viewMode === 'list' && (
+        <>
             {loading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {[...Array(4)].map((_, i) => (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[...Array(6)].map((_, i) => (
                     <div key={i} className="space-y-4">
                     <Skeleton className="h-56 w-full" />
                     <Skeleton className="h-6 w-3/4" />
@@ -400,7 +415,7 @@ export default function PropertiesPage() {
                 ))}
                 </div>
             ) : filteredProperties.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredProperties.map((property) => (
                     <PropertyCard key={property.id} property={property} />
                 ))}
@@ -410,9 +425,11 @@ export default function PropertiesPage() {
                     <p className="text-muted-foreground">No se encontraron propiedades. Intenta ajustar tu búsqueda.</p>
                 </div>
             )}
-        </div>
+        </>
+      )}
 
-        <div className="lg:order-1 h-[400px] lg:h-auto lg:sticky lg:top-24">
+      {viewMode === 'map' && (
+        <div className="w-full h-[70vh]">
             {isLoaded ? (
                 <GoogleMap
                     mapContainerStyle={mapContainerStyle}
@@ -469,7 +486,8 @@ export default function PropertiesPage() {
                 <Skeleton className="w-full h-full rounded-xl" />
             )}
         </div>
-      </div>
+      )}
     </div>
   );
 }
+
