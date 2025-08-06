@@ -243,7 +243,7 @@ export default function PropertiesPage() {
   }
   
   const mapBounds = useMemo(() => {
-    if (!isLoaded || filteredProperties.length === 0) return undefined;
+    if (!isLoaded) return undefined;
     
     const bounds = new window.google.maps.LatLngBounds();
     filteredProperties.forEach(prop => {
@@ -266,18 +266,18 @@ export default function PropertiesPage() {
   const mapRef = useRef<google.maps.Map | null>(null);
 
   useEffect(() => {
-    if (mapRef.current && mapBounds) {
-        if (filteredProperties.length === 1 && filteredProperties[0].location) {
+    if (isLoaded && mapRef.current && mapBounds) {
+        if (filteredProperties.length > 1 && !mapBounds.isEmpty()) {
+            mapRef.current.fitBounds(mapBounds);
+        } else if (filteredProperties.length === 1 && filteredProperties[0].location) {
             mapRef.current.setCenter(filteredProperties[0].location);
             mapRef.current.setZoom(15);
-        } else if (filteredProperties.length > 1) {
-            mapRef.current.fitBounds(mapBounds);
         } else {
              mapRef.current.setCenter(defaultCenter);
              mapRef.current.setZoom(5);
         }
     }
-  }, [filteredProperties, mapBounds]);
+  }, [filteredProperties, mapBounds, isLoaded]);
   
 
   return (
@@ -436,8 +436,8 @@ export default function PropertiesPage() {
                     center={defaultCenter}
                     zoom={5}
                     options={{
-                        fullscreenControl: false,
-                        streetViewControl: false,
+                        fullscreenControl: true,
+                        streetViewControl: true,
                         mapTypeControl: false,
                         zoomControl: true,
                     }}
@@ -463,7 +463,7 @@ export default function PropertiesPage() {
                                     const prop = properties.find(p => p.id === activeMarker);
                                     if (!prop) return null;
                                     const price = prop.modality === 'alquiler' ? prop.pricePEN : prop.priceUSD;
-                                    const symbol = prop.modality === 'alquiler' ? 'S/' : 'S/';
+                                    const symbol = prop.modality === 'alquiler' ? 'S/' : '$';
 
                                     return (
                                         <div className="flex gap-3 items-center">
@@ -490,5 +490,3 @@ export default function PropertiesPage() {
     </div>
   );
 }
-
-    
