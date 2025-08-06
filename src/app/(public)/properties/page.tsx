@@ -463,7 +463,7 @@ export default function PropertiesPage() {
                                     const prop = properties.find(p => p.id === activeMarker);
                                     if (!prop) return null;
                                     const price = prop.modality === 'alquiler' ? prop.pricePEN : prop.priceUSD;
-                                    const symbol = prop.modality === 'alquiler' ? 'S/' : '$';
+                                    const symbol = prop.modality === 'alquiler' ? 'S/' : 'S/';
 
                                     return (
                                         <div className="flex gap-3 items-center">
@@ -490,3 +490,5 @@ export default function PropertiesPage() {
     </div>
   );
 }
+
+    
