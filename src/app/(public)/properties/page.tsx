@@ -434,7 +434,7 @@ export default function PropertiesPage() {
                 <GoogleMap
                     mapContainerStyle={mapContainerStyle}
                     center={defaultCenter}
-                    zoom={5}
+                    zoom={8}
                     options={{
                         fullscreenControl: true,
                         streetViewControl: true,
@@ -458,7 +458,7 @@ export default function PropertiesPage() {
                             position={properties.find(p => p.id === activeMarker)?.location}
                             onCloseClick={() => setActiveMarker(null)}
                         >
-                            <div className="p-1 max-w-xs">
+                            <div className="p-1 max-w-xs bg-background">
                                 {(() => {
                                     const prop = properties.find(p => p.id === activeMarker);
                                     if (!prop) return null;
