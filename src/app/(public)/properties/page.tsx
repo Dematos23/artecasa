@@ -201,25 +201,30 @@ export default function PropertiesPage() {
 
 
   const filteredProperties = useMemo(() => {
-    return properties.filter(property => {
-      const propertyLocation = `${property.district || ''}, ${property.province || ''}, ${property.region || ''}`.toLowerCase();
+    return properties
+      .filter(property => {
+        const propertyLocation = `${property.district || ''}, ${property.province || ''}, ${property.region || ''}`.toLowerCase();
 
-      const locationMatch = !locationQuery || propertyLocation.includes(locationQuery);
-      const modalityMatch = !modalityFilter || modalityFilter === 'all' || property.modality === modalityFilter;
-      const propertyTypeMatch = !propertyTypeFilter || propertyTypeFilter === 'all' || property.propertyType === propertyTypeFilter;
-      const bedroomsMatch = bedroomsFilter === 'all' || (property.bedrooms && property.bedrooms >= parseInt(bedroomsFilter));
+        const locationMatch = !locationQuery || propertyLocation.includes(locationQuery);
+        const modalityMatch = !modalityFilter || modalityFilter === 'all' || property.modality === modalityFilter;
+        const propertyTypeMatch = !propertyTypeFilter || propertyTypeFilter === 'all' || property.propertyType === propertyTypeFilter;
+        const bedroomsMatch = bedroomsFilter === 'all' || (property.bedrooms && property.bedrooms >= parseInt(bedroomsFilter));
 
-      const minPriceNumber = minPrice ? Number(minPrice) : 0;
-      const maxPriceNumber = maxPrice ? Number(maxPrice) : Infinity;
+        const minPriceNumber = minPrice ? Number(minPrice) : 0;
+        const maxPriceNumber = maxPrice ? Number(maxPrice) : Infinity;
 
-      const priceToCompare = priceCurrency === 'PEN' ? property.pricePEN : property.priceUSD;
+        const priceToCompare = priceCurrency === 'PEN' ? property.pricePEN : property.priceUSD;
 
-      const minPriceMatch = priceToCompare >= minPriceNumber;
-      const maxPriceMatch = priceToCompare <= maxPriceNumber;
+        const minPriceMatch = priceToCompare >= minPriceNumber;
+        const maxPriceMatch = priceToCompare <= maxPriceNumber;
 
-
-      return locationMatch && modalityMatch && propertyTypeMatch && bedroomsMatch && minPriceMatch && maxPriceMatch;
-    });
+        return locationMatch && modalityMatch && propertyTypeMatch && bedroomsMatch && minPriceMatch && maxPriceMatch;
+      })
+      .sort((a, b) => {
+        if (a.featured && !b.featured) return -1;
+        if (!a.featured && b.featured) return 1;
+        return 0;
+      });
   }, [properties, locationQuery, modalityFilter, propertyTypeFilter, bedroomsFilter, minPrice, maxPrice, priceCurrency]);
 
   const handleClearFilters = () => {
