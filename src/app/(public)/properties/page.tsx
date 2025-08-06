@@ -274,7 +274,7 @@ export default function PropertiesPage() {
             mapRef.current.setZoom(15);
         } else {
              mapRef.current.setCenter(defaultCenter);
-             mapRef.current.setZoom(10);
+             mapRef.current.setZoom(12);
         }
     }
   }, [filteredProperties, mapBounds, isLoaded]);
@@ -434,7 +434,7 @@ export default function PropertiesPage() {
                 <GoogleMap
                     mapContainerStyle={mapContainerStyle}
                     center={defaultCenter}
-                    zoom={10}
+                    zoom={12}
                     options={{
                         fullscreenControl: true,
                         streetViewControl: true,
