@@ -1,27 +1,122 @@
+
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Public read access for properties and settings
-    match /properties/{propertyId} {
-      allow read: if true;
-      allow write: if request.auth != null;
+
+    // Helper functions to make rules more readable
+    function isAuthed() {
+      return request.auth != null;
     }
 
-    match /settings/global {
-      allow read: if true;
-      allow write: if request.auth != null;
+    function platformRole() {
+      return request.auth.token.platformRole;
     }
 
-    // Allow anyone to create a lead, but only admins to read/delete
-    match /leads/{leadId} {
-      allow create: if true;
-      allow read, delete: if request.auth != null;
+    function isPlatformAdmin() {
+      return isAuthed() && platformRole() == 'admin';
+    }
+    
+    function isTenantAgent(tenantId) {
+      return isAuthed() && exists(/databases/$(database)/documents/tenants/$(tenantId)/agents/$(request.auth.uid));
+    }
+    
+    function tenantAgentRole(tenantId) {
+      return get(/databases/$(database)/documents/tenants/$(tenantId)/agents/$(request.auth.uid)).data.role;
     }
 
-    // Only authenticated users can manage contacts
-    match /contacts/{contactId} {
-      allow read, write, delete: if request.auth != null;
+    function inTenantAgentRoles(tenantId, roles) {
+      return isTenantAgent(tenantId) && tenantAgentRole(tenantId) in roles;
+    }
+
+    // ===== PLATFORM SCOPE =====
+    match /platformUsers/{userId} {
+      allow read: if isPlatformAdmin();
+      // Allow user to edit their own profile, but only admins can create/delete
+      allow update: if isPlatformAdmin() || (isAuthed() && request.auth.uid == userId);
+      allow create, delete: if isPlatformAdmin();
+    }
+
+    match /platformSettings/{docId} {
+      allow read, write: if isPlatformAdmin();
+    }
+
+    // ===== CLIENT SCOPE (root clients) =====
+    match /clients/{clientId} {
+      // The client can read/edit ONLY their own profile.
+      // Platform admins can read for support purposes.
+      allow read: if isPlatformAdmin() || (isAuthed() && request.auth.uid == clientId);
+      allow create: if isAuthed() && request.auth.uid == clientId;
+      allow update: if isAuthed() && request.auth.uid == clientId;
+      // Clients should not be able to delete their own accounts directly via rules
+      // this should be handled by a server-side function.
+      allow delete: if isPlatformAdmin();
+    }
+
+    // ===== TENANT SCOPE =====
+    match /tenants/{tenantId} {
+      allow read, write: if isPlatformAdmin(); // Admins can manage tenant documents
+
+      // --- PUBLIC CATALOG: published properties ---
+      match /properties/{propertyId} {
+        // Anyone can read a property if it's marked as published.
+        allow read: if resource.data.published == true;
+        // Writes are restricted to agents of the specific tenant.
+        allow create, update, delete: if inTenantAgentRoles(tenantId, ['manager', 'agent']);
+      }
+
+      // --- CONTACTS (private to the tenant) ---
+      match /contacts/{contactId} {
+        allow read, create, update, delete: if inTenantAgentRoles(tenantId, ['manager', 'agent']);
+      }
+
+      // --- LEADS (private to the tenant) ---
+      match /leads/{leadId} {
+        // Allow public creation for the contact form, but secure reads/deletes.
+        allow create: if true;
+        allow read, update, delete: if inTenantAgentRoles(tenantId, ['manager', 'agent']);
+      }
+
+      // --- AGENTS membership (tenant's internal management) ---
+      match /agents/{uid} {
+        // Agents of the same tenant can see each other. Admins can see all.
+        allow read: if isTenantAgent(tenantId) || isPlatformAdmin();
+        // Only managers can add/remove/edit other agents.
+        allow create, update, delete: if inTenantAgentRoles(tenantId, ['manager']) || isPlatformAdmin();
+      }
+
+      // --- DOMAINS (managed by managers) ---
+      match /domains/{domainId} {
+        allow read: if isTenantAgent(tenantId) || isPlatformAdmin();
+        allow create, update, delete: if inTenantAgentRoles(tenantId, ['manager']) || isPlatformAdmin();
+      }
+
+      // --- SETTINGS (theme/branding/text) ---
+      match /settings/{docId} {
+        // Settings should be public so the website can be themed.
+        allow read: if true;
+        allow write: if inTenantAgentRoles(tenantId, ['manager']) || isPlatformAdmin();
+      }
+
+      // --- RELATIONS (client/contact ↔ property) ---
+      match /relations/{relId} {
+        // Only agents of the tenant CRM can manage their own relationships.
+        allow read, create, update, delete: if inTenantAgentRoles(tenantId, ['manager', 'agent']);
+      }
+
+      // --- SHARES (public tokenized lists) ---
+      match /shares/{shareId} {
+        // Public reads should be handled by a server-side function that validates a token,
+        // not by direct client access to this document.
+        allow read: if inTenantAgentRoles(tenantId, ['manager', 'agent']);
+        allow create, update, delete: if inTenantAgentRoles(tenantId, ['manager', 'agent']);
+      }
+    }
+
+    // Implicitly deny all other access.
+    // This is not strictly necessary as rules are deny-by-default, but it's good practice.
+    match /{path=**} {
+      allow read, write: if false;
     }
   }
 }
