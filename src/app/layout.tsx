@@ -3,14 +3,19 @@ import './globals.css';
 import { cn } from '@/lib/utils';
 import { Toaster } from "@/components/ui/toaster"
 import { AuthProvider } from '@/context/AuthContext';
+import { TenantProvider } from '@/context/TenantContext'; // Import TenantProvider
 import { getSettings } from '@/services/settings';
 
-async function getFontSettings() {
-  const settings = await getSettings();
-  const bodyFont = settings?.bodyFont || 'Montserrat';
-  const headlineFont = settings?.headlineFont || 'Montserrat';
-  return { bodyFont, headlineFont };
-}
+// This function can no longer be called from a Server Component Root Layout
+// because it requires a tenantId, which is not available here globally.
+// We will move font loading to be client-side or pass settings down.
+// For now, we will use a default.
+// async function getFontSettings() {
+//   const settings = await getSettings(); // This now requires a tenantId
+//   const bodyFont = settings?.bodyFont || 'Montserrat';
+//   const headlineFont = settings?.headlineFont || 'Montserrat';
+//   return { bodyFont, headlineFont };
+// }
 
 export const metadata: Metadata = {
   title: 'Artecasa - Inmobiliaria de Lujo',
@@ -22,7 +27,9 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { bodyFont, headlineFont } = await getFontSettings();
+  // const { bodyFont, headlineFont } = await getFontSettings();
+  const bodyFont = 'Montserrat';
+  const headlineFont = 'Montserrat';
   const fontUrl = `https://fonts.googleapis.com/css2?family=${bodyFont.replace(/ /g, '+')}:wght@400;700&family=${headlineFont.replace(/ /g, '+')}:wght@400;700&display=swap`;
 
   return (
@@ -35,8 +42,10 @@ export default async function RootLayout({
       </head>
       <body className={cn('font-body antialiased min-h-screen')}>
         <AuthProvider>
-          {children}
-          <Toaster />
+          <TenantProvider>
+            {children}
+            <Toaster />
+          </TenantProvider>
         </AuthProvider>
       </body>
     </html>

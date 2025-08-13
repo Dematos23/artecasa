@@ -4,25 +4,29 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import type { Property, Settings } from '@/types';
+import type { Property } from '@/types';
+import type { TenantSettings } from '@/types/multitenant';
 import { BedDouble, Bath, Building } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { getSettings } from '@/services/settings';
+import { useTenant } from '@/context/TenantContext';
 
 interface PropertyCardProps {
   property: Property;
 }
 
 export function PropertyCard({ property }: PropertyCardProps) {
-  const [settings, setSettings] = useState<Settings | null>(null);
+  const { tenantId } = useTenant();
+  const [settings, setSettings] = useState<TenantSettings | null>(null);
 
   useEffect(() => {
     async function fetchSettingsData() {
-        const settingsData = await getSettings();
+        if (!tenantId) return;
+        const settingsData = await getSettings(tenantId);
         setSettings(settingsData);
     }
     fetchSettingsData();
-  }, []);
+  }, [tenantId]);
   
   const getPreferredPrice = () => {
     switch (property.preferredCurrency) {

@@ -10,20 +10,23 @@ import { ArrowLeft, Home, DollarSign, FileText, BedDouble, Bath, Car, Maximize, 
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { getPropertyById } from '@/services/properties';
+import { useTenant } from '@/context/TenantContext';
 
 export function PropertyDetailsClientView({ propertyId, onClose, onEdit }: { propertyId: string, onClose?: () => void, onEdit?: (property: Property) => void }) {
+  const { tenantId } = useTenant();
   const [property, setProperty] = useState<Property | undefined>(undefined);
   const [loading, setLoading] = useState(true);
 
    useEffect(() => {
       const fetchDetails = async () => {
+        if (!tenantId) return;
         setLoading(true);
-        const prop = await getPropertyById(propertyId);
+        const prop = await getPropertyById(tenantId, propertyId);
         setProperty(prop);
         setLoading(false);
       };
       fetchDetails();
-  }, [propertyId]);
+  }, [propertyId, tenantId]);
 
   const handleEdit = () => {
     if(onEdit && property) {

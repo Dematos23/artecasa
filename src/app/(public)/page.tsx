@@ -2,7 +2,8 @@
 "use client"
 import { Button } from '@/components/ui/button';
 import { PropertyCard } from '@/components/PropertyCard';
-import type { Property, Settings } from '@/types';
+import type { Property } from '@/types';
+import type { TenantSettings } from '@/types/multitenant';
 import Link from 'next/link';
 import { ArrowRight, BedDouble, Bath, Car, MapPin, Loader2 } from 'lucide-react';
 import Image from 'next/image';
@@ -15,11 +16,13 @@ import Autoplay from "embla-carousel-autoplay"
 import React, { useState, useEffect } from 'react';
 import { getProperties } from '@/services/properties';
 import { getSettings } from '@/services/settings';
+import { useTenant } from '@/context/TenantContext';
 
 export default function Home() {
+  const { tenantId } = useTenant();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
-  const [settings, setSettings] = useState<Settings | null>(null);
+  const [settings, setSettings] = useState<TenantSettings | null>(null);
 
   const plugin = React.useRef(
     Autoplay({ delay: 5000, stopOnInteraction: true })
@@ -27,11 +30,12 @@ export default function Home() {
 
   useEffect(() => {
     const fetchPageData = async () => {
+      if (!tenantId) return;
       try {
         setLoading(true);
         const [propertiesData, settingsData] = await Promise.all([
-          getProperties(),
-          getSettings(),
+          getProperties(tenantId),
+          getSettings(tenantId),
         ]);
         setProperties(propertiesData);
         setSettings(settingsData);
@@ -42,7 +46,7 @@ export default function Home() {
       }
     };
     fetchPageData();
-  }, []);
+  }, [tenantId]);
 
   if (loading) {
     return (

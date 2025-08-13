@@ -13,26 +13,29 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { getSettings } from '@/services/settings';
-import type { Settings } from '@/types';
+import type { TenantSettings } from '@/types/multitenant';
+import { useTenant } from '@/context/TenantContext';
 
 const auth = getAuth(app);
 
 export default function LoginPage() {
+  const { tenantId } = useTenant();
   const { user, loading } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [settings, setSettings] = useState<Settings | null>(null);
+  const [settings, setSettings] = useState<TenantSettings | null>(null);
   const { toast } = useToast();
 
    useEffect(() => {
     async function fetchSettingsData() {
-        const settingsData = await getSettings();
+        if (!tenantId) return;
+        const settingsData = await getSettings(tenantId);
         setSettings(settingsData);
     }
     fetchSettingsData();
-  }, []);
+  }, [tenantId]);
 
   useEffect(() => {
     if (!loading && user) {

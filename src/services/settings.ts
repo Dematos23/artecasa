@@ -1,27 +1,26 @@
-
 import { db } from '@/lib/firebase';
 import { doc, getDoc, setDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
-import type { Settings } from '@/types';
+import { type TenantSettings } from '@/types/multitenant';
 
-const settingsDocRef = doc(db, 'settings', 'global');
+// This file is now tenant-aware.
+// It will fetch settings from a tenant's sub-collection.
 
-export async function getSettings(): Promise<Settings | null> {
+export async function getSettings(tenantId: string): Promise<TenantSettings | null> {
+  const settingsDocRef = doc(db, 'tenants', tenantId, 'settings', 'default');
   const docSnap = await getDoc(settingsDocRef);
   if (docSnap.exists()) {
     const data = docSnap.data();
-    // Convert Firestore Timestamp to ISO string if it's a Timestamp object
     const updatedAt = data.updatedAt?.toDate ? data.updatedAt.toDate().toISOString() : null;
-    return { ...data, updatedAt } as Settings;
+    return { ...data, updatedAt } as TenantSettings;
   }
   return null;
 }
 
 
-export async function saveSettings(settings: Omit<Settings, 'updatedAt'>) {
+export async function saveSettings(tenantId: string, settings: Omit<TenantSettings, 'updatedAt'>) {
+    const settingsDocRef = doc(db, 'tenants', tenantId, 'settings', 'default');
     await setDoc(settingsDocRef, {
         ...settings,
         updatedAt: serverTimestamp()
     }, { merge: true });
 }
-
-    

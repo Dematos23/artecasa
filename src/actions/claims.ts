@@ -17,17 +17,20 @@ const ClaimInputSchema = z.object({
   claimedAmount: z.number(),
   description: z.string(),
   clientRequest: z.string(),
+  tenantId: z.string(), // Added tenantId
 });
 
 type ClaimInput = z.infer<typeof ClaimInputSchema>;
 
 export async function handleClaimSubmit(input: ClaimInput) {
     try {
+        const { tenantId, ...claimData } = input;
+        
         // 1. Save claim to Firestore and get correlative
-        const correlative = await addClaim(input);
+        const correlative = await addClaim(tenantId, claimData);
 
         // 2. Get company email from settings
-        const settings = await getSettings();
+        const settings = await getSettings(tenantId);
         const companyEmail = settings?.claimsEmail;
         if (!companyEmail) {
             throw new Error("Claims email not configured in settings.");

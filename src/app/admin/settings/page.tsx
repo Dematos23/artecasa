@@ -23,7 +23,8 @@ import { app } from '@/lib/firebase';
 import { UploadCloud, X, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { ColorPicker } from '@/components/ui/color-picker';
-import type { Settings } from '@/types';
+import { useTenant } from '@/context/TenantContext';
+import type { TenantSettings } from '@/types/multitenant';
 
 const storage = getStorage(app);
 
@@ -157,6 +158,7 @@ const SingleImageUploader = ({
 
 export default function SettingsPage() {
   const { user, loading: authLoading } = useAuth();
+  const { tenantId } = useTenant();
   const [settingsLoading, setSettingsLoading] = useState(true);
   const isLoading = authLoading || settingsLoading;
   const { toast } = useToast();
@@ -225,9 +227,10 @@ export default function SettingsPage() {
 
   useEffect(() => {
     async function fetchSettings() {
+      if (!tenantId) return;
       setSettingsLoading(true);
       try {
-        const settings = await getSettings();
+        const settings = await getSettings(tenantId);
         if (settings) {
           form.reset(settings as any);
           setImagePreviews(settings.heroImages || []);
@@ -247,7 +250,7 @@ export default function SettingsPage() {
     if (user) {
       fetchSettings();
     }
-  }, [form, toast, user]);
+  }, [form, toast, user, tenantId]);
 
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -304,6 +307,7 @@ export default function SettingsPage() {
 
 
   const onSubmit = async (data: SettingsFormValues) => {
+    if (!tenantId) return;
     try {
       let { logoUrl, defaultPropertyImageUrl } = data;
 
@@ -342,14 +346,14 @@ export default function SettingsPage() {
       const existingUrls = form.getValues('heroImages')?.filter(url => !imagesToDelete.includes(url)) || [];
       const finalImageUrls = [...existingUrls, ...uploadedImageUrls];
       
-      const settingsData: Settings = {
+      const settingsData: TenantSettings = {
         ...data,
         logoUrl,
         defaultPropertyImageUrl,
         heroImages: finalImageUrls,
       };
       
-      await saveSettings(settingsData);
+      await saveSettings(tenantId, settingsData);
       
       await generateThemeFromSettings(settingsData);
 

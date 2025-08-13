@@ -14,6 +14,7 @@ import { documentTypes } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 import { handleClaimSubmit } from '@/actions/claims';
+import { useTenant } from '@/context/TenantContext';
 
 const claimSchema = z.object({
   fullName: z.string().min(3, 'El nombre es muy corto.'),
@@ -31,6 +32,7 @@ const claimSchema = z.object({
 type ClaimFormValues = z.infer<typeof claimSchema>;
 
 export default function ClaimsPage() {
+    const { tenantId } = useTenant();
     const { toast } = useToast();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -50,9 +52,13 @@ export default function ClaimsPage() {
     });
 
     const onSubmit = async (data: ClaimFormValues) => {
+        if (!tenantId) {
+            toast({ variant: "destructive", title: "Error", description: "No se pudo identificar la inmobiliaria. Inténtalo de nuevo." });
+            return;
+        }
         setIsSubmitting(true);
         try {
-            const result = await handleClaimSubmit(data);
+            const result = await handleClaimSubmit({...data, tenantId});
             if(result.success) {
                 toast({
                     title: "Reclamo Enviado",

@@ -10,22 +10,25 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { getSettings } from '@/services/settings';
 import { handleContactSubmit } from '@/actions/contact';
-import type { Settings } from '@/types';
+import type { TenantSettings } from '@/types/multitenant';
+import { useTenant } from '@/context/TenantContext';
 
 export default function ContactPage() {
+    const { tenantId } = useTenant();
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
     const [message, setMessage] = useState('');
-    const [settings, setSettings] = useState<Settings | null>(null);
+    const [settings, setSettings] = useState<TenantSettings | null>(null);
 
     useEffect(() => {
         async function fetchSettingsData() {
-            const settingsData = await getSettings();
+            if (!tenantId) return;
+            const settingsData = await getSettings(tenantId);
             setSettings(settingsData);
         }
         fetchSettingsData();
-    }, []);
+    }, [tenantId]);
 
     const handleWhatsAppClick = () => {
         if (!settings?.whatsappNumber) return;
@@ -85,6 +88,7 @@ export default function ContactPage() {
             </CardHeader>
             <CardContent>
               <form action={handleContactSubmit} className="space-y-4">
+                <input type="hidden" name="tenantId" value={tenantId || ''} />
                 <div>
                   <label htmlFor="name" className="sr-only">Nombre</label>
                   <Input id="name" name="name" type="text" placeholder="Tu Nombre" required value={name} onChange={(e) => setName(e.target.value)} />

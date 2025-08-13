@@ -35,7 +35,7 @@ import { ContactDetailsClientView } from './ContactDetailsClientView';
 import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
+import { useTenant } from '@/context/TenantContext';
 
 
 const getFullName = (contact: Pick<Contact, 'firstname' | 'secondname' | 'firstlastname' | 'secondlastname'>) => {
@@ -43,6 +43,7 @@ const getFullName = (contact: Pick<Contact, 'firstname' | 'secondname' | 'firstl
 }
 
 export default function AdminContactsPage() {
+  const { tenantId } = useTenant();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const { user, loading: authLoading } = useAuth();
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -58,9 +59,10 @@ export default function AdminContactsPage() {
 
 
   const fetchContacts = useCallback(async () => {
+    if (!tenantId) return;
     try {
       setLoading(true);
-      const contactsData = await getContacts();
+      const contactsData = await getContacts(tenantId);
       setContacts(contactsData);
     } catch (error) {
       console.error(error);
@@ -72,7 +74,7 @@ export default function AdminContactsPage() {
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [toast, tenantId]);
 
   useEffect(() => {
     if (!authLoading && user) {
@@ -101,15 +103,16 @@ export default function AdminContactsPage() {
   }, [contacts, searchQuery, typeFilter]);
 
   const handleSave = async (contactData: UpdateContactData) => {
+    if (!tenantId) return;
     try {
       if (selectedContact) {
-        await updateContact(selectedContact.id, contactData);
+        await updateContact(tenantId, selectedContact.id, contactData);
         toast({
             title: "Éxito",
             description: "El contacto se ha actualizado correctamente.",
         });
       } else {
-        await addContact(contactData as Omit<Contact, 'id' | 'date' | 'interestedInPropertyIds' | 'ownerOfPropertyIds'>);
+        await addContact(tenantId, contactData as Omit<Contact, 'id' | 'date' | 'interestedInPropertyIds' | 'ownerOfPropertyIds'>);
         toast({
             title: "Éxito",
             description: "El contacto se ha creado correctamente.",
@@ -145,9 +148,9 @@ export default function AdminContactsPage() {
   };
 
   const confirmDelete = async () => {
-    if (contactToDelete) {
+    if (contactToDelete && tenantId) {
         try {
-            await deleteContact(contactToDelete);
+            await deleteContact(tenantId, contactToDelete);
             toast({
                 title: "Éxito",
                 description: "El contacto se ha eliminado correctamente.",

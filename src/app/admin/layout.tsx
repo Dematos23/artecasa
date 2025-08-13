@@ -23,7 +23,8 @@ import { useAuth } from '@/context/AuthContext';
 import { auth } from '@/lib/firebase';
 import React, { useState, useEffect } from 'react';
 import { getSettings } from '@/services/settings';
-import type { Settings as AppSettings } from '@/types';
+import { useTenant } from '@/context/TenantContext';
+import type { TenantSettings } from '@/types/multitenant';
 
 
 function AdminSidebarButton({ href, children }: { href: string, children: React.ReactNode }) {
@@ -52,7 +53,8 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const { user, loading } = useAuth();
-  const [settings, setSettings] = useState<AppSettings | null>(null);
+  const { tenantId } = useTenant();
+  const [settings, setSettings] = useState<TenantSettings | null>(null);
   const [isSettingsLoading, setIsSettingsLoading] = useState(true);
   
   useEffect(() => {
@@ -60,13 +62,14 @@ export default function AdminLayout({
       redirect('/login');
     }
     async function fetchSettings() {
+      if (!tenantId) return;
       setIsSettingsLoading(true);
-      const settingsData = await getSettings();
+      const settingsData = await getSettings(tenantId);
       setSettings(settingsData);
       setIsSettingsLoading(false);
     }
     fetchSettings();
-  }, [user, loading]);
+  }, [user, loading, tenantId]);
   
   const handleLogout = async () => {
     await auth.signOut();

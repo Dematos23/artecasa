@@ -9,9 +9,15 @@ export async function handleContactSubmit(formData: FormData) {
   const email = formData.get('email') as string;
   const phone = formData.get('phone') as string;
   const message = formData.get('message') as string;
+  const tenantId = formData.get('tenantId') as string;
+
+  if (!tenantId) {
+      console.error('Error: tenantId is missing from contact form.');
+      return;
+  }
 
   try {
-    await addLead({
+    await addLead(tenantId, {
       name,
       email,
       phone,

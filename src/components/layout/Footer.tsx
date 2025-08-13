@@ -4,23 +4,26 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
-import type { Settings } from '@/types';
+import type { TenantSettings } from '@/types/multitenant';
 import { getSettings } from '@/services/settings';
 import { FaFacebook, FaInstagram, FaLinkedin, FaTiktok, FaWhatsapp, FaYoutube, FaTelegramPlane } from 'react-icons/fa';
 import { FaXTwitter } from 'react-icons/fa6';
+import { useTenant } from '@/context/TenantContext';
 
 
 export function Footer() {
   const year = new Date().getFullYear();
-  const [settings, setSettings] = useState<Settings | null>(null);
+  const { tenantId } = useTenant();
+  const [settings, setSettings] = useState<TenantSettings | null>(null);
 
   useEffect(() => {
     async function fetchSettingsData() {
-        const settingsData = await getSettings();
+        if (!tenantId) return;
+        const settingsData = await getSettings(tenantId);
         setSettings(settingsData);
     }
     fetchSettingsData();
-  }, []);
+  }, [tenantId]);
 
   const socialIconProps = {
     className: "h-6 w-6 text-primary hover:text-accent-foreground transition-colors",

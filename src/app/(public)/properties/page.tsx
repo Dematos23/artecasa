@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Check, ChevronsUpDown, MapPin, X, LayoutGrid, Map as MapIcon } from 'lucide-react';
+import { Check, ChevronsUpDown, MapPin, X, LayoutGrid, Map as MapIcon, Loader2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { getProperties } from '@/services/properties';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -21,6 +21,7 @@ import { propertyTypes } from '@/types';
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useTenant } from '@/context/TenantContext';
 
 
 // Generate a flat list of location strings for the combobox
@@ -144,6 +145,7 @@ function LocationCombobox({ value, onChange, className }: { value: string, onCha
 
 
 export default function PropertiesPage() {
+  const { tenantId } = useTenant();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
@@ -169,9 +171,10 @@ export default function PropertiesPage() {
 
   useEffect(() => {
     const fetchProperties = async () => {
+      if (!tenantId) return;
       try {
         setLoading(true);
-        const propertiesData = await getProperties();
+        const propertiesData = await getProperties(tenantId);
         setProperties(propertiesData);
       } catch (error) {
         console.error("Error fetching properties:", error);
@@ -180,7 +183,7 @@ export default function PropertiesPage() {
       }
     };
     fetchProperties();
-  }, []);
+  }, [tenantId]);
 
   const handleModalityChange = (value: string) => {
     setModalityFilter(value);
@@ -243,7 +246,7 @@ export default function PropertiesPage() {
   }
   
   const mapBounds = useMemo(() => {
-    if (!isLoaded) return undefined;
+    if (!isLoaded || typeof window === 'undefined' || !window.google) return undefined;
     
     const bounds = new window.google.maps.LatLngBounds();
     filteredProperties.forEach(prop => {
@@ -279,6 +282,14 @@ export default function PropertiesPage() {
     }
   }, [filteredProperties, mapBounds, isLoaded]);
   
+  if (loading) {
+      return (
+          <div className="flex justify-center items-center h-[80vh]">
+              <Loader2 className="h-16 w-16 animate-spin text-primary" />
+          </div>
+      );
+  }
+
 
   return (
     <div className="container mx-auto py-8 md:py-12 px-4 md:px-6">
@@ -404,17 +415,7 @@ export default function PropertiesPage() {
 
       {viewMode === 'list' && (
         <>
-            {loading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[...Array(6)].map((_, i) => (
-                    <div key={i} className="space-y-4">
-                    <Skeleton className="h-56 w-full" />
-                    <Skeleton className="h-6 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
-                    </div>
-                ))}
-                </div>
-            ) : filteredProperties.length > 0 ? (
+            {filteredProperties.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredProperties.map((property) => (
                     <PropertyCard key={property.id} property={property} />
@@ -458,7 +459,7 @@ export default function PropertiesPage() {
                             position={properties.find(p => p.id === activeMarker)?.location}
                             onCloseClick={() => setActiveMarker(null)}
                         >
-                            <div className="p-2 max-w-xs bg-background">
+                            <div className="p-1 bg-background">
                                 {(() => {
                                     const prop = properties.find(p => p.id === activeMarker);
                                     if (!prop) return null;

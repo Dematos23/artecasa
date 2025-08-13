@@ -14,6 +14,7 @@ import { getContactProperties, disassociatePropertyFromContact, updateContactAss
 import { AssociatePropertyForm } from './AssociatePropertyForm';
 import { useToast } from '@/hooks/use-toast';
 import { EditAssociationForm } from './EditAssociationForm';
+import { useTenant } from '@/context/TenantContext';
 
 
 const getFullName = (contact: Pick<Contact, 'firstname' | 'secondname' | 'firstlastname' | 'secondlastname'>) => {
@@ -110,6 +111,7 @@ interface ContactDetailsClientViewProps {
 }
 
 export function ContactDetailsClientView({ contactId, onClose, onEdit, onNavigateToProperty }: ContactDetailsClientViewProps) {
+  const { tenantId } = useTenant();
   const [contact, setContact] = useState<Contact | undefined>(undefined);
   const [ownedProperties, setOwnedProperties] = useState<Property[]>([]);
   const [interestedProperties, setInterestedProperties] = useState<Property[]>([]);
@@ -121,12 +123,13 @@ export function ContactDetailsClientView({ contactId, onClose, onEdit, onNavigat
   const { toast } = useToast();
   
   const fetchContactData = async () => {
+    if (!tenantId) return;
     setLoading(true);
     try {
-        const contactData = await getContactById(contactId);
+        const contactData = await getContactById(tenantId, contactId);
         if (contactData) {
             setContact(contactData);
-            const { owned, interested, tenantOf } = await getContactProperties(contactData);
+            const { owned, interested, tenantOf } = await getContactProperties(tenantId, contactData);
             setOwnedProperties(owned);
             setInterestedProperties(interested);
             setTenantOfProperty(tenantOf);
@@ -143,16 +146,16 @@ export function ContactDetailsClientView({ contactId, onClose, onEdit, onNavigat
     if (contactId) {
       fetchContactData();
     }
-  }, [contactId]);
+  }, [contactId, tenantId]);
 
   const handleAssociationSaved = () => {
       fetchContactData(); // Refetch all data
   };
   
   const handleDisassociate = async (propertyId: string) => {
-    if (!contact) return;
+    if (!contact || !tenantId) return;
     try {
-      await disassociatePropertyFromContact(contact.id, propertyId);
+      await disassociatePropertyFromContact(tenantId, contact.id, propertyId);
       toast({ title: "Éxito", description: "Propiedad desasociada correctamente." });
       fetchContactData(); // Refetch
     } catch (error) {
@@ -167,9 +170,9 @@ export function ContactDetailsClientView({ contactId, onClose, onEdit, onNavigat
   };
   
   const handleEditAssociation = async (propertyId: string, newType: AssociationType) => {
-    if (!contact) return;
+    if (!contact || !tenantId) return;
     try {
-      await updateContactAssociationType(contact.id, propertyId, newType);
+      await updateContactAssociationType(tenantId, contact.id, propertyId, newType);
       toast({ title: "Éxito", description: "La asociación ha sido actualizada." });
       fetchContactData();
       setIsEditAssociationFormOpen(false);

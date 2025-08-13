@@ -7,19 +7,22 @@ import { getProperties } from '@/services/properties';
 import { getContacts } from '@/services/contacts';
 import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useTenant } from '@/context/TenantContext';
 
 export default function AdminDashboardPage() {
+  const { tenantId } = useTenant();
   const [propertyCount, setPropertyCount] = useState(0);
   const [contactCount, setContactCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
+      if (!tenantId) return;
       try {
         setLoading(true);
         const [properties, contacts] = await Promise.all([
-          getProperties(),
-          getContacts(),
+          getProperties(tenantId),
+          getContacts(tenantId),
         ]);
         setPropertyCount(properties.length);
         setContactCount(contacts.length);
@@ -30,7 +33,7 @@ export default function AdminDashboardPage() {
       }
     }
     fetchData();
-  }, []);
+  }, [tenantId]);
   
   if (loading) {
     return (

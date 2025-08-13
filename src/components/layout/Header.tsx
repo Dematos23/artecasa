@@ -20,8 +20,9 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { getSettings } from '@/services/settings';
-import type { Settings } from '@/types';
+import type { TenantSettings } from '@/types/multitenant';
 import { useEffect, useState } from 'react';
+import { useTenant } from '@/context/TenantContext';
 
 
 const navLinks = [
@@ -33,16 +34,18 @@ const navLinks = [
 export function Header() {
   const pathname = usePathname();
   const { user } = useAuth();
-  const [settings, setSettings] = useState<Settings | null>(null);
+  const { tenantId } = useTenant();
+  const [settings, setSettings] = useState<TenantSettings | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
    useEffect(() => {
     async function fetchSettingsData() {
-        const settingsData = await getSettings();
+        if (!tenantId) return;
+        const settingsData = await getSettings(tenantId);
         setSettings(settingsData);
     }
     fetchSettingsData();
-  }, []);
+  }, [tenantId]);
 
   const handleLogout = async () => {
     await auth.signOut();

@@ -20,8 +20,10 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { format } from 'date-fns';
 import { Input } from '@/components/ui/input';
+import { useTenant } from '@/context/TenantContext';
 
 export default function AdminLeadsPage() {
+  const { tenantId } = useTenant();
   const [leads, setLeads] = useState<Lead[]>([]);
   const { user, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -29,9 +31,10 @@ export default function AdminLeadsPage() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const fetchLeads = useCallback(async () => {
+    if (!tenantId) return;
     try {
       setLoading(true);
-      const leadsData = await getLeads();
+      const leadsData = await getLeads(tenantId);
       setLeads(leadsData);
     } catch (error) {
       console.error(error);
@@ -43,7 +46,7 @@ export default function AdminLeadsPage() {
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [toast, tenantId]);
 
   useEffect(() => {
     if (!authLoading && user) {
@@ -67,8 +70,9 @@ export default function AdminLeadsPage() {
   }, [leads, searchQuery]);
 
   const handleDelete = async (id: string) => {
+    if (!tenantId) return;
     try {
-      await deleteLead(id);
+      await deleteLead(tenantId, id);
       toast({
         title: "Éxito",
         description: "El lead se ha eliminado correctamente.",
@@ -85,8 +89,9 @@ export default function AdminLeadsPage() {
   };
   
   const handleConvert = async (lead: Lead) => {
+    if (!tenantId) return;
     try {
-        await convertLeadToContact(lead);
+        await convertLeadToContact(tenantId, lead);
         toast({
             title: "Éxito",
             description: "El lead se ha convertido a contacto.",

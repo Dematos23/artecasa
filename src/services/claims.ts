@@ -1,12 +1,17 @@
-
 import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import type { Claim } from '@/types';
 
-const claimsCollection = collection(db, 'claims');
+// This file is now tenant-aware.
+// Functions will need a tenantId to know which sub-collection to query.
 
-// Function to get the last correlative number
-async function getLastCorrelative(): Promise<number> {
+export const getClaimsCollection = (tenantId: string) => {
+  return collection(db, 'tenants', tenantId, 'claims');
+};
+
+// Function to get the last correlative number for a specific tenant
+async function getLastCorrelative(tenantId: string): Promise<number> {
+    const claimsCollection = getClaimsCollection(tenantId);
     const q = query(claimsCollection, orderBy('correlative', 'desc'), limit(1));
     const querySnapshot = await getDocs(q);
 
@@ -19,9 +24,9 @@ async function getLastCorrelative(): Promise<number> {
     return parseInt(lastCorrelativeParts[1], 10);
 }
 
-// Function to generate the next correlative ID string
-async function generateCorrelative(): Promise<string> {
-    const lastNumber = await getLastCorrelative();
+// Function to generate the next correlative ID string for a specific tenant
+async function generateCorrelative(tenantId: string): Promise<string> {
+    const lastNumber = await getLastCorrelative(tenantId);
     const nextNumber = lastNumber + 1;
     const year = new Date().getFullYear();
     // Format: 000001-YEAR
@@ -29,9 +34,10 @@ async function generateCorrelative(): Promise<string> {
 }
 
 
-// Function to add a new claim to Firestore
-export async function addClaim(claimData: Omit<Claim, 'id' | 'correlative' | 'createdAt'>): Promise<string> {
-  const correlative = await generateCorrelative();
+// Function to add a new claim to a specific tenant's collection in Firestore
+export async function addClaim(tenantId: string, claimData: Omit<Claim, 'id' | 'correlative' | 'createdAt'>): Promise<string> {
+  const correlative = await generateCorrelative(tenantId);
+  const claimsCollection = getClaimsCollection(tenantId);
   
   const docRef = await addDoc(claimsCollection, {
     ...claimData,

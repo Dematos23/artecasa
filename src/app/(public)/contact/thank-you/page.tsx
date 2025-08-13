@@ -6,19 +6,22 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import type { Settings } from '@/types';
 import { getSettings } from '@/services/settings';
+import type { TenantSettings } from '@/types/multitenant';
+import { useTenant } from '@/context/TenantContext';
 
 export default function ThankYouPage() {
-    const [settings, setSettings] = useState<Settings | null>(null);
+    const { tenantId } = useTenant();
+    const [settings, setSettings] = useState<TenantSettings | null>(null);
 
     useEffect(() => {
         async function fetchSettingsData() {
-            const settingsData = await getSettings();
+            if (!tenantId) return;
+            const settingsData = await getSettings(tenantId);
             setSettings(settingsData);
         }
         fetchSettingsData();
-    }, []);
+    }, [tenantId]);
 
   return (
     <div className="container mx-auto py-12 md:py-24 px-4 md:px-6 flex items-center justify-center">

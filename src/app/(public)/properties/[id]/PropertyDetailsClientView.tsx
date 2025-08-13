@@ -5,12 +5,14 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { Property, Settings } from '@/types';
+import type { Property } from '@/types';
+import type { TenantSettings } from '@/types/multitenant';
 import { BedDouble, Bath, Car, Maximize, MapPin, Phone, CalendarClock, Building } from 'lucide-react';
 import Link from 'next/link';
 import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
 import { getPropertyById } from '@/services/properties';
 import { getSettings } from '@/services/settings';
+import { useTenant } from '@/context/TenantContext';
 
 const containerStyle = {
   width: '100%',
@@ -24,8 +26,9 @@ const defaultCenter = {
 };
 
 export function PropertyDetailsClientView({ propertyId }: { propertyId: string }) {
+  const { tenantId } = useTenant();
   const [property, setProperty] = useState<Property | undefined>(undefined);
-  const [settings, setSettings] = useState<Settings | null>(null);
+  const [settings, setSettings] = useState<TenantSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
@@ -37,17 +40,18 @@ export function PropertyDetailsClientView({ propertyId }: { propertyId: string }
 
   useEffect(() => {
     const fetchProperty = async () => {
+      if (!tenantId) return;
       setLoading(true);
       const [prop, settingsData] = await Promise.all([
-        getPropertyById(propertyId),
-        getSettings()
+        getPropertyById(tenantId, propertyId),
+        getSettings(tenantId)
       ]);
       setProperty(prop);
       setSettings(settingsData);
       setLoading(false);
     }
     fetchProperty();
-  }, [propertyId]);
+  }, [propertyId, tenantId]);
 
   const handleWhatsAppInquiry = () => {
     if (!settings?.whatsappNumber || !property) return;

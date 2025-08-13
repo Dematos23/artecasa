@@ -38,6 +38,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { useTenant } from '@/context/TenantContext';
 
 
 const storage = getStorage(app);
@@ -50,6 +51,7 @@ const getOwnerName = (ownerId: string | undefined, contacts: Contact[]) => {
 
 
 export default function AdminPropertiesPage() {
+  const { tenantId } = useTenant();
   const [properties, setProperties] = useState<Property[]>([]);
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -72,11 +74,12 @@ export default function AdminPropertiesPage() {
   const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
   const fetchData = useCallback(async () => {
+    if (!tenantId) return;
     try {
       setLoading(true);
       const [propertiesData, contactsData] = await Promise.all([
-        getProperties(),
-        getContacts(),
+        getProperties(tenantId),
+        getContacts(tenantId),
       ]);
       setProperties(propertiesData);
       setContacts(contactsData);
@@ -90,7 +93,7 @@ export default function AdminPropertiesPage() {
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [toast, tenantId]);
 
   useEffect(() => {
     fetchData();
@@ -118,6 +121,7 @@ export default function AdminPropertiesPage() {
 
 
   const handleSave = async (propertyData: Omit<Property, 'id'>, newImages: File[]) => {
+    if (!tenantId) return;
     setIsSaving(true);
     try {
         const uploadedImageUrls = await Promise.all(
@@ -134,13 +138,13 @@ export default function AdminPropertiesPage() {
         };
 
         if (selectedProperty) {
-            await updateProperty(selectedProperty.id, finalPropertyData);
+            await updateProperty(tenantId, selectedProperty.id, finalPropertyData);
             toast({
                 title: "Éxito",
                 description: "La propiedad se ha actualizado correctamente.",
             });
         } else {
-            await addProperty(finalPropertyData);
+            await addProperty(tenantId, finalPropertyData);
              toast({
                 title: "Éxito",
                 description: "La propiedad se ha creado correctamente.",
@@ -168,9 +172,9 @@ export default function AdminPropertiesPage() {
   };
 
   const confirmDelete = async () => {
-    if (propertyToDelete) {
+    if (propertyToDelete && tenantId) {
         try {
-            await deleteProperty(propertyToDelete.id, propertyToDelete.imageUrls);
+            await deleteProperty(tenantId, propertyToDelete.id, propertyToDelete.imageUrls);
             toast({
                 title: "Éxito",
                 description: "La propiedad se ha eliminado correctamente.",

@@ -1,20 +1,24 @@
-
 import { db } from '@/lib/firebase';
 import { collection, getDocs, addDoc, serverTimestamp, query, orderBy, doc, deleteDoc, updateDoc, getDoc, arrayUnion, arrayRemove, writeBatch } from 'firebase/firestore';
 import type { Contact, Property, AssociationType } from '@/types';
 import { getPropertiesByIds, updateProperty, getPropertyById } from './properties';
 import { getProperties } from './properties';
 
+// This service is now tenant-aware.
+// All functions need a tenantId to interact with the correct sub-collection.
 
-const contactsCollection = collection(db, 'contacts');
+export const getContactsCollection = (tenantId: string) => {
+  return collection(db, 'tenants', tenantId, 'contacts');
+};
 
 // Type for new contact data, omitting id and date which will be generated
 export type NewContactData = Omit<Contact, 'id' | 'date' | 'interestedInPropertyIds' | 'ownerOfPropertyIds' | 'tenantOfPropertyId'>;
 export type UpdateContactData = Partial<Omit<Contact, 'id' | 'date'>>;
 
 
-// Function to get all contacts from Firestore
-export async function getContacts(): Promise<Contact[]> {
+// Function to get all contacts from a tenant's collection
+export async function getContacts(tenantId: string): Promise<Contact[]> {
+  const contactsCollection = getContactsCollection(tenantId);
   const q = query(contactsCollection, orderBy('date', 'desc'));
   const querySnapshot = await getDocs(q);
   return querySnapshot.docs.map(doc => {
@@ -28,9 +32,9 @@ export async function getContacts(): Promise<Contact[]> {
   });
 }
 
-// Function to get a single contact by ID
-export async function getContactById(id: string): Promise<Contact | undefined> {
-    const contactDoc = doc(db, 'contacts', id);
+// Function to get a single contact by ID from a tenant's collection
+export async function getContactById(tenantId: string, id: string): Promise<Contact | undefined> {
+    const contactDoc = doc(getContactsCollection(tenantId), id);
     const docSnap = await getDoc(contactDoc);
 
     if (docSnap.exists()) {
@@ -45,37 +49,37 @@ export async function getContactById(id: string): Promise<Contact | undefined> {
     }
 }
 
-// Function to get the full name of a contact by ID
-export async function getContactNameById(id: string): Promise<string> {
-    const contact = await getContactById(id);
+// Function to get the full name of a contact by ID from a tenant's collection
+export async function getContactNameById(tenantId: string, id: string): Promise<string> {
+    const contact = await getContactById(tenantId, id);
     if (!contact) return 'Desconocido';
     return [contact.firstname, contact.secondname, contact.firstlastname, contact.secondlastname].filter(Boolean).join(' ');
 }
 
 
-// Function to get the properties (owned and interested) for a contact
-export async function getContactProperties(contact: Contact): Promise<{ owned: Property[], interested: Property[], tenantOf?: Property }> {
+// Function to get the properties (owned and interested) for a contact within a tenant
+export async function getContactProperties(tenantId: string, contact: Contact): Promise<{ owned: Property[], interested: Property[], tenantOf?: Property }> {
     let owned: Property[] = [];
     let interested: Property[] = [];
     let tenantOf: Property | undefined = undefined;
 
     if (contact.ownerOfPropertyIds && contact.ownerOfPropertyIds.length > 0) {
-        owned = await getPropertiesByIds(contact.ownerOfPropertyIds);
+        owned = await getPropertiesByIds(tenantId, contact.ownerOfPropertyIds);
     }
     if (contact.interestedInPropertyIds && contact.interestedInPropertyIds.length > 0) {
-        interested = await getPropertiesByIds(contact.interestedInPropertyIds);
+        interested = await getPropertiesByIds(tenantId, contact.interestedInPropertyIds);
     }
      if (contact.tenantOfPropertyId) {
-        tenantOf = await getPropertyById(contact.tenantOfPropertyId);
+        tenantOf = await getPropertyById(tenantId, contact.tenantOfPropertyId);
     }
 
     return { owned, interested, tenantOf };
 }
 
-// Function to get all properties that are not currently associated with any contact as an owner
-export async function getUnassociatedProperties(): Promise<Property[]> {
-    const allProperties = await getProperties();
-    const allContacts = await getContacts();
+// Function to get all properties that are not currently associated with any contact as an owner within a tenant
+export async function getUnassociatedProperties(tenantId: string): Promise<Property[]> {
+    const allProperties = await getProperties(tenantId);
+    const allContacts = await getContacts(tenantId);
     const associatedPropertyIds = new Set(allContacts.flatMap(c => c.ownerOfPropertyIds || []));
 
     return allProperties.filter(p => !associatedPropertyIds.has(p.id));
@@ -83,9 +87,9 @@ export async function getUnassociatedProperties(): Promise<Property[]> {
 
 
 
-// Function to add a new contact to Firestore
-export async function addContact(contactData: NewContactData): Promise<string> {
-  const docRef = await addDoc(contactsCollection, {
+// Function to add a new contact to a tenant's collection in Firestore
+export async function addContact(tenantId: string, contactData: NewContactData): Promise<string> {
+  const docRef = await addDoc(getContactsCollection(tenantId), {
     ...contactData,
     interestedInPropertyIds: [],
     ownerOfPropertyIds: [],
@@ -95,25 +99,26 @@ export async function addContact(contactData: NewContactData): Promise<string> {
   return docRef.id;
 }
 
-// Function to update an existing contact in Firestore
-export async function updateContact(id: string, contactData: UpdateContactData): Promise<void> {
-    const contactDoc = doc(db, 'contacts', id);
+// Function to update an existing contact in a tenant's collection
+export async function updateContact(tenantId: string, id: string, contactData: UpdateContactData): Promise<void> {
+    const contactDoc = doc(getContactsCollection(tenantId), id);
     await updateDoc(contactDoc, contactData);
 }
 
-// Function to delete a contact from Firestore
-export async function deleteContact(id: string): Promise<void> {
-    const contactDoc = doc(db, 'contacts', id);
+// Function to delete a contact from a tenant's collection
+export async function deleteContact(tenantId: string, id: string): Promise<void> {
+    const contactDoc = doc(getContactsCollection(tenantId), id);
     await deleteDoc(contactDoc);
 }
 
-// Function to associate a contact with a property
+// Function to associate a contact with a property within a tenant
 export async function updateContactAssociations(
+  tenantId: string,
   contactId: string, 
   propertyId: string, 
   associationType: 'interested' | 'owner' | 'inquilino'
 ): Promise<void> {
-    const contactDoc = doc(db, 'contacts', contactId);
+    const contactDoc = doc(getContactsCollection(tenantId), contactId);
 
     if (associationType === 'interested') {
         await updateDoc(contactDoc, {
@@ -122,20 +127,19 @@ export async function updateContactAssociations(
     } else if (associationType === 'inquilino') {
         await updateDoc(contactDoc, {
             tenantOfPropertyId: propertyId,
-            types: arrayUnion('arrendatario') // 'inquilino' se traduce a 'arrendatario'
+            types: arrayUnion('arrendatario')
         });
     } else if (associationType === 'owner') {
         await updateDoc(contactDoc, {
             ownerOfPropertyIds: arrayUnion(propertyId)
         });
-        // Also update the property to set the ownerId
-        await updateProperty(propertyId, { ownerId: contactId });
+        await updateProperty(tenantId, propertyId, { ownerId: contactId });
     }
 }
 
-// Function to disassociate a property from a contact
-export async function disassociatePropertyFromContact(contactId: string, propertyId: string): Promise<void> {
-    const contactDocRef = doc(db, 'contacts', contactId);
+// Function to disassociate a property from a contact within a tenant
+export async function disassociatePropertyFromContact(tenantId: string, contactId: string, propertyId: string): Promise<void> {
+    const contactDocRef = doc(getContactsCollection(tenantId), contactId);
     const contactSnap = await getDoc(contactDocRef);
     const contact = contactSnap.data() as Contact | undefined;
 
@@ -144,53 +148,48 @@ export async function disassociatePropertyFromContact(contactId: string, propert
         ownerOfPropertyIds: arrayRemove(propertyId)
     };
 
-    // If this was the tenant property, clear the field.
     if (contact?.tenantOfPropertyId === propertyId) {
         updates.tenantOfPropertyId = "";
     }
     
     await updateDoc(contactDocRef, updates);
 
-    // Unset the ownerId from the property as well
-    const propertySnap = await getPropertyById(propertyId);
+    const propertySnap = await getPropertyById(tenantId, propertyId);
     if(propertySnap?.ownerId === contactId) {
-      await updateProperty(propertyId, { ownerId: '' }); // or delete the field
+      await updateProperty(tenantId, propertyId, { ownerId: '' });
     }
 }
 
-// Function to change the association type of a property for a contact
+// Function to change the association type of a property for a contact within a tenant
 export async function updateContactAssociationType(
+    tenantId: string,
     contactId: string,
     propertyId: string,
     newType: AssociationType
 ): Promise<void> {
     const batch = writeBatch(db);
-    const contactRef = doc(db, 'contacts', contactId);
+    const contactRef = doc(getContactsCollection(tenantId), contactId);
 
-    // First, remove all existing associations for this property
     const removalUpdates: any = {
         ownerOfPropertyIds: arrayRemove(propertyId),
         interestedInPropertyIds: arrayRemove(propertyId),
     };
     batch.update(contactRef, removalUpdates);
 
-    // If the contact was a tenant of this property, clear the field
     const contactSnap = await getDoc(contactRef);
     if (contactSnap.exists() && contactSnap.data().tenantOfPropertyId === propertyId) {
         batch.update(contactRef, { tenantOfPropertyId: '' });
     }
 
-    // Now, add the new association
     if (newType === 'owner') {
         batch.update(contactRef, { ownerOfPropertyIds: arrayUnion(propertyId) });
-        const propertyRef = doc(db, 'properties', propertyId);
+        const propertyRef = doc(db, 'tenants', tenantId, 'properties', propertyId);
         batch.update(propertyRef, { ownerId: contactId });
     } else if (newType === 'interested') {
         batch.update(contactRef, { interestedInPropertyIds: arrayUnion(propertyId) });
-        // Make sure to remove ownerId from property if they are no longer the owner
-        const propertyRef = doc(db, 'properties', propertyId);
-        const propertySnap = await getPropertyById(propertyId);
+        const propertySnap = await getPropertyById(tenantId, propertyId);
         if(propertySnap?.ownerId === contactId) {
+            const propertyRef = doc(db, 'tenants', tenantId, 'properties', propertyId);
             batch.update(propertyRef, { ownerId: '' });
         }
     } else if (newType === 'inquilino') {
@@ -198,15 +197,12 @@ export async function updateContactAssociationType(
             tenantOfPropertyId: propertyId,
             types: arrayUnion('arrendatario')
         });
-        // Make sure to remove ownerId from property if they are no longer the owner
-         const propertyRef = doc(db, 'properties', propertyId);
-        const propertySnap = await getPropertyById(propertyId);
+        const propertySnap = await getPropertyById(tenantId, propertyId);
         if(propertySnap?.ownerId === contactId) {
+            const propertyRef = doc(db, 'tenants', tenantId, 'properties', propertyId);
             batch.update(propertyRef, { ownerId: '' });
         }
     }
 
     await batch.commit();
 }
-
-    

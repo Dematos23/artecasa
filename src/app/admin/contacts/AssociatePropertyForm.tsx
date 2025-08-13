@@ -25,6 +25,7 @@ import { cn } from '@/lib/utils';
 import { getUnassociatedProperties } from '@/services/contacts';
 import { updateContactAssociations } from '@/services/contacts';
 import { useToast } from '@/hooks/use-toast';
+import { useTenant } from '@/context/TenantContext';
 
 const associationSchema = z.object({
   propertyId: z.string().min(1, { message: 'Debes seleccionar una propiedad.' }),
@@ -43,6 +44,7 @@ interface AssociatePropertyFormProps {
 }
 
 export function AssociatePropertyForm({ isOpen, onClose, onAssociationSaved, contact }: AssociatePropertyFormProps) {
+  const { tenantId } = useTenant();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [openCombobox, setOpenCombobox] = useState(false);
@@ -58,15 +60,15 @@ export function AssociatePropertyForm({ isOpen, onClose, onAssociationSaved, con
 
   useEffect(() => {
     async function fetchProperties() {
-      if (isOpen) {
+      if (isOpen && tenantId) {
         setLoading(true);
-        const unassociatedProps = await getUnassociatedProperties();
+        const unassociatedProps = await getUnassociatedProperties(tenantId);
         setProperties(unassociatedProps);
         setLoading(false);
       }
     }
     fetchProperties();
-  }, [isOpen]);
+  }, [isOpen, tenantId]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -75,8 +77,9 @@ export function AssociatePropertyForm({ isOpen, onClose, onAssociationSaved, con
   }, [isOpen, form]);
 
   const onSubmit = async (values: AssociationFormValues) => {
+    if (!tenantId) return;
     try {
-      await updateContactAssociations(contact.id, values.propertyId, values.associationType);
+      await updateContactAssociations(tenantId, contact.id, values.propertyId, values.associationType);
       toast({
         title: "Éxito",
         description: "El contacto ha sido asociado a la propiedad.",
