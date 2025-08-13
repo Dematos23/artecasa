@@ -62,7 +62,10 @@ export default function AdminLayout({
       redirect('/login');
     }
     async function fetchSettings() {
-      if (!tenantId) return;
+        if (!tenantId) {
+            console.log("AdminLayout: Tenant ID not available yet.");
+            return;
+        };
       setIsSettingsLoading(true);
       const settingsData = await getSettings(tenantId);
       setSettings(settingsData);
@@ -86,7 +89,7 @@ export default function AdminLayout({
             <Link href="/" className="flex items-center justify-center">
                 <Image 
                     src={settings?.logoUrl || "/logo.png"} 
-                    alt="Artecasa Logo" 
+                    alt="Casora Logo" 
                     width={160} 
                     height={40} 
                     className="h-16 w-auto" 
@@ -134,7 +137,7 @@ export default function AdminLayout({
                     <SidebarMenuButton asChild>
                       <Link href="/">
                         <ArrowLeft />
-                        Volver al Inicio
+                        Volver al Sitio
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

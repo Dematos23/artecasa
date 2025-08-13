@@ -689,7 +689,7 @@ export default function SettingsPage() {
                  <FormItem>
                  <Label>Contenido Tarjeta Correo</Label>
                  <FormControl>
-                 <Input placeholder="contact@artecasa.com" {...field} />
+                 <Input placeholder="contact@casora.com" {...field} />
                  </FormControl>
                  <FormMessage />
                  </FormItem>

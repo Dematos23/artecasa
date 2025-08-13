@@ -123,7 +123,7 @@ export function ContactForm({ isOpen, onClose, onSave, contact }: ContactFormPro
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="email">Correo Electrónico</Label>
-                    <Input id="email" type="email" placeholder="Ej. john@example.com" {...form.register('email')} />
+                    <Input id="email" type="email" placeholder="john@example.com" {...form.register('email')} />
                     {errors.email && <p className="text-sm font-medium text-destructive">{errors.email.message}</p>}
                 </div>
                 <div className="space-y-2">

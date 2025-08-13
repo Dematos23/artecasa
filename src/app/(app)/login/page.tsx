@@ -30,7 +30,10 @@ export default function LoginPage() {
 
    useEffect(() => {
     async function fetchSettingsData() {
-        if (!tenantId) return;
+        if (!tenantId) {
+            console.log("LoginPage: Tenant ID not available yet.");
+            return;
+        }
         const settingsData = await getSettings(tenantId);
         setSettings(settingsData);
     }
