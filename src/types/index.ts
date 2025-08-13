@@ -34,7 +34,7 @@ export interface Property {
     lat: number;
     lng: number;
   };
-  ownerId?: string;
+  ownerContactId?: string; // This field might exist in old data, points to a contact within the same tenant.
   preferredCurrency: 'USD' | 'PEN';
 }
 
@@ -46,9 +46,7 @@ export type UpdatePropertyData = Partial<NewPropertyData>;
 export const contactTypes = ['comprador', 'arrendatario', 'propietario'] as const;
 export type ContactType = (typeof contactTypes)[number];
 
-export const associationTypes = ['owner', 'interested', 'inquilino'] as const;
-export type AssociationType = (typeof associationTypes)[number];
-
+// This type remains for tenant-internal CRM data
 export interface Contact {
   id: string;
   firstname: string;
@@ -59,9 +57,6 @@ export interface Contact {
   phone: string;
   notes?: string;
   types: ContactType[];
-  interestedInPropertyIds?: string[];
-  ownerOfPropertyIds?: string[];
-  tenantOfPropertyId?: string;
   date?: Date | Timestamp | null | undefined;
 }
 
@@ -74,6 +69,7 @@ export interface Lead {
     date: Date | Timestamp;
 }
 
+// These settings now apply to a Tenant and are stored under /tenants/{tenantId}/settings/default
 export interface Settings {
   logoUrl?: string;
   defaultPropertyImageUrl?: string;

@@ -4,11 +4,10 @@ import {
   type PlatformUser,
   platformUserConverter,
   type PlatformSettings,
-  platformSettingsConverter,
 } from '@/types/multitenant';
 
 // =================================================================================
-// Platform Users Repository
+// Platform Users Repository (Client-Side)
 // =================================================================================
 
 const platformUsersCollection = collection(db, 'platformUsers').withConverter(
@@ -35,19 +34,19 @@ export const platformUsersRepo = {
 };
 
 // =================================================================================
-// Platform Settings Repository
+// Platform Settings Repository (Client-Side)
 // =================================================================================
 
 const platformSettingsCollection = collection(
   db,
   'platformSettings'
-).withConverter(platformSettingsConverter);
+);
 
 export const platformSettingsRepo = {
   get: async (): Promise<PlatformSettings | null> => {
     // Platform settings are often a singleton document.
     const settingsDoc = doc(platformSettingsCollection, 'default');
     const docSnap = await getDoc(settingsDoc);
-    return docSnap.exists() ? docSnap.data() : null;
+    return docSnap.exists() ? docSnap.data() as PlatformSettings : null;
   },
 };

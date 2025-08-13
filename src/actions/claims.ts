@@ -56,7 +56,7 @@ export async function handleClaimSubmit(input: ClaimInput) {
         Su reclamo será atendido según los plazos legales establecidos. Gracias por comunicarse con nosotros.
 
         Atentamente,
-        El equipo de Artecasa
+        El equipo de Casora
         `.trim();
         
         // This is a placeholder for sending an email.

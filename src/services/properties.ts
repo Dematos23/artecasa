@@ -40,14 +40,6 @@ export async function getPropertyById(tenantId: string, id: string): Promise<Pro
     }
 }
 
-// Function to get properties where the ownerId matches a contactId within a tenant
-export async function getPropertiesByOwnerId(tenantId: string, ownerId: string): Promise<Property[]> {
-  const propertiesCollection = getPropertiesCollection(tenantId);
-  const q = query(propertiesCollection, where('ownerId', '==', ownerId));
-  const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Property));
-}
-
 // Function to get multiple properties by their IDs within a tenant
 export async function getPropertiesByIds(tenantId: string, ids: string[]): Promise<Property[]> {
   if (ids.length === 0) return [];

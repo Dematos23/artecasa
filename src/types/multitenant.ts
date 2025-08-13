@@ -1,175 +1,156 @@
-import {
-  type DocumentData,
-  type FirestoreDataConverter,
-  type QueryDocumentSnapshot,
-  type SnapshotOptions,
-  Timestamp,
+import type {
+    DocumentData,
+    FirestoreDataConverter,
+    QueryDocumentSnapshot,
+    SnapshotOptions,
+    Timestamp
 } from 'firebase/firestore';
+import type { Property } from '.';
 
 // =================================================================================
-// Platform Scope Types & Converters
+// 1. PLATFORM SCOPE (ROOT COLLECTIONS)
 // =================================================================================
 
-export type PlatformRole = 'owner' | 'admin' | 'support' | 'readonly';
+// For Casora's internal team
+export type PlatformRole = 'admin';
 
 export interface PlatformUser {
-  id: string;
-  email: string;
-  displayName?: string;
-  role: PlatformRole;
-  status: 'active' | 'suspended';
-  createdAt: Timestamp;
-  lastLoginAt?: Timestamp;
+    id: string;
+    email: string;
+    displayName?: string;
+    role: PlatformRole;
+    status: 'active' | 'suspended';
+    createdAt: Timestamp;
+    lastLoginAt?: Timestamp;
 }
 
-export const platformUserConverter: FirestoreDataConverter<PlatformUser> = {
-  toFirestore(user: PlatformUser): DocumentData {
-    return user;
-  },
-  fromFirestore(
-    snapshot: QueryDocumentSnapshot,
-    options: SnapshotOptions
-  ): PlatformUser {
-    const data = snapshot.data(options);
-    return {
-      id: snapshot.id,
-      email: data.email,
-      displayName: data.displayName,
-      role: data.role,
-      status: data.status,
-      createdAt: data.createdAt,
-      lastLoginAt: data.lastLoginAt,
-    };
-  },
-};
-
+// Global settings for the entire Casora platform
 export interface PlatformSettings {
-  id: string;
-  marketingEnabled: boolean;
-  maxPageSize: number;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
+    id: string; // Typically a singleton document, e.g., 'default'
+    marketingEnabled: boolean;
+    maxPageSize: number;
+    createdAt: Timestamp;
+    updatedAt: Timestamp;
 }
 
-export const platformSettingsConverter: FirestoreDataConverter<PlatformSettings> =
-  {
-    toFirestore(settings: PlatformSettings): DocumentData {
-      return settings;
-    },
-    fromFirestore(
-      snapshot: QueryDocumentSnapshot,
-      options: SnapshotOptions
-    ): PlatformSettings {
-      const data = snapshot.data(options);
-      return {
-        id: snapshot.id,
-        marketingEnabled: data.marketingEnabled,
-        maxPageSize: data.maxPageSize,
-        createdAt: data.createdAt,
-        updatedAt: data.updatedAt,
-      };
-    },
-  };
-
 // =================================================================================
-// Tenant Root Types & Converters
+// 2. CLIENT SCOPE (ROOT COLLECTION)
 // =================================================================================
 
+// End-users of the main portal (casora.pe)
+export interface ClientProfile {
+    id: string; // Corresponds to Firebase Auth UID
+    email: string;
+    displayName?: string;
+    photoURL?: string;
+    interestedProperties: InterestedProperty[];
+    lookingFor?: Partial<Property>; // Optional search criteria
+    visibility?: {
+        shareWithAgents: boolean; // Consent to share profile with property agents
+    };
+    createdAt: Timestamp;
+    updatedAt: Timestamp;
+}
+
+// Reference to a property a client is interested in
+export interface InterestedProperty {
+    tenantId: string;
+    propertyId: string;
+    host?: string; // Optional: The domain where the property was favorited
+    addedAt: Timestamp;
+}
+
+
+// =================================================================================
+// 3. TENANT SCOPE (NESTED UNDER /tenants/{tenantId})
+// =================================================================================
+
+// Represents an individual real estate agency
 export interface Tenant {
-  id: string;
-  name: string;
-  status: 'active' | 'suspended' | 'trial';
-  createdAt: Timestamp;
-  ownerId: string; // The platformUser ID of the owner
+    id: string;
+    name: string;
+    status: 'active' | 'suspended' | 'trial';
+    createdAt: Timestamp;
+    ownerId: string; // The platformUser ID of the owner
 }
 
-export const tenantConverter: FirestoreDataConverter<Tenant> = {
-  toFirestore(tenant: Tenant): DocumentData {
-    return tenant;
-  },
-  fromFirestore(
-    snapshot: QueryDocumentSnapshot,
-    options: SnapshotOptions
-  ): Tenant {
-    const data = snapshot.data(options);
-    return {
-      id: snapshot.id,
-      name: data.name,
-      status: data.status,
-      createdAt: data.createdAt,
-      ownerId: data.ownerId,
-    };
-  },
-};
+// Users who belong to a specific tenant (e.g., real estate agents)
+export type AgentRole = 'manager' | 'agent';
 
-// =================================================================================
-// Tenant Scope Types & Converters (Nested under /tenants/{tenantId})
-// =================================================================================
-
-// Re-using the same interfaces for simplicity where possible
-export type { Property, Contact, Lead, Claim } from '.';
-
-// Tenant-specific User
-export type TenantRole = 'owner' | 'admin' | 'seller' | 'viewer';
-
-export interface TenantUser {
-  id: string;
-  email: string;
-  displayName?: string;
-  role: TenantRole;
-  status: 'active' | 'suspended';
-  createdAt: Timestamp;
-  lastLoginAt?: Timestamp;
+export interface Agent {
+    id: string; // Corresponds to Firebase Auth UID
+    email: string;
+    displayName?: string;
+    role: AgentRole;
+    status: 'active' | 'suspended';
+    tenantId: string;
+    createdAt: Timestamp;
+    lastLoginAt?: Timestamp;
 }
 
-export const tenantUserConverter: FirestoreDataConverter<TenantUser> = {
-  toFirestore(user: TenantUser): DocumentData {
-    return user;
-  },
-  fromFirestore(
-    snapshot: QueryDocumentSnapshot,
-    options: SnapshotOptions
-  ): TenantUser {
-    const data = snapshot.data(options);
-    return {
-      id: snapshot.id,
-      email: data.email,
-      displayName: data.displayName,
-      role: data.role,
-      status: data.status,
-      createdAt: data.createdAt,
-      lastLoginAt: data.lastLoginAt,
-    };
-  },
-};
-
-// Tenant Domain
+// Custom domains associated with a tenant
 export interface Domain {
-  id: string;
-  hostname: string;
-  isPrimary: boolean;
-  verified: boolean;
-  createdAt: Timestamp;
+    id: string; // The hostname itself
+    tenantId: string;
+    isPrimary: boolean;
+    verified: boolean;
+    createdAt: Timestamp;
 }
 
-export const domainConverter: FirestoreDataConverter<Domain> = {
-  toFirestore(domain: Domain): DocumentData {
-    return domain;
-  },
-  fromFirestore(
-    snapshot: QueryDocumentSnapshot,
-    options: SnapshotOptions
-  ): Domain {
-    const data = snapshot.data(options);
-    return {
-      id: snapshot.id,
-      hostname: data.hostname,
-      isPrimary: data.isPrimary,
-      verified: data.verified,
-      createdAt: data.createdAt,
-    };
-  },
-};
+// A relationship between a Client/Contact and a Property
+export type RelationSubjectType = 'client' | 'contact';
+export type RelationRole = 'Owner' | 'Interested' | 'Applicant' | 'Tenant' | 'Buyer';
+export type RelationStatus = 'new' | 'verified' | 'matched' | 'rejected';
+export type RelationSource = 'client-favorite' | 'agent-link' | 'import';
 
-// Tenant Settings
-export type { Settings as TenantSettings } from '.';
+export interface Relation {
+    id: string;
+    tenantId: string; // The tenant that "owns" this relation (the agent's tenant)
+    subjectType: RelationSubjectType;
+    subjectId: string; // ID of the client or contact
+    propertyTenantId: string; // The tenant that owns the property
+    propertyId: string;
+    role: RelationRole;
+    status?: RelationStatus;
+    source?: RelationSource;
+    createdAt: Timestamp;
+    updatedAt: Timestamp;
+}
+
+// A shareable, public link to a curated list of properties
+export interface Share {
+    id: string;
+    token: string; // Secure, random token for the public URL
+    properties: Array<{
+        propertyTenantId: string;
+        propertyId: string;
+    }>;
+    contactId?: string; // Optional: Link to a CRM contact
+    expiresAt?: Timestamp;
+    createdBy: string; // Agent's UID
+    createdAt: Timestamp;
+}
+
+
+// =================================================================================
+// DATA CONVERTERS
+// =================================================================================
+
+// Generic converter factory
+const createConverter = <T>(): FirestoreDataConverter<T> => ({
+    toFirestore(data: T): DocumentData {
+        return data as DocumentData;
+    },
+    fromFirestore(snapshot: QueryDocumentSnapshot, options: SnapshotOptions): T {
+        return { id: snapshot.id, ...snapshot.data(options) } as T;
+    },
+});
+
+export const platformUserConverter = createConverter<PlatformUser>();
+export const platformSettingsConverter = createConverter<PlatformSettings>();
+export const clientProfileConverter = createConverter<ClientProfile>();
+export const tenantConverter = createConverter<Tenant>();
+export const agentConverter = createConverter<Agent>();
+export const domainConverter = createConverter<Domain>();
+export const relationConverter = createConverter<Relation>();
+export const shareConverter = createConverter<Share>();
