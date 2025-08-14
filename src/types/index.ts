@@ -1,3 +1,4 @@
+
 import { Timestamp } from "firebase/firestore";
 
 export const propertyTypes = [
@@ -13,6 +14,7 @@ export type PropertyType = (typeof propertyTypes)[number];
 
 export interface Property {
   id: string;
+  tenantId?: string; // Added to easily identify the owner tenant on portal queries
   title: string;
   priceUSD: number;
   pricePEN: number;
@@ -34,7 +36,7 @@ export interface Property {
     lat: number;
     lng: number;
   };
-  ownerContactId?: string; // This field might exist in old data, points to a contact within the same tenant.
+  ownerId?: string; 
   preferredCurrency: 'USD' | 'PEN';
 }
 
@@ -58,7 +60,15 @@ export interface Contact {
   notes?: string;
   types: ContactType[];
   date?: Date | Timestamp | null | undefined;
+  // Associations
+  ownerOfPropertyIds?: string[];
+  interestedInPropertyIds?: string[];
+  tenantOfPropertyId?: string | null;
 }
+
+export const associationTypes = ['owner', 'interested', 'inquilino'] as const;
+export type AssociationType = (typeof associationTypes)[number];
+
 
 export interface Lead {
     id: string;

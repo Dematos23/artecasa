@@ -16,17 +16,16 @@ interface PropertyCardProps {
 }
 
 export function PropertyCard({ property }: PropertyCardProps) {
-  const { tenantId } = useTenant();
   const [settings, setSettings] = useState<TenantSettings | null>(null);
 
   useEffect(() => {
     async function fetchSettingsData() {
-        if (!tenantId) return;
-        const settingsData = await getSettings(tenantId);
+        if (!property.tenantId) return;
+        const settingsData = await getSettings(property.tenantId);
         setSettings(settingsData);
     }
     fetchSettingsData();
-  }, [tenantId]);
+  }, [property.tenantId]);
   
   const getPreferredPrice = () => {
     switch (property.preferredCurrency) {
@@ -44,10 +43,13 @@ export function PropertyCard({ property }: PropertyCardProps) {
   const { price, currencySymbol } = getPreferredPrice();
 
   const imageUrl = property.imageUrls?.[0] ?? settings?.defaultPropertyImageUrl ?? '/appartment.webp';
+  
+  // Construct the URL to include the tenantId for proper linking
+  const propertyUrl = `/properties/${property.tenantId}:${property.id}`;
 
   return (
     <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 group">
-      <Link href={`/properties/${property.id}`}>
+      <Link href={propertyUrl}>
         <div className="relative">
           <Image
             src={imageUrl}

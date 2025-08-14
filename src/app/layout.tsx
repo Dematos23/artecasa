@@ -3,7 +3,9 @@ import './globals.css';
 import { cn } from '@/lib/utils';
 import { Toaster } from "@/components/ui/toaster"
 import { AuthProvider } from '@/context/AuthContext';
-import { TenantProvider } from '@/context/TenantContext'; // Import TenantProvider
+import { TenantProvider } from '@/context/TenantContext';
+import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
 
 // This function can no longer be called from a Server Component Root Layout
 // because it requires a tenantId, which is not available here globally.
@@ -39,10 +41,12 @@ export default async function RootLayout({
         <link href={fontUrl} rel="stylesheet" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </head>
-      <body className={cn('font-body antialiased min-h-screen')}>
+      <body className={cn('font-body antialiased min-h-screen flex flex-col')}>
         <AuthProvider>
           <TenantProvider>
-            {children}
+            <Header />
+            <main className="flex-grow">{children}</main>
+            <Footer />
             <Toaster />
           </TenantProvider>
         </AuthProvider>

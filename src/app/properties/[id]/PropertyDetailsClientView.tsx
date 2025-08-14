@@ -10,12 +10,12 @@ import type { TenantSettings } from '@/types/multitenant';
 import { BedDouble, Bath, Car, Maximize, MapPin, Phone, CalendarClock, Building, Heart, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
-import { getPropertyById } from '@/services/properties';
 import { getSettings } from '@/services/settings';
 import { useTenant } from '@/context/TenantContext';
 import { useAuth } from '@/context/AuthContext';
 import { getClientProfile, toggleFavoriteProperty } from '@/services/clients';
 import { useToast } from '@/hooks/use-toast';
+import { getPropertyPortal } from '@/actions/portal';
 
 const containerStyle = {
   width: '100%',
@@ -33,7 +33,7 @@ export function PropertyDetailsClientView({ propertyId }: { propertyId: string }
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
 
-  const [property, setProperty] = useState<Property | undefined>(undefined);
+  const [property, setProperty] = useState<Property | undefined | null>(undefined);
   const [settings, setSettings] = useState<TenantSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -49,12 +49,19 @@ export function PropertyDetailsClientView({ propertyId }: { propertyId: string }
 
   useEffect(() => {
     const fetchProperty = async () => {
-      if (!tenantId) return;
+      // The property ID from the URL is structured as "tenantId:propertyId"
+      const [pTenantId, pId] = propertyId.split(':');
+      if (!pTenantId || !pId) {
+          setProperty(null);
+          setLoading(false);
+          return;
+      }
+
       setLoading(true);
       try {
         const [prop, settingsData] = await Promise.all([
-          getPropertyById(tenantId, propertyId),
-          getSettings(tenantId)
+          getPropertyPortal({tenantId: pTenantId, propertyId: pId}),
+          getSettings(pTenantId)
         ]);
         setProperty(prop);
         setSettings(settingsData);
@@ -67,25 +74,26 @@ export function PropertyDetailsClientView({ propertyId }: { propertyId: string }
 
       } catch(error) {
         console.error("Error fetching property details:", error);
+        setProperty(null);
       } finally {
         setLoading(false);
       }
     }
     fetchProperty();
-  }, [propertyId, tenantId, user]);
+  }, [propertyId, user]);
   
   const handleToggleFavorite = async () => {
     if (!user) {
         toast({ title: "Inicia sesión", description: "Debes iniciar sesión para guardar propiedades." });
         return;
     }
-    if (!property || !tenantId) return;
+    if (!property || !property.tenantId) return;
 
     setIsTogglingFavorite(true);
     try {
         const result = await toggleFavoriteProperty(user.uid, {
             propertyId: property.id,
-            propertyTenantId: tenantId, // Assuming property belongs to the current tenant context
+            propertyTenantId: property.tenantId, 
         });
         setIsFavorite(result);
         toast({
@@ -249,4 +257,3 @@ export function PropertyDetailsClientView({ propertyId }: { propertyId: string }
     </div>
   );
 }
-
