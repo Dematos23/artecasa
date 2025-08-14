@@ -1,3 +1,4 @@
+
 /**
  * @fileoverview Client-side utilities for resolving tenant context from the hostname.
  */
@@ -16,7 +17,7 @@ export function setTenantResolver(instance: Resolver) {
   resolver = instance;
 }
 
-const PLATFORM_HOSTNAMES = ['casora.pe', 'www.casora.pe', 'app.casora.pe', 'localhost'];
+const PLATFORM_HOSTNAMES = ['casora.pe', 'www.casora.pe', 'app.casora.pe', 'localhost:9002', 'localhost'];
 
 /**
  * Resolves a tenant ID from a given hostname.
@@ -24,17 +25,15 @@ const PLATFORM_HOSTNAMES = ['casora.pe', 'www.casora.pe', 'app.casora.pe', 'loca
  * @returns The tenantId or null if it's a platform-level host.
  */
 export async function getTenantIdFromHost(host: string): Promise<string | null> {
-  if (PLATFORM_HOSTNAMES.includes(host) || host.endsWith('.casora.pe')) {
-    const parts = host.split('.');
-    const isPlatform = PLATFORM_HOSTNAMES.includes(host);
-    
-    // Handles subdomains like 'demo.casora.pe' -> tenantId: 'demo'
-    // Platform domains like 'app.casora.pe' resolve to null.
-    if (!isPlatform && parts.length > 2) {
-      return parts[0];
-    }
-    
+  if (PLATFORM_HOSTNAMES.some(ph => host.startsWith(ph))) {
     return null; // It's a main platform URL
+  }
+
+  // Handles subdomains like 'demo.casora.pe' -> tenantId: 'demo'
+  // or 'demo.localhost:9002' -> 'demo'
+  const parts = host.split('.');
+  if (parts.length > 1 && !PLATFORM_HOSTNAMES.includes(parts[0])) {
+      return parts[0];
   }
 
   // For custom domains, a resolver mechanism is needed.

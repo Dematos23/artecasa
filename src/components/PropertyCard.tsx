@@ -9,7 +9,6 @@ import type { TenantSettings } from '@/types/multitenant';
 import { BedDouble, Bath, Building } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { getSettings } from '@/services/settings';
-import { useTenant } from '@/context/TenantContext';
 
 interface PropertyCardProps {
   property: Property;

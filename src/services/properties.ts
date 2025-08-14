@@ -1,4 +1,5 @@
 
+
 import { db, storage } from '@/lib/firebase';
 import { 
     collection, 
@@ -98,6 +99,7 @@ export async function getProperties(tenantId: string): Promise<Property[]> {
     const data = doc.data();
     return {
       id: doc.id,
+      tenantId: tenantId, // Add tenantId to the property object
       ...data,
     } as Property;
   });

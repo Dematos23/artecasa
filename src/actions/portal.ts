@@ -3,7 +3,7 @@
 
 import { db } from '@/lib/firebase-admin';
 import type { Property } from '@/types';
-import * as firestore from 'firebase-admin/firestore';
+import { getFirestore, Filter, FieldPath } from 'firebase-admin/firestore';
 
 /**
  * Lists published properties from all tenants for the main public portal.
@@ -28,38 +28,45 @@ export async function listPublicPropertiesPortal(
   cursor?: string, // The cursor should be the array of values from the previous 'orderBy' fields
   pageSize: number = 24
 ): Promise<{ properties: Property[]; nextCursor: any[] | null }> {
+  const firestore = getFirestore();
+  const propertiesCollectionGroup = firestore.collectionGroup('properties');
+  
+  let q: FirebaseFirestore.Query = propertiesCollectionGroup;
 
-  const propertiesCollection = firestore.collectionGroup(db, 'properties');
-  
-  let q: firestore.Query<Property> = firestore.query(propertiesCollection as firestore.Query<Property>, firestore.where('featured', '==', true));
-  
-  const constraints = [];
+  const constraints: FirebaseFirestore.Filter[] = [Filter.where('featured', '==', true)];
 
   if (filters.modality && filters.modality !== 'all') {
-    constraints.push(firestore.where('modality', '==', filters.modality));
+    constraints.push(Filter.where('modality', '==', filters.modality));
   }
   if (filters.propertyType && filters.propertyType !== 'all') {
-    constraints.push(firestore.where('propertyType', '==', filters.propertyType));
+    constraints.push(Filter.where('propertyType', '==', filters.propertyType));
   }
   if (filters.bedrooms && filters.bedrooms > 0) {
-    constraints.push(firestore.where('bedrooms', '>=', filters.bedrooms));
+    constraints.push(Filter.where('bedrooms', '>=', filters.bedrooms));
   }
   
   const priceField = filters.currency === 'PEN' ? 'pricePEN' : 'priceUSD';
   if (filters.minPrice) {
-    constraints.push(firestore.where(priceField, '>=', filters.minPrice));
+    constraints.push(Filter.where(priceField, '>=', filters.minPrice));
   }
   if (filters.maxPrice) {
-    constraints.push(firestore.where(priceField, '<=', filters.maxPrice));
+    constraints.push(Filter.where(priceField, '<=', filters.maxPrice));
   }
 
-  q = firestore.query(q, ...constraints, firestore.orderBy(priceField, 'desc'), firestore.limit(pageSize));
+  if (constraints.length > 1) {
+      q = q.where(Filter.and(...constraints));
+  } else if (constraints.length === 1) {
+      q = q.where(constraints[0]);
+  }
+  
+  q = q.orderBy(priceField, 'desc').limit(pageSize);
+
 
   if (cursor) {
-    q = firestore.query(q, firestore.startAfter(JSON.parse(cursor)));
+    q = q.startAfter(JSON.parse(cursor));
   }
 
-  const querySnapshot = await firestore.getDocs(q);
+  const querySnapshot = await q.get();
   
   const properties = querySnapshot.docs.map(doc => {
     // We need to add the tenantId to the property object from its path
@@ -69,9 +76,9 @@ export async function listPublicPropertiesPortal(
 
   const lastDoc = querySnapshot.docs[querySnapshot.docs.length - 1];
   // Create a cursor from the values of the fields we ordered by
-  const nextCursor = lastDoc ? JSON.stringify(lastDoc.data()[priceField]) : null;
+  const nextCursorValue = lastDoc ? lastDoc.data()[priceField] : null;
 
-  return { properties, nextCursor: nextCursor ? [nextCursor] : null };
+  return { properties, nextCursor: nextCursorValue ? [JSON.stringify(nextCursorValue)] : null };
 }
 
 /**
@@ -91,10 +98,10 @@ export async function getPropertyPortal({
   propertyId: string;
 }): Promise<Property | null> {
   try {
-    const propertyRef = firestore.doc(db, 'tenants', tenantId, 'properties', propertyId);
-    const docSnap = await firestore.getDoc(propertyRef);
+    const propertyRef = db.collection('tenants').doc(tenantId).collection('properties').doc(propertyId);
+    const docSnap = await propertyRef.get();
 
-    if (docSnap.exists()) {
+    if (docSnap.exists) {
       const propertyData = docSnap.data() as Property;
       // Enforce the "published" rule on the server
       if (propertyData.featured) {

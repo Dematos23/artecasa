@@ -104,7 +104,7 @@ export default async function PortalHomePage() {
                   <div className="flex items-center gap-2"><Car className="text-primary" /> <span>{featuredProperty.garage} Cochera</span></div>
                 </div>
                 <Button asChild>
-                  <Link href={`/properties/${featuredProperty.id}`}>
+                  <Link href={`/properties/${featuredProperty.tenantId}:${featuredProperty.id}`}>
                     {settings?.featuredPropertyButtonText}
                   </Link>
                 </Button>

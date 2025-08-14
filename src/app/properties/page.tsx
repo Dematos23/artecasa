@@ -10,7 +10,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Check, ChevronsUpDown, MapPin, X, LayoutGrid, Map as MapIcon, Loader2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
-import { getProperties } from '@/services/properties';
 import { Skeleton } from '@/components/ui/skeleton';
 import { peruLocations } from '@/lib/peru-locations';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
@@ -21,7 +20,8 @@ import { propertyTypes } from '@/types';
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useTenant } from '@/context/TenantContext';
+import { listPublicPropertiesPortal } from '@/actions/portal';
+import { useDebounce } from 'react-use';
 
 
 // Generate a flat list of location strings for the combobox
@@ -145,7 +145,6 @@ function LocationCombobox({ value, onChange, className }: { value: string, onCha
 
 
 export default function PropertiesPage() {
-  const { tenantId } = useTenant();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
@@ -164,26 +163,40 @@ export default function PropertiesPage() {
   const [bedroomsFilter, setBedroomsFilter] = useState('all');
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
-  const [priceCurrency, setPriceCurrency] = useState('PEN');
+  const [priceCurrency, setPriceCurrency] = useState('USD');
   
   // Map state
   const [activeMarker, setActiveMarker] = useState<string | null>(null);
 
+  const filters = useMemo(() => ({
+      modality: modalityFilter === 'all' ? undefined : modalityFilter as 'venta' | 'alquiler',
+      propertyType: propertyTypeFilter === 'all' ? undefined : propertyTypeFilter,
+      bedrooms: bedroomsFilter === 'all' ? undefined : Number(bedroomsFilter),
+      minPrice: minPrice ? Number(minPrice) : undefined,
+      maxPrice: maxPrice ? Number(maxPrice) : undefined,
+      currency: priceCurrency as 'USD' | 'PEN',
+  }), [modalityFilter, propertyTypeFilter, bedroomsFilter, minPrice, maxPrice, priceCurrency]);
+
+
+  const fetchProperties = async () => {
+    try {
+      setLoading(true);
+      const { properties: propertiesData } = await listPublicPropertiesPortal(filters);
+      setProperties(propertiesData);
+    } catch (error) {
+      console.error("Error fetching properties:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useDebounce(fetchProperties, 500, [filters]);
+
   useEffect(() => {
-    const fetchProperties = async () => {
-      if (!tenantId) return;
-      try {
-        setLoading(true);
-        const propertiesData = await getProperties(tenantId);
-        setProperties(propertiesData);
-      } catch (error) {
-        console.error("Error fetching properties:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProperties();
-  }, [tenantId]);
+      fetchProperties();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
 
   const handleModalityChange = (value: string) => {
     setModalityFilter(value);
@@ -207,28 +220,15 @@ export default function PropertiesPage() {
     return properties
       .filter(property => {
         const propertyLocation = `${property.district || ''}, ${property.province || ''}, ${property.region || ''}`.toLowerCase();
-
         const locationMatch = !locationQuery || propertyLocation.includes(locationQuery);
-        const modalityMatch = !modalityFilter || modalityFilter === 'all' || property.modality === modalityFilter;
-        const propertyTypeMatch = !propertyTypeFilter || propertyTypeFilter === 'all' || property.propertyType === propertyTypeFilter;
-        const bedroomsMatch = bedroomsFilter === 'all' || (property.bedrooms && property.bedrooms >= parseInt(bedroomsFilter));
-
-        const minPriceNumber = minPrice ? Number(minPrice) : 0;
-        const maxPriceNumber = maxPrice ? Number(maxPrice) : Infinity;
-
-        const priceToCompare = priceCurrency === 'PEN' ? property.pricePEN : property.priceUSD;
-
-        const minPriceMatch = priceToCompare >= minPriceNumber;
-        const maxPriceMatch = priceToCompare <= maxPriceNumber;
-
-        return locationMatch && modalityMatch && propertyTypeMatch && bedroomsMatch && minPriceMatch && maxPriceMatch;
+        return locationMatch;
       })
       .sort((a, b) => {
         if (a.featured && !b.featured) return -1;
         if (!a.featured && b.featured) return 1;
         return 0;
       });
-  }, [properties, locationQuery, modalityFilter, propertyTypeFilter, bedroomsFilter, minPrice, maxPrice, priceCurrency]);
+  }, [properties, locationQuery]);
 
   const handleClearFilters = () => {
     setLocationQuery('');
@@ -237,7 +237,7 @@ export default function PropertiesPage() {
     setBedroomsFilter('all');
     setMinPrice('');
     setMaxPrice('');
-    setPriceCurrency('PEN');
+    setPriceCurrency('USD');
   }
 
   const handlePriceRangeClick = (min: number, max: number) => {
@@ -282,14 +282,6 @@ export default function PropertiesPage() {
     }
   }, [filteredProperties, mapBounds, isLoaded]);
   
-  if (loading) {
-      return (
-          <div className="flex justify-center items-center h-[80vh]">
-              <Loader2 className="h-16 w-16 animate-spin text-primary" />
-          </div>
-      );
-  }
-
 
   return (
     <div className="container mx-auto py-8 md:py-12 px-4 md:px-6">
@@ -413,7 +405,11 @@ export default function PropertiesPage() {
         <div className="text-lg font-semibold">{filteredProperties.length} propiedades encontradas</div>
       </div>
 
-      {viewMode === 'list' && (
+      {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-96 w-full" />)}
+          </div>
+      ) : viewMode === 'list' ? (
         <>
             {filteredProperties.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -427,9 +423,7 @@ export default function PropertiesPage() {
                 </div>
             )}
         </>
-      )}
-
-      {viewMode === 'map' && (
+      ) : ( // viewMode === 'map'
         <div className="w-full h-[70vh]">
             {isLoaded ? (
                 <GoogleMap
@@ -472,7 +466,7 @@ export default function PropertiesPage() {
                                             <div>
                                                 <h4 className="font-bold text-sm truncate">{prop.title}</h4>
                                                 <p className="text-primary font-semibold">{symbol}{Number(price).toLocaleString()}</p>
-                                                <Link href={`/properties/${prop.id}`} className="text-xs text-blue-600 hover:underline">
+                                                <Link href={`/properties/${prop.tenantId}:${prop.id}`} className="text-xs text-blue-600 hover:underline">
                                                     Ver detalles
                                                 </Link>
                                             </div>
