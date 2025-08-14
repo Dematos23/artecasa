@@ -1,20 +1,98 @@
+
 import { db, storage } from '@/lib/firebase';
-import { collection, getDocs, query, orderBy, doc, addDoc, updateDoc, deleteDoc, getDoc, where, documentId } from 'firebase/firestore';
+import { 
+    collection, 
+    getDocs, 
+    query, 
+    orderBy, 
+    doc, 
+    addDoc, 
+    updateDoc, 
+    deleteDoc, 
+    getDoc, 
+    where, 
+    documentId,
+    startAfter,
+    limit,
+    QueryConstraint
+} from 'firebase/firestore';
 import { ref, deleteObject } from 'firebase/storage';
 import type { Property, NewPropertyData, UpdatePropertyData } from '@/types';
+import { makeCursor, parseCursor } from './pagination';
 
-// This service is now tenant-aware.
+// This service is tenant-aware for CLIENT-SIDE operations.
 // All functions need a tenantId to interact with the correct sub-collection.
 
 export const getPropertiesCollection = (tenantId: string) => {
     return collection(db, 'tenants', tenantId, 'properties');
 };
 
+/**
+ * Lists published properties for a specific tenant with filtering and pagination.
+ * This is intended for the public-facing tenant website.
+ */
+export async function listPublishedProperties(
+    tenantId: string, 
+    filters: {
+        modality?: 'venta' | 'alquiler' | 'all';
+        propertyType?: string | 'all';
+        bedrooms?: number | 'all';
+        minPrice?: number;
+        maxPrice?: number;
+        currency?: 'USD' | 'PEN';
+    } = {},
+    cursor?: string,
+    pageSize: number = 24
+): Promise<{ properties: Property[]; nextCursor: string | null }> {
+    const propertiesCollection = getPropertiesCollection(tenantId);
+    
+    const constraints: QueryConstraint[] = [
+        where('featured', '==', true) // Always filter by published status
+    ];
 
-// Function to get all properties from a tenant's collection
+    if (filters.modality && filters.modality !== 'all') {
+        constraints.push(where('modality', '==', filters.modality));
+    }
+    if (filters.propertyType && filters.propertyType !== 'all') {
+        constraints.push(where('propertyType', '==', filters.propertyType));
+    }
+    if (filters.bedrooms && filters.bedrooms !== 'all') {
+        constraints.push(where('bedrooms', '>=', filters.bedrooms));
+    }
+
+    const priceField = filters.currency === 'PEN' ? 'pricePEN' : 'priceUSD';
+    if (filters.minPrice) {
+        constraints.push(where(priceField, '>=', filters.minPrice));
+    }
+    if (filters.maxPrice) {
+        constraints.push(where(priceField, '<=', filters.maxPrice));
+    }
+
+    // Default order. Use a consistent field for reliable pagination.
+    constraints.push(orderBy(priceField, 'desc'));
+    constraints.push(limit(pageSize));
+
+    const parsedCursor = parseCursor(cursor);
+    if (parsedCursor) {
+        constraints.push(startAfter(parsedCursor));
+    }
+    
+    const q = query(propertiesCollection, ...constraints);
+    const querySnapshot = await getDocs(q);
+    
+    const properties = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Property));
+    
+    const lastDoc = querySnapshot.docs[querySnapshot.docs.length - 1];
+    const nextCursor = lastDoc ? makeCursor(lastDoc) : null;
+
+    return { properties, nextCursor };
+}
+
+
+// Function to get all properties from a tenant's collection (for internal admin use)
 export async function getProperties(tenantId: string): Promise<Property[]> {
   const propertiesCollection = getPropertiesCollection(tenantId);
-  const q = query(propertiesCollection, orderBy('title', 'asc')); // Example order
+  const q = query(propertiesCollection, orderBy('title', 'asc'));
   const querySnapshot = await getDocs(q);
   return querySnapshot.docs.map(doc => {
     const data = doc.data();
