@@ -15,7 +15,7 @@ import { getSettings } from '@/services/settings';
 import { useAuth } from '@/context/AuthContext';
 import { getClientProfile, toggleFavoriteProperty } from '@/services/clients';
 import { useToast } from '@/hooks/use-toast';
-import { getPropertyPortal } from '@/actions/portal';
+import { getPropertyById } from '@/services/properties'; // Changed from portal action to direct service
 
 const containerStyle = {
   width: '100%',
@@ -28,7 +28,7 @@ const defaultCenter = {
   lng: -77.042793
 };
 
-export function PropertyDetailsClientView({ propertyId }: { propertyId: string }) {
+export function PropertyDetailsClientView({ tenantId, propertyId }: { tenantId: string, propertyId: string }) {
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
 
@@ -48,9 +48,7 @@ export function PropertyDetailsClientView({ propertyId }: { propertyId: string }
 
   useEffect(() => {
     const fetchProperty = async () => {
-      // The property ID from the URL is structured as "tenantId:propertyId"
-      const [pTenantId, pId] = propertyId.split(':');
-      if (!pTenantId || !pId) {
+      if (!tenantId || !propertyId) {
           setProperty(null);
           setLoading(false);
           return;
@@ -59,9 +57,10 @@ export function PropertyDetailsClientView({ propertyId }: { propertyId: string }
       setLoading(true);
       try {
         const [prop, settingsData] = await Promise.all([
-          getPropertyPortal({tenantId: pTenantId, propertyId: pId}),
-          getSettings(pTenantId)
+          getPropertyById(tenantId, propertyId),
+          getSettings(tenantId)
         ]);
+        
         setProperty(prop);
         setSettings(settingsData);
 
@@ -79,20 +78,20 @@ export function PropertyDetailsClientView({ propertyId }: { propertyId: string }
       }
     }
     fetchProperty();
-  }, [propertyId, user]);
+  }, [tenantId, propertyId, user]);
   
   const handleToggleFavorite = async () => {
     if (!user) {
         toast({ title: "Inicia sesión", description: "Debes iniciar sesión para guardar propiedades." });
         return;
     }
-    if (!property || !property.tenantId) return;
+    if (!property) return;
 
     setIsTogglingFavorite(true);
     try {
         const result = await toggleFavoriteProperty(user.uid, {
             propertyId: property.id,
-            propertyTenantId: property.tenantId, 
+            propertyTenantId: tenantId, 
         });
         setIsFavorite(result);
         toast({

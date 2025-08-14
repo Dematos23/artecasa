@@ -20,11 +20,19 @@ export function middleware(request: NextRequest) {
   // For subdomains like 'demo.casora.pe' or 'demo.localhost:9002'
   const tenantId = hostname.split('.')[0];
   
-  if (!isPlatformHostname && tenantId && tenantId !== 'localhost') {
+  if (!isPlatformHostname && tenantId && tenantId !== 'localhost' && tenantId !== 'app') {
     // This is a tenant-specific subdomain.
-    // We set the header and let the request continue to the (public) pages.
-    request.headers.set('x-tenant-id', tenantId);
-    return NextResponse.next();
+    // Rewrite the path to the (tenant) group and set the header.
+    url.pathname = `/${tenantId}${url.pathname}`
+    const headers = new Headers(request.headers);
+    headers.set('x-tenant-id', tenantId);
+    return NextResponse.rewrite(url, { headers });
+  }
+
+  // Rewrite for the admin app
+  if (hostname.startsWith('app.')) {
+     url.pathname = `/app${url.pathname}`
+     return NextResponse.rewrite(url);
   }
 
   // Otherwise, it's a platform route

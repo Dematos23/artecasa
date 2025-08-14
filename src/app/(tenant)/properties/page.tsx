@@ -21,9 +21,9 @@ import { propertyTypes } from '@/types';
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
 import Image from 'next/image';
 import Link from 'next/link';
-import { listPublicPropertiesPortal } from '@/actions/portal';
+import { listPublishedProperties } from '@/services/properties';
 import { useDebounce } from 'react-use';
-
+import { useTenant } from '@/context/TenantContext';
 
 // Generate a flat list of location strings for the combobox
 const locationStrings = peruLocations.flatMap(region =>
@@ -146,6 +146,7 @@ function LocationCombobox({ value, onChange, className }: { value: string, onCha
 
 
 export default function PropertiesPage() {
+  const { tenantId } = useTenant();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
@@ -180,9 +181,13 @@ export default function PropertiesPage() {
 
 
   const fetchProperties = async () => {
+    if (!tenantId) {
+        setLoading(false);
+        return;
+    };
     try {
       setLoading(true);
-      const { properties: propertiesData } = await listPublicPropertiesPortal(filters);
+      const { properties: propertiesData } = await listPublishedProperties(tenantId, filters);
       setProperties(propertiesData);
     } catch (error) {
       console.error("Error fetching properties:", error);
@@ -191,7 +196,7 @@ export default function PropertiesPage() {
     }
   };
 
-  useDebounce(fetchProperties, 500, [filters]);
+  useDebounce(fetchProperties, 500, [filters, tenantId]);
 
   useEffect(() => {
       fetchProperties();
@@ -467,7 +472,7 @@ export default function PropertiesPage() {
                                             <div>
                                                 <h4 className="font-bold text-sm truncate">{prop.title}</h4>
                                                 <p className="text-primary font-semibold">{symbol}{Number(price).toLocaleString()}</p>
-                                                <Link href={`/properties/${prop.tenantId}:${prop.id}`} className="text-xs text-blue-600 hover:underline">
+                                                <Link href={`/properties/${prop.id}`} className="text-xs text-blue-600 hover:underline">
                                                     Ver detalles
                                                 </Link>
                                             </div>

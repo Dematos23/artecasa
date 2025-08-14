@@ -1,4 +1,5 @@
 
+
 "use client";
 import Image from 'next/image';
 import Link from 'next/link';
@@ -43,8 +44,9 @@ export function PropertyCard({ property }: PropertyCardProps) {
 
   const imageUrl = property.imageUrls?.[0] ?? settings?.defaultPropertyImageUrl ?? '/appartment.webp';
   
-  // Construct the URL to include the tenantId for proper linking
-  const propertyUrl = `/properties/${property.tenantId}:${property.id}`;
+  // Construct the URL based on whether it's a portal or tenant context
+  const propertyUrl = property.tenantId ? `/properties/${property.tenantId}:${property.id}` : `/properties/${property.id}`;
+
 
   return (
     <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 group">
