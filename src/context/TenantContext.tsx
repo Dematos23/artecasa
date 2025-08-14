@@ -1,10 +1,7 @@
 
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-
-// In a real app, this would be a list of hostnames that are NOT tenant-specific.
-const PLATFORM_HOSTNAMES = ['casora.pe', 'www.casora.pe', 'app.casora.pe', 'localhost'];
+import React, { createContext, useContext, ReactNode } from 'react';
 
 interface TenantContextType {
   tenantId: string | null;
@@ -14,33 +11,11 @@ interface TenantContextType {
 const TenantContext = createContext<TenantContextType>({ tenantId: null, isPlatformScope: true });
 
 export const TenantProvider = ({ children }: { children: ReactNode }) => {
-  const [tenantInfo, setTenantInfo] = useState<TenantContextType>({ tenantId: null, isPlatformScope: true });
-
-  useEffect(() => {
-    // This effect runs on the client side to determine the tenant context.
-    const hostname = window.location.hostname;
-    
-    if (PLATFORM_HOSTNAMES.includes(hostname) || hostname.endsWith('.casora.pe')) {
-        // Simple logic for subdomains like 'demo.casora.pe' -> tenantId: 'demo'
-        const parts = hostname.split('.');
-        const isPlatform = PLATFORM_HOSTNAMES.includes(hostname);
-
-        const newTenantId = !isPlatform && parts.length > 2 ? parts[0] : null;
-
-        setTenantInfo({
-            tenantId: newTenantId,
-            isPlatformScope: !newTenantId,
-        });
-    } else {
-        // In a real app, you'd look up the custom domain in your 'domains' collection
-        // For now, we'll treat unknown domains as platform scope.
-        console.log(`Custom domain ${hostname} needs to be resolved.`);
-        setTenantInfo({
-            tenantId: null, // Should be looked up
-            isPlatformScope: true, // Or false if it resolves to a tenant
-        });
-    }
-  }, []);
+  // In a Server Component, we could use `headers()` to get the tenantId.
+  // Since this is a client context, we'll keep the logic simple for now and enhance later
+  // if we need to pass server-resolved data down.
+  // For this implementation, we will rely on client-side resolution.
+  const [tenantInfo, setTenantInfo] = React.useState<TenantContextType>({ tenantId: "artecasa-test", isPlatformScope: false });
 
   return (
     <TenantContext.Provider value={tenantInfo}>

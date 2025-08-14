@@ -4,7 +4,6 @@ import { cn } from '@/lib/utils';
 import { Toaster } from "@/components/ui/toaster"
 import { AuthProvider } from '@/context/AuthContext';
 import { TenantProvider } from '@/context/TenantContext'; // Import TenantProvider
-import { getSettings } from '@/services/settings';
 
 // This function can no longer be called from a Server Component Root Layout
 // because it requires a tenantId, which is not available here globally.
@@ -18,8 +17,8 @@ import { getSettings } from '@/services/settings';
 // }
 
 export const metadata: Metadata = {
-  title: 'Artecasa - Inmobiliaria de Lujo',
-  description: 'Encuentra la casa de tus sueños con Artecasa. Especializados en propiedades de lujo.',
+  title: 'Casora - Inmobiliaria de Lujo',
+  description: 'Encuentra la casa de tus sueños con Casora. Especializados en propiedades de lujo.',
 };
 
 export default async function RootLayout({
