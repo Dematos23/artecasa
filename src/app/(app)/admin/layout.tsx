@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { redirect, usePathname } from 'next/navigation';
-import { Home, Building2, Users, User, LogOut, ArrowLeft, Settings, Inbox, Loader2 } from 'lucide-react';
+import { Home, Building2, Users, User, LogOut, ArrowLeft, Settings, Inbox, Loader2, ExternalLink } from 'lucide-react';
 
 import {
   Sidebar,
@@ -79,6 +79,13 @@ export default function AdminLayout({
     redirect('/login');
   };
 
+  const handleViewSite = () => {
+    // In a real app, you'd replace 'casora.pe' with your actual root domain from an environment variable.
+    const rootDomain = 'casora.pe'; 
+    const url = `https://${tenantId}.${rootDomain}`;
+    window.open(url, '_blank');
+  }
+
   const showLoader = loading || isSettingsLoading || !user;
 
   return (
@@ -133,6 +140,12 @@ export default function AdminLayout({
             </SidebarContent>
             <SidebarFooter>
                 <SidebarMenu>
+                   <SidebarMenuItem>
+                    <SidebarMenuButton onClick={handleViewSite}>
+                        <ExternalLink />
+                        Ver mi sitio
+                      </SidebarMenuButton>
+                  </SidebarMenuItem>
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild>
                       <Link href="/">

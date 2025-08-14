@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, type User } from 'firebase/auth';
 import { app } from '@/lib/firebase';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -15,11 +15,24 @@ import { useAuth } from '@/context/AuthContext';
 import { getSettings } from '@/services/settings';
 import type { Settings } from '@/types';
 import { useTenant } from '@/context/TenantContext';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 const auth = getAuth(app);
 
+// In a real multi-tenant app, this would be more dynamic.
+const HARDCODED_TENANT_ID = 'artecasa-test';
+
+async function isUserAgent(user: User): Promise<boolean> {
+  const agentRef = doc(db, 'tenants', HARDCODED_TENANT_ID, 'agents', user.uid);
+  const docSnap = await getDoc(agentRef);
+  return docSnap.exists();
+}
+
+
 export default function LoginPage() {
-  const { tenantId } = useTenant();
+  // Although this page is in the (app) group, the login logic itself doesn't need a tenantId
+  // The redirection logic will handle sending the user to the correct tenant's admin panel.
   const { user, loading } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -30,54 +43,68 @@ export default function LoginPage() {
 
    useEffect(() => {
     async function fetchSettingsData() {
-        // Pass tenantId (which can be null) to getSettings
-        const settingsData = await getSettings(tenantId);
+        // Fetch settings for the hardcoded tenant for branding purposes on the login page
+        const settingsData = await getSettings(HARDCODED_TENANT_ID);
         setSettings(settingsData);
     }
     fetchSettingsData();
-  }, [tenantId]);
+  }, []);
 
   useEffect(() => {
     if (!loading && user) {
-      router.push('/admin');
+        // If user is already logged in, check their role and redirect
+        handleRedirection(user);
     }
-  }, [user, loading, router]);
+  }, [user, loading]);
+
+  const handleRedirection = async (loggedInUser: User) => {
+      const isAgent = await isUserAgent(loggedInUser);
+      if (isAgent) {
+        // Redirect to the app subdomain for admin tasks.
+        // In local dev, this might not work as expected without host file mapping.
+        // For production, ensure app.casora.pe is configured.
+        window.location.href = 'https://app.casora.pe/admin';
+      } else {
+        // It's a client, redirect to the main portal homepage.
+        router.push('/');
+      }
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      // On successful login, handle redirection
+      await handleRedirection(userCredential.user);
     } catch (error: any) {
-        if (error.code === 'auth/user-not-found') {
-            try {
-                await createUserWithEmailAndPassword(auth, email, password);
-            } catch (creationError: any) {
-                toast({
-                    variant: "destructive",
-                    title: "Error",
-                    description: "No se pudo crear la cuenta: " + creationError.message,
-                });
-            }
-        } else {
-             toast({
-                variant: "destructive",
-                title: "Error de inicio de sesión",
-                description: "Credenciales inválidas. Por favor, inténtalo de nuevo.",
-             });
-        }
+        // If user doesn't exist, we don't create them here anymore.
+        // Agent creation should be a separate admin process.
+        // Client creation happens on the main portal.
+         toast({
+            variant: "destructive",
+            title: "Error de inicio de sesión",
+            description: "Credenciales inválidas. Por favor, inténtalo de nuevo.",
+         });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  if (loading || user) {
+  if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-secondary p-4">
         <p>Cargando...</p>
       </div>
     );
   }
+  
+  // If user is already logged in, the useEffect will handle redirection.
+  // We show null to prevent a flash of the login page.
+  if (user) {
+    return null;
+  }
+
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-secondary p-4">
