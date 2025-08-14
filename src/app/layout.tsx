@@ -1,22 +1,12 @@
+
 import type { Metadata } from 'next';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { Toaster } from "@/components/ui/toaster"
 import { AuthProvider } from '@/context/AuthContext';
-import { TenantProvider } from '@/context/TenantContext';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-
-// This function can no longer be called from a Server Component Root Layout
-// because it requires a tenantId, which is not available here globally.
-// We will move font loading to be client-side or pass settings down.
-// For now, we will use a default.
-// async function getFontSettings() {
-//   const settings = await getSettings(); // This now requires a tenantId
-//   const bodyFont = settings?.bodyFont || 'Montserrat';
-//   const headlineFont = settings?.headlineFont || 'Montserrat';
-//   return { bodyFont, headlineFont };
-// }
+import { TenantResolver } from './TenantResolver';
 
 export const metadata: Metadata = {
   title: 'Casora - Inmobiliaria de Lujo',
@@ -28,7 +18,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // const { bodyFont, headlineFont } = await getFontSettings();
   const bodyFont = 'Montserrat';
   const headlineFont = 'Montserrat';
   const fontUrl = `https://fonts.googleapis.com/css2?family=${bodyFont.replace(/ /g, '+')}:wght@400;700&family=${headlineFont.replace(/ /g, '+')}:wght@400;700&display=swap`;
@@ -43,12 +32,12 @@ export default async function RootLayout({
       </head>
       <body className={cn('font-body antialiased min-h-screen flex flex-col')}>
         <AuthProvider>
-          <TenantProvider>
+          <TenantResolver>
             <Header />
             <main className="flex-grow">{children}</main>
             <Footer />
             <Toaster />
-          </TenantProvider>
+          </TenantResolver>
         </AuthProvider>
       </body>
     </html>

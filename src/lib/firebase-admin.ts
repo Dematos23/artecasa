@@ -1,5 +1,6 @@
 
 import admin from 'firebase-admin';
+import { getFirestore } from 'firebase-admin/firestore';
 
 // This is the Firebase Admin SDK, for use in server-side code (Next.js actions).
 // It has privileged access to all data, bypassing security rules.
@@ -24,7 +25,7 @@ if (!admin.apps.length) {
   }
 }
 
-const db = admin.firestore();
+const db = getFirestore();
 const auth = admin.auth();
 
 export { db, auth, admin };

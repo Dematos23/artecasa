@@ -2,41 +2,44 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-// In a real app, this would be a list of hostnames that are NOT tenant-specific.
 const PLATFORM_HOSTNAMES = ['casora.pe', 'www.casora.pe', 'app.casora.pe', 'localhost'];
 
-// This function can be marked `async` if using `await` inside
 export function middleware(request: NextRequest) {
   const url = request.nextUrl.clone()
   const hostname = request.headers.get('host') || url.hostname;
 
-  // Prevent rewriting for static assets
-  if (url.pathname.startsWith('/_next') || url.pathname.includes('.')) {
+  // Prevent rewriting for static assets, API routes, etc.
+  if (url.pathname.startsWith('/_next') || url.pathname.startsWith('/api') || url.pathname.includes('.')) {
     return NextResponse.next();
   }
   
   const isPlatformHostname = PLATFORM_HOSTNAMES.find(h => hostname.startsWith(h));
 
-  // For subdomains like 'demo.casora.pe' or 'demo.localhost:9002'
+  // Handle the admin panel subdomain
+  if (hostname.startsWith('app.')) {
+      url.pathname = `/app${url.pathname}`
+      return NextResponse.rewrite(url);
+  }
+
+  // Handle root domains for the main portal
+  if (isPlatformHostname) {
+    return NextResponse.next();
+  }
+
+  // Handle tenant subdomains
   const tenantId = hostname.split('.')[0];
   
-  if (!isPlatformHostname && tenantId && tenantId !== 'localhost' && tenantId !== 'app') {
-    // This is a tenant-specific subdomain.
-    // Rewrite the path to the (tenant) group and set the header.
-    url.pathname = `/${tenantId}${url.pathname}`
-    const headers = new Headers(request.headers);
-    headers.set('x-tenant-id', tenantId);
-    return NextResponse.rewrite(url, { headers });
-  }
+  // Set the tenantId in the request headers
+  request.headers.set('x-tenant-id', tenantId);
 
-  // Rewrite for the admin app
-  if (hostname.startsWith('app.')) {
-     url.pathname = `/app${url.pathname}`
-     return NextResponse.rewrite(url);
-  }
-
-  // Otherwise, it's a platform route
-  return NextResponse.next();
+  // Rewrite to the (tenant) group
+  url.pathname = `/tenant${url.pathname}`;
+  
+  return NextResponse.rewrite(url, {
+    request: {
+      headers: request.headers,
+    }
+  });
 }
 
 export const config = {
