@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Check, ChevronsUpDown, MapPin, X, LayoutGrid, Map as MapIcon, Loader2 } from 'lucide-react';
+import { Check, ChevronsUpDown, X, LayoutGrid, Map as MapIcon } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { peruLocations } from '@/lib/peru-locations';
@@ -21,7 +21,7 @@ import { propertyTypes } from '@/types';
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
 import Image from 'next/image';
 import Link from 'next/link';
-import { listPublishedProperties } from '@/services/properties';
+import { listProperties } from '@/services/properties';
 import { useDebounce } from 'react-use';
 import { useTenant } from '@/context/TenantContext';
 
@@ -187,7 +187,7 @@ export default function PropertiesPage() {
     };
     try {
       setLoading(true);
-      const { properties: propertiesData } = await listPublishedProperties(tenantId, filters);
+      const { properties: propertiesData } = await listProperties({ tenantId, filters });
       setProperties(propertiesData);
     } catch (error) {
       console.error("Error fetching properties:", error);

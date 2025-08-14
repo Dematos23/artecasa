@@ -3,30 +3,21 @@ import { Button } from '@/components/ui/button';
 import { PropertyCard } from '@/components/PropertyCard';
 import type { Property } from '@/types';
 import Link from 'next/link';
-import { ArrowRight, BedDouble, Bath, Car, MapPin, Loader2 } from 'lucide-react';
+import { ArrowRight, BedDouble, Bath, Car, MapPin } from 'lucide-react';
 import Image from 'next/image';
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
 } from '@/components/ui/carousel';
-import { listPublicPropertiesPortal } from '@/actions/portal';
+import { listProperties } from '@/services/properties';
+import { getSettings } from '@/services/settings';
 
 
 async function getPortalData() {
-    const { properties } = await listPublicPropertiesPortal({}, undefined, 4);
-    // In a real app, you would fetch global settings for the portal here.
-    const settings = {
-        homepageTitle: 'Encuentra tu Próximo Hogar',
-        homepageSubtitle: 'El portal inmobiliario líder para descubrir propiedades exclusivas.',
-        homepageHeroButtonText: 'Explorar Propiedades',
-        featuredPropertyTitle: 'Propiedades Destacadas',
-        featuredPropertyButtonText: 'Ver Detalles',
-        discoverPropertiesTitle: 'Descubre Nuestras Propiedades',
-        discoverPropertiesSubtitle: 'Una cuidada selección de las mejores casas de lujo, adaptadas a tu estilo de vida.',
-        discoverPropertiesButtonText: 'Ver Todas las Propiedades',
-        heroImages: ['/appartment.webp', '/house.webp'],
-    };
+    // For the main portal, tenantId is null.
+    const { properties } = await listProperties({ tenantId: null, pageSize: 4 });
+    const settings = await getSettings(null);
     return { properties, settings };
 }
 
@@ -35,7 +26,7 @@ export default async function PortalHomePage() {
 
   const featuredProperty = properties.find(p => p.featured) || properties[0];
   const recentProperties = properties.slice(0, 3);
-  const heroImages = settings?.heroImages || [];
+  const heroImages = settings?.heroImages || ['/appartment.webp', '/house.webp'];
 
   return (
     <div className="bg-background">
@@ -87,7 +78,7 @@ export default async function PortalHomePage() {
                   className="w-full h-auto" />
               </div>
               <div className="md:w-1/2">
-                <h2 className="text-2xl md:text-4xl font-bold font-headline mb-4">{settings?.featuredPropertyTitle}</h2>
+                <h2 className="text-2xl md:text-4xl font-bold font-headline mb-4">{settings?.featuredPropertyTitle || "Propiedades Destacadas"}</h2>
                 <h3 className="text-xl md:text-2xl font-semibold text-primary mb-2">{featuredProperty.title}</h3>
                 <p className="text-muted-foreground flex items-center gap-2 mb-4">
                   <MapPin size={16} /> {featuredProperty.address}
@@ -105,7 +96,7 @@ export default async function PortalHomePage() {
                 </div>
                 <Button asChild>
                   <Link href={`/properties/${featuredProperty.tenantId}:${featuredProperty.id}`}>
-                    {settings?.featuredPropertyButtonText}
+                    {settings?.featuredPropertyButtonText || "Ver Detalles"}
                   </Link>
                 </Button>
               </div>
@@ -117,9 +108,9 @@ export default async function PortalHomePage() {
       <section className="py-12 md:py-24">
         <div className="container mx-auto px-4 md:px-6">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold font-headline mb-4">{settings?.discoverPropertiesTitle}</h2>
+            <h2 className="text-3xl md:text-4xl font-bold font-headline mb-4">{settings?.discoverPropertiesTitle || "Descubre Nuestras Propiedades"}</h2>
             <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
-              {settings?.discoverPropertiesSubtitle}
+              {settings?.discoverPropertiesSubtitle || "Una cuidada selección de las mejores casas de lujo, adaptadas a tu estilo de vida."}
             </p>
           </div>
           {recentProperties.length > 0 ? (
@@ -136,7 +127,7 @@ export default async function PortalHomePage() {
           <div className="text-center mt-12">
             <Button asChild size="lg">
               <Link href="/properties">
-                {settings?.discoverPropertiesButtonText}
+                {settings?.discoverPropertiesButtonText || 'Ver Todas las Propiedades'}
               </Link>
             </Button>
           </div>

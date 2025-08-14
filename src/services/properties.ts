@@ -15,7 +15,8 @@ import {
     documentId,
     startAfter,
     limit,
-    QueryConstraint
+    QueryConstraint,
+    collectionGroup
 } from 'firebase/firestore';
 import { ref, deleteObject } from 'firebase/storage';
 import type { Property, NewPropertyData, UpdatePropertyData } from '@/types';
@@ -29,26 +30,32 @@ export const getPropertiesCollection = (tenantId: string) => {
 };
 
 /**
- * Lists published properties for a specific tenant with filtering and pagination.
- * This is intended for the public-facing tenant website.
+ * Lists published properties for a specific tenant or for the entire portal.
+ * This is intended for the public-facing websites.
  */
-export async function listPublishedProperties(
-    tenantId: string, 
-    filters: {
-        modality?: 'venta' | 'alquiler' | 'all';
-        propertyType?: string | 'all';
-        bedrooms?: number | 'all';
-        minPrice?: number;
-        maxPrice?: number;
-        currency?: 'USD' | 'PEN';
-    } = {},
-    cursor?: string,
-    pageSize: number = 24
+export async function listProperties(
+    { tenantId, filters = {}, cursor, pageSize = 24 }: {
+        tenantId: string | null;
+        filters?: {
+            modality?: 'venta' | 'alquiler' | 'all';
+            propertyType?: string | 'all';
+            bedrooms?: number | 'all';
+            minPrice?: number;
+            maxPrice?: number;
+            currency?: 'USD' | 'PEN';
+        };
+        cursor?: string;
+        pageSize?: number;
+    }
 ): Promise<{ properties: Property[]; nextCursor: string | null }> {
-    const propertiesCollection = getPropertiesCollection(tenantId);
+    
+    const isPortalQuery = !tenantId;
+    const propertiesCollection = isPortalQuery 
+        ? collectionGroup(db, 'properties') 
+        : getPropertiesCollection(tenantId);
     
     const constraints: QueryConstraint[] = [
-        where('featured', '==', true) // Always filter by published status
+        where('featured', '==', true) // Always filter by published status for public lists
     ];
 
     if (filters.modality && filters.modality !== 'all') {
@@ -81,7 +88,15 @@ export async function listPublishedProperties(
     const q = query(propertiesCollection, ...constraints);
     const querySnapshot = await getDocs(q);
     
-    const properties = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Property));
+    const properties = querySnapshot.docs.map(doc => {
+      const data = doc.data() as Property;
+      return { 
+        id: doc.id, 
+        ...data,
+        // For portal queries, extract tenantId from the doc path
+        tenantId: isPortalQuery ? doc.ref.parent.parent?.id : tenantId,
+      } as Property
+    });
     
     const lastDoc = querySnapshot.docs[querySnapshot.docs.length - 1];
     const nextCursor = lastDoc ? makeCursor(lastDoc) : null;

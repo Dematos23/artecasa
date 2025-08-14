@@ -3,15 +3,15 @@ import { doc, getDoc, setDoc, serverTimestamp, Timestamp } from 'firebase/firest
 import type { Settings } from '@/types';
 
 // This file is now tenant-aware.
-// It will fetch settings from a tenant's sub-collection.
+// It will fetch settings from a tenant's sub-collection or return portal defaults.
 
-export async function getSettings(tenantId: string | null): Promise<Settings | null> {
+export async function getSettings(tenantId?: string | null): Promise<Settings | null> {
   if (!tenantId) {
-    // Return default settings for the main portal if no tenant is identified
+    // This is the root portal, return hardcoded global defaults.
+    // In a more complex app, this could come from a 'platformSettings' collection.
     return {
       logoUrl: '/logo.png',
-      whatsappNumber: '', // Should be configured in platform settings eventually
-      // Provide sensible defaults for the main portal
+      whatsappNumber: '51987654321', // Example number for the portal
       homepageTitle: 'Casora - Inmobiliaria de Lujo',
       homepageSubtitle: 'Encuentra la propiedad de tus sueños.',
       homepageHeroButtonText: 'Explorar Propiedades',
@@ -23,6 +23,7 @@ export async function getSettings(tenantId: string | null): Promise<Settings | n
     };
   }
   
+  // This is a tenant-specific request.
   const settingsDocRef = doc(db, 'tenants', tenantId, 'settings', 'default');
   const docSnap = await getDoc(settingsDocRef);
   if (docSnap.exists()) {
@@ -30,7 +31,7 @@ export async function getSettings(tenantId: string | null): Promise<Settings | n
     const updatedAt = data.updatedAt?.toDate ? data.updatedAt.toDate().toISOString() : null;
     return { ...data, updatedAt } as Settings;
   }
-  return null;
+  return null; // Tenant exists but has no settings configured
 }
 
 
