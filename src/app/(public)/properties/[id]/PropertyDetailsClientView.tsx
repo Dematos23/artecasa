@@ -7,12 +7,15 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Property } from '@/types';
 import type { TenantSettings } from '@/types/multitenant';
-import { BedDouble, Bath, Car, Maximize, MapPin, Phone, CalendarClock, Building } from 'lucide-react';
+import { BedDouble, Bath, Car, Maximize, MapPin, Phone, CalendarClock, Building, Heart, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
 import { getPropertyById } from '@/services/properties';
 import { getSettings } from '@/services/settings';
 import { useTenant } from '@/context/TenantContext';
+import { useAuth } from '@/context/AuthContext';
+import { getClientProfile, toggleFavoriteProperty } from '@/services/clients';
+import { useToast } from '@/hooks/use-toast';
 
 const containerStyle = {
   width: '100%',
@@ -27,9 +30,15 @@ const defaultCenter = {
 
 export function PropertyDetailsClientView({ propertyId }: { propertyId: string }) {
   const { tenantId } = useTenant();
+  const { user, loading: authLoading } = useAuth();
+  const { toast } = useToast();
+
   const [property, setProperty] = useState<Property | undefined>(undefined);
   const [settings, setSettings] = useState<TenantSettings | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
+  
   const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
   const { isLoaded } = useJsApiLoader({
@@ -42,16 +51,55 @@ export function PropertyDetailsClientView({ propertyId }: { propertyId: string }
     const fetchProperty = async () => {
       if (!tenantId) return;
       setLoading(true);
-      const [prop, settingsData] = await Promise.all([
-        getPropertyById(tenantId, propertyId),
-        getSettings(tenantId)
-      ]);
-      setProperty(prop);
-      setSettings(settingsData);
-      setLoading(false);
+      try {
+        const [prop, settingsData] = await Promise.all([
+          getPropertyById(tenantId, propertyId),
+          getSettings(tenantId)
+        ]);
+        setProperty(prop);
+        setSettings(settingsData);
+
+        if (user && prop) {
+            const clientProfile = await getClientProfile(user.uid);
+            const isFav = clientProfile?.interestedProperties.some(p => p.propertyId === prop.id) || false;
+            setIsFavorite(isFav);
+        }
+
+      } catch(error) {
+        console.error("Error fetching property details:", error);
+      } finally {
+        setLoading(false);
+      }
     }
     fetchProperty();
-  }, [propertyId, tenantId]);
+  }, [propertyId, tenantId, user]);
+  
+  const handleToggleFavorite = async () => {
+    if (!user) {
+        toast({ title: "Inicia sesión", description: "Debes iniciar sesión para guardar propiedades." });
+        return;
+    }
+    if (!property || !tenantId) return;
+
+    setIsTogglingFavorite(true);
+    try {
+        const result = await toggleFavoriteProperty(user.uid, {
+            propertyId: property.id,
+            propertyTenantId: tenantId, // Assuming property belongs to the current tenant context
+        });
+        setIsFavorite(result);
+        toast({
+            title: result ? "Añadido a Favoritos" : "Eliminado de Favoritos",
+            description: result ? `"${property.title}" se ha guardado en tu perfil.` : `"${property.title}" se ha eliminado de tus favoritos.`,
+        });
+    } catch(error) {
+        console.error("Error toggling favorite:", error);
+        toast({ variant: "destructive", title: "Error", description: "No se pudo actualizar tus favoritos." });
+    } finally {
+        setIsTogglingFavorite(false);
+    }
+  }
+
 
   const handleWhatsAppInquiry = () => {
     if (!settings?.whatsappNumber || !property) return;
@@ -179,10 +227,20 @@ export function PropertyDetailsClientView({ propertyId }: { propertyId: string }
                     </div>
                    )}
                 </div>
-                <Button size="lg" className="w-full mt-8" onClick={handleWhatsAppInquiry} disabled={!settings?.whatsappNumber}>
-                    <Phone className="mr-2" />
-                    Consultar sobre esta Propiedad
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-2 mt-8">
+                    <Button size="lg" className="w-full" onClick={handleWhatsAppInquiry} disabled={!settings?.whatsappNumber}>
+                        <Phone className="mr-2" />
+                        Consultar
+                    </Button>
+                     <Button size="lg" variant="outline" className="w-full" onClick={handleToggleFavorite} disabled={isTogglingFavorite || authLoading}>
+                        {isTogglingFavorite ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                            <Heart className={`mr-2 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`}/>
+                        )}
+                        {isFavorite ? 'Favorito' : 'Guardar'}
+                    </Button>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -191,3 +249,4 @@ export function PropertyDetailsClientView({ propertyId }: { propertyId: string }
     </div>
   );
 }
+
