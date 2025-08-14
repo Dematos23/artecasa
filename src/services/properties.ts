@@ -30,12 +30,12 @@ export const getPropertiesCollection = (tenantId: string) => {
 };
 
 /**
- * Lists published properties for a specific tenant or for the entire portal.
- * This is intended for the public-facing websites.
+ * Lists published properties for a specific tenant.
+ * This is intended for the public-facing tenant websites.
  */
 export async function listProperties(
     { tenantId, filters = {}, cursor, pageSize = 24 }: {
-        tenantId: string | null;
+        tenantId: string;
         filters?: {
             modality?: 'venta' | 'alquiler' | 'all';
             propertyType?: string | 'all';
@@ -49,10 +49,7 @@ export async function listProperties(
     }
 ): Promise<{ properties: Property[]; nextCursor: string | null }> {
     
-    const isPortalQuery = !tenantId;
-    const propertiesCollection = isPortalQuery 
-        ? collectionGroup(db, 'properties') 
-        : getPropertiesCollection(tenantId);
+    const propertiesCollection = getPropertiesCollection(tenantId);
     
     const constraints: QueryConstraint[] = [
         where('featured', '==', true) // Always filter by published status for public lists
@@ -93,8 +90,7 @@ export async function listProperties(
       return { 
         id: doc.id, 
         ...data,
-        // For portal queries, extract tenantId from the doc path
-        tenantId: isPortalQuery ? doc.ref.parent.parent?.id : tenantId,
+        tenantId: tenantId,
       } as Property
     });
     

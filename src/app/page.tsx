@@ -1,6 +1,6 @@
 
 import { Button } from '@/components/ui/button';
-import { PropertyCard } from '@/components/PropertyCard';
+import { PortalPropertyCard } from '@/components/PortalPropertyCard';
 import type { Property } from '@/types';
 import Link from 'next/link';
 import { ArrowRight, BedDouble, Bath, Car, MapPin } from 'lucide-react';
@@ -10,13 +10,13 @@ import {
   CarouselContent,
   CarouselItem,
 } from '@/components/ui/carousel';
-import { listProperties } from '@/services/properties';
+import { listPublicPropertiesPortal } from '@/actions/portal';
 import { getSettings } from '@/services/settings';
 
 
 async function getPortalData() {
     // For the main portal, tenantId is null.
-    const { properties } = await listProperties({ tenantId: null, pageSize: 4 });
+    const { properties } = await listPublicPropertiesPortal({ pageSize: 4 });
     const settings = await getSettings(null);
     return { properties, settings };
 }
@@ -116,7 +116,7 @@ export default async function PortalHomePage() {
           {recentProperties.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
               {recentProperties.map((property) => (
-                <PropertyCard key={property.id} property={property} />
+                <PortalPropertyCard key={property.id} property={property} />
               ))}
             </div>
           ) : (

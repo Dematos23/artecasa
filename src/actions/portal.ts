@@ -15,18 +15,22 @@ import { getFirestore, Filter, FieldPath } from 'firebase-admin/firestore';
  * @returns An object containing the list of properties and the next cursor.
  */
 export async function listPublicPropertiesPortal(
-  filters: {
-    modality?: 'venta' | 'alquiler';
-    propertyType?: string;
-    bedrooms?: number;
-    minPrice?: number;
-    maxPrice?: number;
-    currency?: 'USD' | 'PEN';
-    // Note: Full-text search or complex location filtering might require a dedicated search service like Algolia/Typesense.
-    // Simple filtering by exact district/province/region can be added here if needed.
-  } = {},
-  cursor?: string, // The cursor should be the array of values from the previous 'orderBy' fields
-  pageSize: number = 24
+  {
+    filters = {},
+    cursor,
+    pageSize = 24
+  }: {
+    filters?: {
+        modality?: 'venta' | 'alquiler';
+        propertyType?: string;
+        bedrooms?: number;
+        minPrice?: number;
+        maxPrice?: number;
+        currency?: 'USD' | 'PEN';
+    };
+    cursor?: string;
+    pageSize?: number;
+  } = {}
 ): Promise<{ properties: Property[]; nextCursor: any[] | null }> {
   const firestore = getFirestore();
   const propertiesCollectionGroup = firestore.collectionGroup('properties');
@@ -101,7 +105,7 @@ export async function getPropertyPortal({
     const propertyRef = db.collection('tenants').doc(tenantId).collection('properties').doc(propertyId);
     const docSnap = await propertyRef.get();
 
-    if (docSnap.exists) {
+    if (docSnap.exists()) {
       const propertyData = docSnap.data() as Property;
       // Enforce the "published" rule on the server
       if (propertyData.featured) {
