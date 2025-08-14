@@ -1,3 +1,4 @@
+
 import { db } from '@/lib/firebase';
 import { collection, getDocs, addDoc, serverTimestamp, query, orderBy, doc, deleteDoc } from 'firebase/firestore';
 import type { Lead } from '@/types';
@@ -15,6 +16,10 @@ export type NewLeadData = Omit<Lead, 'id' | 'date'>;
 
 // Function to get all leads from a tenant's collection
 export async function getLeads(tenantId: string): Promise<Lead[]> {
+  if (!tenantId) {
+      console.error("getLeads called without tenantId");
+      return [];
+  }
   const leadsCollection = getLeadsCollection(tenantId);
   const q = query(leadsCollection, orderBy('date', 'desc'));
   const querySnapshot = await getDocs(q);
@@ -23,6 +28,7 @@ export async function getLeads(tenantId: string): Promise<Lead[]> {
     return {
       id: doc.id,
       ...data,
+      // Convert Firestore Timestamp to JS Date for consistency
       date: data.date?.toDate ? data.date.toDate() : new Date(),
     } as Lead;
   });
@@ -30,6 +36,7 @@ export async function getLeads(tenantId: string): Promise<Lead[]> {
 
 // Function to add a new lead to a tenant's collection
 export async function addLead(tenantId: string, leadData: NewLeadData): Promise<string> {
+  if (!tenantId) throw new Error("tenantId is required to add a lead.");
   const docRef = await addDoc(getLeadsCollection(tenantId), {
     ...leadData,
     date: serverTimestamp(),
@@ -39,6 +46,7 @@ export async function addLead(tenantId: string, leadData: NewLeadData): Promise<
 
 // Function to delete a lead from a tenant's collection
 export async function deleteLead(tenantId: string, id: string): Promise<void> {
+    if (!tenantId) throw new Error("tenantId is required to delete a lead.");
     const leadDoc = doc(getLeadsCollection(tenantId), id);
     await deleteDoc(leadDoc);
 }
@@ -46,8 +54,11 @@ export async function deleteLead(tenantId: string, id: string): Promise<void> {
 
 // Function to convert a lead to a contact within a tenant
 export async function convertLeadToContact(tenantId: string, lead: Lead): Promise<string> {
+    if (!tenantId) throw new Error("tenantId is required to convert a lead.");
+    
     const nameParts = lead.name.split(' ');
     const firstname = nameParts[0] || '';
+    // This is a simple split, might not be perfect for all name formats
     const firstlastname = nameParts.slice(1).join(' ') || '';
 
     const newContactId = await addContact(tenantId, {
@@ -55,8 +66,8 @@ export async function convertLeadToContact(tenantId: string, lead: Lead): Promis
         firstlastname,
         email: lead.email,
         phone: lead.phone,
-        notes: lead.message,
-        types: ['comprador', 'arrendatario'], // Default types
+        notes: `Lead original: "${lead.message}"`, // Add original message to notes
+        types: ['comprador'], // Default to a common type
     });
 
     // After successful conversion, delete the lead
