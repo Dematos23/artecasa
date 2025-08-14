@@ -21,11 +21,10 @@ export function middleware(request: NextRequest) {
   const tenantId = hostname.split('.')[0];
   
   if (!isPlatformHostname && tenantId && tenantId !== 'localhost') {
-    // This is a tenant-specific subdomain
+    // This is a tenant-specific subdomain.
+    // We set the header and let the request continue to the (public) pages.
     request.headers.set('x-tenant-id', tenantId);
-    url.pathname = `/_tenants/${tenantId}${url.pathname}`;
-    console.log(`Rewriting to: ${url.pathname}`);
-    return NextResponse.rewrite(url, { request });
+    return NextResponse.next();
   }
 
   // Otherwise, it's a platform route
