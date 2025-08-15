@@ -4,8 +4,6 @@ import './globals.css';
 import { cn } from '@/lib/utils';
 import { Toaster } from "@/components/ui/toaster"
 import { AuthProvider } from '@/context/AuthContext';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
 import { TenantResolver } from './TenantResolver';
 
 export const metadata: Metadata = {
@@ -30,14 +28,12 @@ export default async function RootLayout({
         <link href={fontUrl} rel="stylesheet" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </head>
-      <body className={cn('font-body antialiased min-h-screen flex flex-col')}>
+      <body className={cn('font-body antialiased min-h-screen flex flex-col bg-casora-bg-soft')}>
         <AuthProvider>
-          <TenantResolver>
-            <Header />
-            <main className="flex-grow">{children}</main>
-            <Footer />
-            <Toaster />
-          </TenantResolver>
+            <TenantResolver>
+                {children}
+                <Toaster />
+            </TenantResolver>
         </AuthProvider>
       </body>
     </html>

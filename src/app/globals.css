@@ -1,38 +1,46 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: 'Montserrat', sans-serif;
-}
-
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    --foreground: 202 18% 15%;
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: 202 18% 15%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 45 53% 51%;
-    --primary-foreground: 240 10% 3.9%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 10% 3.9%;
-    --accent-foreground: 45 53% 51%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 45 53% 51%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    --popover-foreground: 202 18% 15%;
+    --primary: 200 33% 24%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 45 74% 66%;
+    --secondary-foreground: 202 18% 15%;
+    --muted: 200 12% 33%;
+    --muted-foreground: 210 16% 91%;
+    --accent: 173 58% 39%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 12 76% 61%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 210 16% 91%;
+    --input: 210 16% 91%;
+    --ring: 173 58% 39%;
     --radius: 0.5rem;
+    
+    --casora-primary: 200 33% 24%;
+    --casora-secondary: 45 74% 66%;
+    --casora-accent: 173 58% 39%;
+    --casora-highlight: 27 87% 67%;
+    --casora-alert: 12 76% 61%;
+    --casora-bg: 0 0% 100%;
+    --casora-bg-soft: 210 16% 97%;
+    --casora-border: 210 16% 91%;
+    --casora-text: 202 18% 15%;
+    --casora-text-muted: 200 12% 33%;
+    --casora-on-dark: 0 0% 100%;
+    --casora-success: 173 58% 39%;
+    --casora-warning: 27 87% 67%;
+    --casora-error: 12 76% 61%;
+    --casora-info: 194 40% 40%;
   }
 }
 
@@ -42,5 +50,6 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+    font-family: 'Montserrat', sans-serif;
   }
 }
