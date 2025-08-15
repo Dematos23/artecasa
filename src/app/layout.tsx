@@ -5,6 +5,8 @@ import { cn } from '@/lib/utils';
 import { Toaster } from "@/components/ui/toaster"
 import { AuthProvider } from '@/context/AuthContext';
 import { TenantResolver } from './TenantResolver';
+import { PortalHeader } from '@/components/layout/PortalHeader';
+import { PortalFooter } from '@/components/layout/PortalFooter';
 
 export const metadata: Metadata = {
   title: 'Casora - Inmobiliaria de Lujo',
@@ -31,8 +33,10 @@ export default async function RootLayout({
       <body className={cn('font-body antialiased min-h-screen flex flex-col bg-casora-bg-soft')}>
         <AuthProvider>
             <TenantResolver>
+              <div className="flex flex-col min-h-screen">
                 {children}
-                <Toaster />
+              </div>
+              <Toaster />
             </TenantResolver>
         </AuthProvider>
       </body>
